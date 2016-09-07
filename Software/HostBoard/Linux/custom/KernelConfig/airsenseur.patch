@@ -1,0 +1,253 @@
+diff --git a/drivers/gpio/gpio-mcp23s08.c b/drivers/gpio/gpio-mcp23s08.c
+index 2fc7ff8..52d8e08 100644
+--- a/drivers/gpio/gpio-mcp23s08.c
++++ b/drivers/gpio/gpio-mcp23s08.c
+@@ -792,7 +792,7 @@ static int mcp230xx_probe(struct i2c_client *client,
+ 	if (match) {
+ 		pdata = &local_pdata;
+ 		pdata->base = -1;
+-		pdata->chip[0].pullups = 0;
++		pdata->chip[0].pullups = 0xFFFF;
+ 		pdata->irq_controller =	of_property_read_bool(
+ 					client->dev.of_node,
+ 					"interrupt-controller");
+diff --git a/drivers/leds/led-core.c b/drivers/leds/led-core.c
+index 549de7e..96b16cf 100644
+--- a/drivers/leds/led-core.c
++++ b/drivers/leds/led-core.c
+@@ -122,7 +122,7 @@ void led_set_brightness(struct led_classdev *led_cdev,
+        /* delay brightness if soft-blink is active */
+        if (led_cdev->blink_delay_on || led_cdev->blink_delay_off) {
+                led_cdev->delayed_set_value = brightness;
+-               if (brightness == LED_OFF)
++       //      if (brightness == LED_OFF)
+                        schedule_work(&led_cdev->set_brightness_work);
+                return;
+        }
+diff --git a/drivers/power/Kconfig b/drivers/power/Kconfig
+index 08beeed..7a47af7 100644
+--- a/drivers/power/Kconfig
++++ b/drivers/power/Kconfig
+@@ -341,6 +341,13 @@ config CHARGER_GPIO
+ 	  This driver can be build as a module. If so, the module will be
+ 	  called gpio-charger.
+ 
++config CHARGER_LTC4156
++        tristate "Linear Technology LTC4156 battery charger driver"
++        depends on I2C
++        help
++          Say Y to enable support for the LTC4156 LiFePO4 battery charger
++          PMICs.
++
+ config CHARGER_MANAGER
+ 	bool "Battery charger manager for multiple chargers"
+ 	depends on REGULATOR
+diff --git a/drivers/power/Makefile b/drivers/power/Makefile
+index 5752ce8..64e9bd9 100644
+--- a/drivers/power/Makefile
++++ b/drivers/power/Makefile
+@@ -52,6 +52,7 @@ obj-$(CONFIG_CHARGER_TWL4030)	+= twl4030_charger.o
+ obj-$(CONFIG_CHARGER_LP8727)	+= lp8727_charger.o
+ obj-$(CONFIG_CHARGER_LP8788)	+= lp8788-charger.o
+ obj-$(CONFIG_CHARGER_GPIO)	+= gpio-charger.o
++obj-$(CONFIG_CHARGER_LTC4156)   += ltc4156_charger.o
+ obj-$(CONFIG_CHARGER_MANAGER)	+= charger-manager.o
+ obj-$(CONFIG_CHARGER_MAX14577)	+= max14577_charger.o
+ obj-$(CONFIG_CHARGER_MAX77693)	+= max77693_charger.o
+diff --git a/drivers/power/ltc2941-battery-gauge.c b/drivers/power/ltc2941-battery-gauge.c
+index daeb086..0047304 100644
+--- a/drivers/power/ltc2941-battery-gauge.c
++++ b/drivers/power/ltc2941-battery-gauge.c
+@@ -1,11 +1,12 @@
+ /*
+- * I2C client/driver for the Linear Technology LTC2941 and LTC2943
++ * I2C client/driver for the Linear Technology LTC2941, LTC2942 and LTC2943
+  * Battery Gas Gauge IC
+  *
+  * Copyright (C) 2014 Topic Embedded Systems
+  *
+  * Author: Auryn Verwegen
+  * Author: Mike Looijmans
++ * Author: Marco Signorini
+  */
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+@@ -27,6 +28,7 @@
+ #define LTC294X_MID_SUPPLY		0x7FFF
+ 
+ #define LTC2941_MAX_PRESCALER_EXP	7
++#define LTC2942_MAX_PRESCALER_EXP	7
+ #define LTC2943_MAX_PRESCALER_EXP	6
+ 
+ enum ltc294x_reg {
+@@ -40,14 +42,18 @@ enum ltc294x_reg {
+ 	LTC294X_REG_THRESH_LOW_LSB	= 0x07,
+ 	LTC294X_REG_VOLTAGE_MSB	= 0x08,
+ 	LTC294X_REG_VOLTAGE_LSB	= 0x09,
++	LTC2942_REG_TEMPERATURE_MSB = 0x0C,
++	LTC2942_REG_TEMPERATURE_LSB = 0x0D,
+ 	LTC294X_REG_CURRENT_MSB	= 0x0E,
+ 	LTC294X_REG_CURRENT_LSB	= 0x0F,
+-	LTC294X_REG_TEMPERATURE_MSB	= 0x14,
+-	LTC294X_REG_TEMPERATURE_LSB	= 0x15,
++	LTC2943_REG_TEMPERATURE_MSB	= 0x14,
++	LTC2943_REG_TEMPERATURE_LSB	= 0x15,
+ };
+ 
++
+ #define LTC2943_REG_CONTROL_MODE_MASK (BIT(7) | BIT(6))
+ #define LTC2943_REG_CONTROL_MODE_SCAN BIT(7)
++#define LTC2942_REG_CONTROL_MODE_SCAN (BIT(7) | BIT(6))
+ #define LTC294X_REG_CONTROL_PRESCALER_MASK	(BIT(5) | BIT(4) | BIT(3))
+ #define LTC294X_REG_CONTROL_SHUTDOWN_MASK	(BIT(0))
+ #define LTC294X_REG_CONTROL_PRESCALER_SET(x) \
+@@ -55,6 +61,7 @@ enum ltc294x_reg {
+ #define LTC294X_REG_CONTROL_ALCC_CONFIG_DISABLED	0
+ 
+ #define LTC2941_NUM_REGS	0x08
++#define LTC2942_NUM_REGS	0x10
+ #define LTC2943_NUM_REGS	0x18
+ 
+ struct ltc294x_info {
+@@ -153,6 +160,9 @@ static int ltc294x_reset(const struct ltc294x_info *info, int prescaler_exp)
+ 	if (info->num_regs == LTC2943_NUM_REGS)
+ 		control |= LTC2943_REG_CONTROL_MODE_SCAN;
+ 
++	if (info->num_regs == LTC2942_NUM_REGS)
++		control |= LTC2942_REG_CONTROL_MODE_SCAN;
++
+ 	if (value != control) {
+ 		ret = ltc294x_write_regs(info->client,
+ 			LTC294X_REG_CONTROL, &control, 1);
+@@ -253,10 +263,16 @@ static int ltc294x_get_voltage(const struct ltc294x_info *info, int *val)
+ 	u8 datar[2];
+ 	u32 value;
+ 
+-	ret = ltc294x_read_regs(info->client,
+-		LTC294X_REG_VOLTAGE_MSB, &datar[0], 2);
+-	value = (datar[0] << 8) | datar[1];
+-	*val = ((value * 23600) / 0xFFFF) * 1000; /* in uV */
++        ret = ltc294x_read_regs(info->client,
++	        LTC294X_REG_VOLTAGE_MSB, &datar[0], 2);
++        value = (datar[0] << 8) | datar[1];
++
++	if (info->num_regs == LTC2943_NUM_REGS) {
++		*val = ((value * 23600) / 0xFFFF) * 1000; /* in uV */
++	} else {
++		*val = ((value * 6000) / 0xFFFF) * 1000; /* in uV */
++	}
++
+ 	return ret;
+ }
+ 
+@@ -283,11 +299,19 @@ static int ltc294x_get_temperature(const struct ltc294x_info *info, int *val)
+ 	u8 datar[2];
+ 	u32 value;
+ 
+-	ret = ltc294x_read_regs(info->client,
+-		LTC294X_REG_TEMPERATURE_MSB, &datar[0], 2);
+-	value = (datar[0] << 8) | datar[1];
+-	/* Full-scale is 510 Kelvin, convert to centidegrees  */
+-	*val = (((51000 * value) / 0xFFFF) - 27215);
++	if (info->num_regs == LTC2943_NUM_REGS) {
++		ret = ltc294x_read_regs(info->client,
++			LTC2943_REG_TEMPERATURE_MSB, &datar[0], 2);
++		value = (datar[0] << 8) | datar[1];
++		/* Full-scale is 510 Kelvin, convert to centidegrees  */
++		*val = (((51000 * value) / 0xFFFF) - 27215);
++	} else {
++                ret = ltc294x_read_regs(info->client,
++                        LTC2942_REG_TEMPERATURE_MSB, &datar[0], 2);
++                value = (datar[0] << 8) | datar[1];
++                /* Full-scale is 600 Kelvin, convert to centidegrees  */
++                *val = (((60000 * value) / 0xFFFF) - 27215);
++	}
+ 	return ret;
+ }
+ 
+@@ -357,12 +381,24 @@ static void ltc294x_work(struct work_struct *work)
+ 	schedule_delayed_work(&info->work, LTC294X_WORK_DELAY * HZ);
+ }
+ 
+-static enum power_supply_property ltc294x_properties[] = {
++static enum power_supply_property ltc2941_properties[] = {
++        POWER_SUPPLY_PROP_CHARGE_COUNTER,
++        POWER_SUPPLY_PROP_CHARGE_NOW,
++};
++
++static enum power_supply_property ltc2942_properties[] = {
++        POWER_SUPPLY_PROP_CHARGE_COUNTER,
++        POWER_SUPPLY_PROP_CHARGE_NOW,
++        POWER_SUPPLY_PROP_VOLTAGE_NOW,
++        POWER_SUPPLY_PROP_TEMP,
++};
++
++static enum power_supply_property ltc2943_properties[] = {
+ 	POWER_SUPPLY_PROP_CHARGE_COUNTER,
+ 	POWER_SUPPLY_PROP_CHARGE_NOW,
+ 	POWER_SUPPLY_PROP_VOLTAGE_NOW,
+-	POWER_SUPPLY_PROP_CURRENT_NOW,
+ 	POWER_SUPPLY_PROP_TEMP,
++	POWER_SUPPLY_PROP_CURRENT_NOW,
+ };
+ 
+ static int ltc294x_i2c_remove(struct i2c_client *client)
+@@ -438,6 +474,11 @@ static int ltc294x_i2c_probe(struct i2c_client *client,
+ 			prescaler_exp = LTC2943_MAX_PRESCALER_EXP;
+ 		info->Qlsb = ((340 * 50000) / r_sense) /
+ 				(4096 / (1 << (2*prescaler_exp)));
++	} else if (info->num_regs == LTC2942_NUM_REGS) {
++		if (prescaler_exp > LTC2942_MAX_PRESCALER_EXP)
++			prescaler_exp = LTC2942_MAX_PRESCALER_EXP;
++		info->Qlsb = ((85 * 50000) / r_sense) /
++				(128 / (1 << prescaler_exp));
+ 	} else {
+ 		if (prescaler_exp > LTC2941_MAX_PRESCALER_EXP)
+ 			prescaler_exp = LTC2941_MAX_PRESCALER_EXP;
+@@ -448,19 +489,17 @@ static int ltc294x_i2c_probe(struct i2c_client *client,
+ 	info->client = client;
+ 	info->id = num;
+ 	info->supply_desc.type = POWER_SUPPLY_TYPE_BATTERY;
+-	info->supply_desc.properties = ltc294x_properties;
+-	if (info->num_regs >= LTC294X_REG_TEMPERATURE_LSB)
+-		info->supply_desc.num_properties =
+-			ARRAY_SIZE(ltc294x_properties);
+-	else if (info->num_regs >= LTC294X_REG_CURRENT_LSB)
+-		info->supply_desc.num_properties =
+-			ARRAY_SIZE(ltc294x_properties) - 1;
+-	else if (info->num_regs >= LTC294X_REG_VOLTAGE_LSB)
+-		info->supply_desc.num_properties =
+-			ARRAY_SIZE(ltc294x_properties) - 2;
+-	else
+-		info->supply_desc.num_properties =
+-			ARRAY_SIZE(ltc294x_properties) - 3;
++	if (info->num_regs == LTC2943_NUM_REGS) {
++		info->supply_desc.properties = ltc2943_properties;
++		info->supply_desc.num_properties = ARRAY_SIZE(ltc2943_properties);
++	} else if (info->num_regs == LTC2942_NUM_REGS) {
++		info->supply_desc.properties = ltc2942_properties;
++		info->supply_desc.num_properties = ARRAY_SIZE(ltc2942_properties);
++	} else {
++		info->supply_desc.properties = ltc2941_properties;
++		info->supply_desc.num_properties = ARRAY_SIZE(ltc2941_properties);
++	}
++
+ 	info->supply_desc.get_property = ltc294x_get_property;
+ 	info->supply_desc.set_property = ltc294x_set_property;
+ 	info->supply_desc.property_is_writeable = ltc294x_property_is_writeable;
+@@ -530,6 +569,7 @@ static SIMPLE_DEV_PM_OPS(ltc294x_pm_ops, ltc294x_suspend, ltc294x_resume);
+ 
+ static const struct i2c_device_id ltc294x_i2c_id[] = {
+ 	{"ltc2941", LTC2941_NUM_REGS},
++	{"ltc2942", LTC2942_NUM_REGS},
+ 	{"ltc2943", LTC2943_NUM_REGS},
+ 	{ },
+ };
+@@ -548,5 +588,6 @@ module_i2c_driver(ltc294x_driver);
+ 
+ MODULE_AUTHOR("Auryn Verwegen, Topic Embedded Systems");
+ MODULE_AUTHOR("Mike Looijmans, Topic Embedded Products");
+-MODULE_DESCRIPTION("LTC2941/LTC2943 Battery Gas Gauge IC driver");
++MODULE_AUTHOR("Marco Signorini, Liberaintentio S.r.l.");
++MODULE_DESCRIPTION("LTC2941/LTC2942/LTC2943 Battery Gas Gauge IC driver");
+ MODULE_LICENSE("GPL");

@@ -1,0 +1,55 @@
+#!/bin/sh
+
+# ===========================================================================
+# Copyright 2015 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or subsequent versions of the
+# EUPL (the "License"); You may not use this work except in compliance
+# with the License. You may obtain a copy of the License at
+# http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Date: 02/04/2015
+# Authors:
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+#   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+#			European Commission - Joint Research Centre, 
+# - Marco Signorini, marco.signorini@liberaintentio.com
+#
+# ===========================================================================
+# kernel PIO pins initialization
+
+echo "Initializing custom PIO"
+
+# PC28, 1PPS, interrupt enabled
+echo "92" > /sys/class/gpio/export
+echo falling > /sys/class/gpio/pioC28/edge
+
+# PA24 (Power Sensor) is output
+echo "24" > /sys/class/gpio/export
+echo "out" > /sys/class/gpio/pioA24/direction
+echo "0" > /sys/class/gpio/pioA24/value
+
+# PA25 (GPS) is output
+echo "25" > /sys/class/gpio/export
+echo "out" > /sys/class/gpio/pioA25/direction
+echo "0" > /sys/class/gpio/pioA25/value
+
+# PA26 (GPRS) is output
+echo "26" > /sys/class/gpio/export
+echo "out" > /sys/class/gpio/pioA26/direction
+echo "0" > /sys/class/gpio/pioA26/value
+
+# PA27 (USBEN) is output
+echo "27" > /sys/class/gpio/export
+echo "out" > /sys/class/gpio/pioA27/direction
+echo "0" > /sys/class/gpio/pioA27/value
+
+# Turn off the LED on the board module
+echo "none" > /sys/class/leds/led_module/trigger
+

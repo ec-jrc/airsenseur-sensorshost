@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# ===========================================================================
+# Copyright 2015 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or subsequent versions of the
+# EUPL (the "License"); You may not use this work except in compliance
+# with the License. You may obtain a copy of the License at
+# http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Date: 02/04/2015
+# Authors:
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+#   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+#			European Commission - Joint Research Centre, 
+# - Marco Signorini, marco.signorini@liberaintentio.com
+#
+# ===========================================================================
+
+# Initializes the GPRS modem, starts a PPP connection, push updates
+# then shutdown the GPRS connection and modem
+
+SCRIPTNAME=runDataPush
+PIDFILE="/var/run/$SCRIPTNAME"
+
+exec 200>$PIDFILE
+flock -n 200 || exit 1
+
+cd "$(dirname "$0")"
+
+SCRIPTBASE="."
+
+$SCRIPTBASE/check_datapushstatus
+RESULT=$?
+if [ "$RESULT" = 0 ]; then
+	exit 0;
+fi
+
+
+echo timer > /sys/class/leds/led_3/trigger
+
+GPRSON="$SCRIPTBASE/on_gprs"
+GPRSOFF="$SCRIPTBASE/off_gprs"
+
+# Power up GPRS dongle
+$GPRSON
+sleep 60
+
+# Start PPP connection
+route del default
+wvdial &
+sleep 20
+
+# Push updates
+cd $SCRIPTBASE/AirSensEURDataPush
+#java -jar AirSensEURDataPush.jar ../../etc/influxpush.properties
+java -jar AirSensEURDataPush.jar ../../etc/datapushsosdb.properties
+cd ..
+
+# Stop GPRS
+sleep 30
+killall wvdial
+sleep 20
+
+# Power down GPRS dongle
+$GPRSOFF
+
+echo none > /sys/class/leds/led_3/trigger
+
+$SCRIPTBASE/update_leds
+
+exit 1;

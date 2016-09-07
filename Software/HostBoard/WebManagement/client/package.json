@@ -1,0 +1,44 @@
+{
+    "name": "AirSensEUR-webconsole",
+    "description": "A simple web based management tool for the AirSensEUR Host",
+    "version": "1.0.0",
+    "licence": "EUPL v1.1 or subsequent",
+    "maintainers": [
+      {
+        "name": "Marco Signorini",
+        "email": "marco.signorini@liberaintentio.com"
+      },
+      {
+          "name": "Michel Gerboles",
+          "email": "michel.gerboles@jrc.ec.europa.eu"
+      },
+      {
+          "name": "Laurent Spinelle",
+          "email": "laurent.spinelle@jrc.ec.europa.eu"
+      },
+      {
+          "name": "Alexander Kotsev",
+          "email": "alexander.kotsev@jrc.ec.europa.eu"
+      }
+    ],
+    "scripts": {
+     "build": "browserify  -t [ babelify --presets [ es2015 react ] ] ./src/AirSensEURWebPanel.js -o AirSensEURBundle.js"
+    },
+    "devDependencies": {
+      "babel-cli": "^6.0.0",
+      "babelify": "7.2.0",
+      "browserify": "12.0.1",
+      "babel-preset-es2015": "6.3.13",
+      "babel-preset-react": "6.3.13",
+      "net-browserify": "0.2.2"
+    },
+    "dependencies": {
+        "react-dom": "0.14.3",
+        "react": "0.14.3",
+        "bootstrap": "3.3.6",
+        "jquery": "2.2.0"
+    }
+}
+        
+        
+        

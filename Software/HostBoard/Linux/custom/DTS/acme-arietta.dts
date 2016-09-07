@@ -1,0 +1,277 @@
+/* ===========================================================================
+ * Copyright 2015 EUROPEAN UNION
+ *
+ * Licensed under the EUPL, Version 1.1 or subsequent versions of the
+ * EUPL (the "License"); You may not use this work except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://ec.europa.eu/idabc/eupl
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Date: 02/04/2015
+ * Authors:
+ * - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
+ *   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+ *   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+ *			European Commission - Joint Research Centre, 
+ * - Marco Signorini, marco.signorini@liberaintentio.com
+ *
+ * ===========================================================================
+ */
+
+/dts-v1/;
+#include "at91sam9g25.dtsi"
+/ {
+	model = "AirSensEUR - Host";
+	compatible = "acme,ariettag25", "atmel,at91sam9x5ek","atmel,at91sam9x5", "atmel,at91sam9";
+	aliases {
+		serial0 = &dbgu;
+		serial1 = &usart0;
+		serial2 = &usart1;
+		serial3 = &usart2;
+		serial4 = &usart3;
+		serial5 = &uart0;
+		serial6 = &uart1;
+	};
+	chosen {
+		bootargs = "console=ttyS0,115200 root=/dev/mmcblk0p2 rw rootwait";
+	};
+	memory {
+		reg = <0x20000000 0x10000000>;
+	};
+	clocks {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+		main_clock: clock@0 {
+			compatible = "atmel,osc", "fixed-clock";
+			clock-frequency = <12000000>;
+		};
+		
+		main_xtal { 
+			clock-frequency = <12000000>; 
+		}; 
+	};
+	ahb {
+		apb {
+			mmc0: mmc@f0008000 {
+				pinctrl-0 = <
+				  &pinctrl_mmc0_slot0_clk_cmd_dat0
+				  &pinctrl_mmc0_slot0_dat1_3>;
+				status = "okay";
+				slot@0 {
+					reg = <0>;
+					bus-width = <4>;
+				};
+			};
+			i2c0: i2c@f8010000 {
+				status ="okay";
+				clock-frequency = <350000>;
+
+                                gpiom1: gpiom1 {
+                                        compatible = "microchip,mcp23017";
+                                        gpio-controller;
+                                        #gpio-cells = <2>;
+                                        reg = <0x20>;
+                                };
+
+				battery_charger: ltc4156 {
+					reg = <0x09>;
+					compatible="ltc4156-charger";
+					usb,currentlimit = <500000>;
+					wal,currentlimit = <2250000>;
+					safety-timer = <14400>;
+					battery-voltage = <3600000>;
+				};
+
+				battery_gauge: ltc2942 {
+					compatible = "ltc2942";
+					reg = <0x64>;
+					lltc,resistor-sense = <3>;
+					lltc,prescaler-exponent = <7>; 
+				};
+
+			};
+			usart0: serial@f801c000 {
+				pinctrl-0 = <&pinctrl_usart0>;
+				status ="okay";
+				atmel,use-dma-rx;
+				atmel,use-dma-tx;
+			};
+			usart1: serial@f8020000 {
+				pinctrl-0 = <&pinctrl_usart1>;
+				status ="okay";
+				atmel,use-dma-rx;
+				atmel,use-dma-tx;
+			};
+			usart2: serial@f8024000 {
+				pinctrl-0 = <&pinctrl_usart2>;
+				status ="okay";
+			};
+			ssc0: ssc@f0010000 {
+				status = "okay";
+			};
+			usb2: gadget@f803c000 {
+				/* status = "okay"; */
+			};
+			dbgu: serial@fffff200 {
+				status = "okay";
+			};
+			pinctrl@fffff400 {
+
+			};
+			rtc@fffffeb0 {
+				status = "okay";
+			};
+		};
+		usb0: ohci@00600000 {
+			status = "okay";
+		};
+		usb1: ehci@00700000 {
+			status = "okay";
+		};
+	};
+	
+	leds_direct {
+		compatible = "gpio-leds";
+		
+		led_module {
+			label = "led_module";
+			gpios = <&pioB 8 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+	};
+
+	leds_exp {
+		compatible = "gpio-leds";
+
+                led_user_1 {
+                        label = "led_1";
+                        gpios = <&gpiom1 0 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "none";
+                };
+
+                led_user_2 {
+                        label = "led_2";
+                        gpios = <&gpiom1 1 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "none";
+                };
+
+                led_user_3 {
+                        label = "led_3";
+                        gpios = <&gpiom1 2 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "none";
+                };
+
+                led_user_4 {
+                        label = "led_4";
+                        gpios = <&gpiom1 3 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "none";
+                };
+
+                led_user_5 {
+                        label = "led_5";
+                        gpios = <&gpiom1 4 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "none";
+                };
+
+                led_user_6 {
+                        label = "led_6";
+                        gpios = <&gpiom1 5 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "none";
+                };
+
+                hb_led {
+                        label = "led_hb";
+                        gpios = <&gpiom1 6 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "timer"; /* Start timer. Will be changed at userlevel */
+                };		
+
+		charge_led {
+			label = "led_charge";
+			gpios = <&gpiom1 7 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "ltc4156-charger-0-charging-blink-full-solid";
+		};
+	};
+
+
+	gpio_keys_direct {
+		compatible = "gpio-keys";
+		
+		shutdown_req {
+			label="Shutdown";
+			gpios = <&pioA 28 GPIO_ACTIVE_HIGH>;
+			linux,code = <116>;	/* KEY_POWER */
+		};
+ 
+                button_module {
+                    label = "BtnModule";
+                    gpios = <&pioC 17 GPIO_ACTIVE_HIGH>;
+                    linux,code = <10>; /* KEY_9 */
+                };
+	};
+
+	gpio_keys {
+	        compatible = "gpio-keys-polled";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		poll-interval = <100>;
+
+                button@1 {
+                    label = "btn1";
+                    gpios = <&gpiom1 15 GPIO_ACTIVE_LOW>;
+                    linux,code = <2>; /* KEY_1 */
+                };
+
+                button@2 {
+                    label = "btn2";
+                    gpios = <&gpiom1 14 GPIO_ACTIVE_LOW>;
+                    linux,code = <3>; /* KEY_2 */
+                };
+
+                button@3 {
+                    label = "btn3";
+                    gpios = <&gpiom1 13 GPIO_ACTIVE_LOW>;
+                    linux,code = <4>; /* KEY_3 */
+                };
+
+                button@4 {
+                    label = "btn4";
+                    gpios = <&gpiom1 12 GPIO_ACTIVE_LOW>;
+                    linux,code = <5>; /* KEY_4 */
+                };
+
+                button@5 {
+                    label = "btn5";
+                    gpios = <&gpiom1 11 GPIO_ACTIVE_LOW>;
+                    linux,code = <6>; /* KEY_5 */
+                };
+
+                button@6 {
+                    label = "btn6";
+                    gpios = <&gpiom1 10 GPIO_ACTIVE_LOW>;
+                    linux,code = <7>; /* KEY_6 */
+                };
+
+                button@7 {
+                    label = "btn7";
+                    gpios = <&gpiom1 9 GPIO_ACTIVE_LOW>;
+                    linux,code = <8>; /* KEY_7 */
+                };
+
+	        button@8 {
+	            label = "btn8";
+	            gpios = <&gpiom1 8 GPIO_ACTIVE_LOW>;
+	            linux,code = <9>; /* KEY_8 */
+        	};
+	};
+	
+	
+	battery {
+		power-supplies = <&battery_charger>;
+	};
+
+};

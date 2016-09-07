@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration device="PIC12F1571" mcc_version="v2.25.2">
+    <managers>
+        <manager generated="true" name="Pin Manager" reloadPin="manual">
+            <setting name="P1SEL" option="RA1"/>
+            <setting name="CWGASEL" option="RA2"/>
+            <setting name="P2SEL" option="RA0"/>
+            <setting name="CWGBSEL" option="RA0"/>
+            <setting name="T1GSEL" option="RA4"/>
+            <setting name="package" option="SOIC8"/>
+            <setting name="sorting" option="true"/>
+            <resource customName="IO_RA0" digital="true" direction="OUTPUT" function="RA0" ioc="0" module="GPIO" name="RA0" start="false" type="pin" wpu="false"/>
+            <resource customName="IO_RA1" digital="true" direction="OUTPUT" function="RA1" ioc="0" module="GPIO" name="RA1" start="false" type="pin" wpu="false"/>
+            <resource customName="IO_RA2" digital="true" direction="OUTPUT" function="RA2" ioc="0" module="GPIO" name="RA2" start="false" type="pin" wpu="false"/>
+            <resource customName="IO_RA3" digital="true" direction="INPUT" function="RA3" ioc="2" module="GPIO" name="RA3" start="false" type="pin" wpu="true"/>
+            <resource customName="channel_AN3" digital="false" direction="INPUT" function="AN3" ioc="0" module="ADC1" name="RA4" start="false" type="pin" wpu="false"/>
+            <resource customName="IO_RA5" digital="true" direction="OUTPUT" function="RA5" ioc="0" module="GPIO" name="RA5" start="false" type="pin" wpu="false"/>
+            <file checksum="3732723080" modified="false" name="pin_manager.c" path="mcc_generated_files/pin_manager.c"/>
+            <file checksum="2901452566" modified="false" name="pin_manager.h" path="mcc_generated_files/pin_manager.h"/>
+        </manager>
+        <manager generated="true" name="System" reloadPin="manual">
+            <initializer comment="" name="Initialize">
+                <setting name="SPLLEN" option="disabled" register="OSCCON"/>
+                <setting name="SCS" option="INTOSC" register="OSCCON"/>
+                <setting name="IRCF" option="1MHz_HF" register="OSCCON"/>
+                <setting name="OSTS" option="intosc" register="OSCSTAT"/>
+                <setting name="HFIOFR" option="disabled" register="OSCSTAT"/>
+                <setting name="HFIOFS" option="not0.5percent_acc" register="OSCSTAT"/>
+                <setting name="PLLR" option="disabled" register="OSCSTAT"/>
+                <setting name="MFIOFR" option="disabled" register="OSCSTAT"/>
+                <setting name="LFIOFR" option="disabled" register="OSCSTAT"/>
+                <setting name="HFIOFL" option="not2percent_acc" register="OSCSTAT"/>
+                <setting name="TUN" option="0x0" register="OSCTUNE"/>
+                <additionalSetting name="pllMultiplier" option=""/>
+                <additionalSetting name="extclk" option="1.0 MHz"/>
+            </initializer>
+            <setting name="BOREN" option="NSLEEP"/>
+            <setting name="PWRTE" option="ON"/>
+            <setting name="FOSC" option="INTOSC"/>
+            <setting name="MCLRE" option="OFF"/>
+            <setting name="CP" option="ON"/>
+            <setting name="WDTE" option="OFF"/>
+            <setting name="CLKOUTEN" option="OFF"/>
+            <setting name="WRT" option="ALL"/>
+            <setting name="LPBOREN" option="OFF"/>
+            <setting name="LVP" option="OFF"/>
+            <setting name="STVREN" option="ON"/>
+            <setting name="PLLEN" option="OFF"/>
+            <setting name="BORV" option="LO"/>
+            <setting name="generateConfigBits" option="true"/>
+            <file checksum="2620960398" modified="false" name="mcc.c" path="mcc_generated_files/mcc.c"/>
+            <file checksum="1151477462" modified="false" name="mcc.h" path="mcc_generated_files/mcc.h"/>
+        </manager>
+        <manager generated="true" name="Interrupt Manager" reloadPin="manual">
+            <setting name="preemptHigh" option="true"/>
+            <setting name="preemptLow" option="true"/>
+            <setting name="useIPEN" option="false"/>
+            <file checksum="2558061229" modified="false" name="interrupt_manager.c" path="mcc_generated_files/interrupt_manager.c"/>
+            <file checksum="2482174213" modified="false" name="interrupt_manager.h" path="mcc_generated_files/interrupt_manager.h"/>
+            <interrupt module="TMR2" name="TMRI" priority="2"/>
+            <interrupt module="Pin Manager" name="IOCI" priority="2"/>
+        </manager>
+    </managers>
+    <modules>
+        <module generated="true" mode="FVR" name="FVR" order="1" reloadPin="manual" type="vref_bandgap_0buf">
+            <initializer comment="" name="Initialize">
+                <setting name="CDAFVR" option="off" register="FVRCON"/>
+                <setting name="TSEN" option="disabled" register="FVRCON"/>
+                <setting name="TSRNG" option="Lo_range" register="FVRCON"/>
+                <setting name="FVREN" option="enabled" register="FVRCON"/>
+                <setting name="FVRRDY" option="disabled" register="FVRCON"/>
+                <setting name="ADFVR" option="2x" register="FVRCON"/>
+            </initializer>
+            <file checksum="1755091745" modified="false" name="fvr.c" path="mcc_generated_files/fvr.c"/>
+            <file checksum="683985373" modified="false" name="fvr.h" path="mcc_generated_files/fvr.h"/>
+        </module>
+        <module generated="true" mode="ADC" name="ADC1" order="0" reloadPin="manual_auto" type="adc_sarcore_10bit">
+            <initializer comment="" name="Initialize">
+                <setting name="GO_nDONE" option="stop" register="ADCON0"/>
+                <setting name="ADON" option="enabled" register="ADCON0"/>
+                <setting name="CHS" option="AN0" register="ADCON0"/>
+                <setting name="ADPREF" option="FVR" register="ADCON1"/>
+                <setting name="ADFM" option="right" register="ADCON1"/>
+                <setting name="ADCS" option="FOSC/64" register="ADCON1"/>
+                <setting name="TRIGSEL" option="TMR0_overflow" register="ADCON2"/>
+                <setting name="ADRESL" option="0x0" register="ADRESL"/>
+                <setting name="ADRESH" option="0x0" register="ADRESH"/>
+            </initializer>
+            <setting name="ADI" option="false"/>
+            <resource customName="channel_AN3" function="AN3" name="RA4" type="pin"/>
+            <file checksum="350340266" modified="true" name="adc1.c" path="mcc_generated_files/adc1.c"/>
+            <file checksum="2397283559" modified="false" name="adc1.h" path="mcc_generated_files/adc1.h"/>
+        </module>
+        <module generated="true" mode="Timer" name="TMR0" order="2" reloadPin="manual" type="tmr_0">
+            <initializer comment="" name="Initialize">
+                <setting name="TMR0CS" option="FOSC/4" register="OPTION_REG"/>
+                <setting name="TMR0SE" option="Increment_hi_lo" register="OPTION_REG"/>
+                <setting name="PS" option="1:16" register="OPTION_REG"/>
+                <setting name="PSA" option="assigned" register="OPTION_REG"/>
+                <setting name="INTEDG" option="rising" register="OPTION_REG"/>
+                <setting name="nWPUEN" option="disabled" register="OPTION_REG"/>
+                <setting name="TMR0" option="100" register="TMR0"/>
+                <additionalSetting name="timerstart" option="enabled"/>
+                <additionalSetting name="extfreq" option="100 kHz"/>
+                <additionalSetting name="periodChanged" option="10.0ms"/>
+            </initializer>
+            <setting name="TMRI" option="false"/>
+            <setting name="ticker" option="0"/>
+            <file checksum="1052993093" modified="false" name="tmr0.c" path="mcc_generated_files/tmr0.c"/>
+            <file checksum="3836959611" modified="false" name="tmr0.h" path="mcc_generated_files/tmr0.h"/>
+        </module>
+        <module generated="true" mode="GPIO" name="GPIO" order="3" reloadPin="manual" type="GPIO">
+            <resource customName="IO_RA0" digital="true" direction="OUTPUT" function="RA0" ioc="0" module="GPIO" name="RA0" start="false" type="pin" wpu="false"/>
+            <resource customName="IO_RA1" digital="true" direction="OUTPUT" function="RA1" ioc="0" module="GPIO" name="RA1" start="false" type="pin" wpu="false"/>
+            <resource customName="IO_RA2" digital="true" direction="OUTPUT" function="RA2" ioc="0" module="GPIO" name="RA2" start="false" type="pin" wpu="false"/>
+            <resource customName="IO_RA3" digital="true" direction="INPUT" function="RA3" ioc="2" module="GPIO" name="RA3" start="false" type="pin" wpu="true"/>
+            <resource customName="IO_RA5" digital="true" direction="OUTPUT" function="RA5" ioc="0" module="GPIO" name="RA5" start="false" type="pin" wpu="false"/>
+        </module>
+        <module generated="true" mode="Timer" name="TMR2" order="4" reloadPin="manual" type="tmr_2">
+            <initializer comment="" name="Initialize">
+                <setting name="TMR2ON" option="off" register="T2CON"/>
+                <setting name="T2CKPS" option="1:1" register="T2CON"/>
+                <setting name="T2OUTPS" option="1:10" register="T2CON"/>
+                <setting name="PR2" option="255" register="PR2"/>
+                <setting name="TMR2" option="0x0" register="TMR2"/>
+                <additionalSetting name="ticker" option="0"/>
+                <additionalSetting name="timerstart" option="enabled"/>
+                <additionalSetting name="maxPeriodChanged" option="10.24 ms"/>
+                <additionalSetting name="T2OUTPS" option="1:10"/>
+                <additionalSetting name="minPeriodChanged" option="40.0 us"/>
+                <additionalSetting name="period" option="10.24 ms"/>
+            </initializer>
+            <setting name="TMRI" option="true"/>
+            <setting name="ticker" option="0"/>
+            <file checksum="1857260379" modified="true" name="tmr2.c" path="mcc_generated_files/tmr2.c"/>
+            <file checksum="119178624" modified="false" name="tmr2.h" path="mcc_generated_files/tmr2.h"/>
+        </module>
+    </modules>
+</configuration>

@@ -1,0 +1,55 @@
+#!/bin/sh
+
+# ===========================================================================
+# Copyright 2015 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or subsequent versions of the
+# EUPL (the "License"); You may not use this work except in compliance
+# with the License. You may obtain a copy of the License at
+# http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Date: 02/04/2015
+# Authors:
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+#   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+#			European Commission - Joint Research Centre, 
+# - Marco Signorini, marco.signorini@liberaintentio.com
+#
+# ===========================================================================
+# AirSensEUR basic custom bootstrap builder
+
+# Prerequisites:
+#sudo pt-get install multistrap
+#sudo apt-get install qemu
+#sudo apt-get install qemu-user-static
+#sudo apt-get install binfmt-support
+#sudo apt-get install dpkg-cross
+
+# Start multistrap
+sudo multistrap -a armel -f multistrap.conf
+
+# Configure packages
+sudo cp /usr/bin/qemu-arm-static target-rootfs/usr/bin
+sudo LC_ALL=C LANGUAGE=C LANG=C chroot target-rootfs dpkg --configure -a
+
+# Customize the standard distribution with variable node parameters
+sudo ./customize.sh
+
+# Copy other custom relevant information
+sudo ./copyapps.sh
+sudo ./copywebapps.sh
+
+# Set root password
+sudo chroot target-rootfs passwd
+
+# Some cleanup
+sudo LC_ALL=C LANGUAGE=C LANG=C chroot target-rootfs apt-get clean
+
+# Remove the qm emulator
+sudo rm target-rootfs/usr/bin/qemu-arm-static

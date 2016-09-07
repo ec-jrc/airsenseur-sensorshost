@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# ===========================================================================
+# Copyright 2015 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or subsequent versions of the
+# EUPL (the "License"); You may not use this work except in compliance
+# with the License. You may obtain a copy of the License at
+# http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Date: 02/04/2015
+# Authors:
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+#   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+#			European Commission - Joint Research Centre, 
+# - Marco Signorini, marco.signorini@liberaintentio.com
+#
+# ===========================================================================
+
+cd "$(dirname "$0")"
+
+# Update leds based on information retrieved 
+# by running several scripts and from the overall
+# led status found in the leds_enabled file
+
+LEDS_ENABLED=0
+LEDS_ENABLEFILE=./leds_enabled
+
+LEDS_CHECKFILE=./leds_checkfile
+
+[ -r $LEDS_ENABLEFILE ] && . $LEDS_ENABLEFILE
+[ -r $LEDS_CHECKFILE ] && . $LEDS_CHECKFILE
+
+# Valid LED names are
+# led_1 to led_6, led_charge, led_hb
+
+# Set LED on
+# $1 is the LED name
+turnOn() {
+	echo 255 > /sys/class/leds/$1/brightness
+}
+
+# Set LED on
+# $1 is the LED name
+turnOff() {
+        echo 0 > /sys/class/leds/$1/brightness
+	echo none > /sys/class/leds/$1/trigger
+}
+
+# Update the LED status on/off based on input parameters
+# $1 is the LED name
+# $2 when 0 the LED is off; the LED is on otherwise
+updateLedStatus() {
+	if [ "$2" = "" ] || [ "$2" = 0 ]; then
+		turnOff $1
+	else
+		$2
+		if [ "$?" = 0 ]; then
+			turnOff $1
+		else
+			turnOn $1
+		fi
+	fi
+}
+
+# Link LED with a trigger
+# $1 is the LED name
+# $2 is the required trigger name
+triggerTo() {
+	echo 0 > /sys/class/leds/$1/brightness
+	echo $2 > /sys/class/leds/$1/trigger
+}
+
+if [ "$LEDS_ENABLED" = 0 ]; then
+	turnOff led_1
+	turnOff led_2
+	turnOff led_3
+	turnOff led_4
+	turnOff led_5
+	turnOff led_6
+	turnOff led_hb
+else
+
+	updateLedStatus led_1 $LED1_CHKSCRIPT
+	updateLedStatus led_2 $LED2_CHKSCRIPT
+	updateLedStatus led_3 $LED3_CHKSCRIPT
+	updateLedStatus led_4 $LED4_CHKSCRIPT
+	updateLedStatus led_5 $LED5_CHKSCRIPT
+	updateLedStatus led_6 $LED6_CHKSCRIPT
+	triggerTo led_hb heartbeat
+fi
+
+

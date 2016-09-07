@@ -1,0 +1,30 @@
+.row {
+    margin-bottom: 20px;
+}
+
+.swatcher_valeval {
+    margin-left: 25%;
+    margin-bottom: 20px;
+    font-size: 250%;
+}
+
+.swatcher_table {
+}
+
+.swatcher_table .label {
+    color: black;
+}
+
+.active {
+    background-color: rgba(255,0,0,0.4);
+}
+
+.samp-sett-feedback {
+    width: 64px;
+    margin: 0 auto;
+    font-size: 24pt;
+}
+
+.astextarea {
+    width: 100%;
+}

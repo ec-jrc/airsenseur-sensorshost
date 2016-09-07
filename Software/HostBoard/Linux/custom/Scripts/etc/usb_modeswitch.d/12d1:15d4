@@ -1,0 +1,12 @@
+########################################################
+# Huawei 2511 (E303)
+
+DefaultVendor= 0x12d1
+DefaultProduct=0x15d4
+
+TargetVendor=  0x12d1
+TargetProduct= 0x15d5
+
+CheckSuccess=20
+
+MessageContent="55534243000000000000000000000611060000000000000000000000000000"

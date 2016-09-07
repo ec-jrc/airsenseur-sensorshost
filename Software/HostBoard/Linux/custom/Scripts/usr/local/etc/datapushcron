@@ -1,0 +1,4 @@
+0 5 * * * root /usr/local/airsenseur/runDataPush
+0 13 * * * root /usr/local/airsenseur/runDataPush
+0 21 * * * root /usr/local/airsenseur/runDataPush
+
