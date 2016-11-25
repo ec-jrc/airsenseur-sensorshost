@@ -138,7 +138,8 @@ public class SamplePersisterSQL implements SamplesPersister {
                             "`gpslatitude` REAL NOT NULL, " +
                             "`gpslongitude` REAL NOT NULL, " +
                             "`gpsaltitude` REAL NOT NULL," +
-                            "`collectedts` INT NOT NULL " +
+                            "`collectedts` INT NOT NULL, " +
+                            "`calibrated` REAL NOT NULL " +
                             ") ";
         
         SQLiteStatement st0 = null;
@@ -192,8 +193,8 @@ public class SamplePersisterSQL implements SamplesPersister {
             db.exec("BEGIN TRANSACTION;");
 
             st1 = db.prepare("INSERT INTO measures"
-                    + "       (`value`, `evvalue`, `timestamp`, `channel`, `channelName`, `gpstimestamp`, `gpslatitude`, `gpslongitude`, `gpsaltitude`, `collectedts`) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", true);
+                    + "       (`value`, `evvalue`, `timestamp`, `channel`, `channelName`, `gpstimestamp`, `gpslatitude`, `gpslongitude`, `gpsaltitude`, `collectedts`, `calibrated`) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", true);
 
             for (SampleDataContainer sample:sampleQueue) {
 
@@ -207,6 +208,7 @@ public class SamplePersisterSQL implements SamplesPersister {
                 st1.bind(8, sample.getLongitude());
                 st1.bind(9, sample.getAltitude());
                 st1.bind(10, sample.getCollectedTimestamp());
+                st1.bind(11, sample.getCalibratedVal());
 
                 st1.step();
 

@@ -74,7 +74,7 @@ public class ChemSensorHostMain {
         boolean bContinue = true;
         while (bContinue) {
             try {
-                Thread.sleep(60000);            
+                bContinue = !chemSensorHost.waitForTermination(6000);
             } catch (InterruptedException ex) {
                 bContinue = false;
             }

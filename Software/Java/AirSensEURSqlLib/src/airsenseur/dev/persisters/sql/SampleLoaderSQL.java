@@ -156,8 +156,8 @@ public class SampleLoaderSQL implements SampleLoader {
                 channelSql = " AND channel = ? ";
             }
             
-            //                          0       1           2            3           4               5               6              7               8               9
-            st1 = db.prepare("SELECT `value`, `evvalue`, `timestamp`, `channel`, `channelName`, `gpstimestamp`, `gpslatitude`, `gpslongitude`, `gpsaltitude`, `collectedts` "
+            //                          0       1           2            3           4               5               6              7               8               9          10
+            st1 = db.prepare("SELECT `value`, `evvalue`, `timestamp`, `channel`, `channelName`, `gpstimestamp`, `gpslatitude`, `gpslongitude`, `gpsaltitude`, `collectedts`, `calibrated` "
                             + "FROM measures "
                             + "WHERE collectedts >= ? AND collectedts < ? " + channelSql +  " ORDER BY collectedts ASC");
             
@@ -179,12 +179,14 @@ public class SampleLoaderSQL implements SampleLoader {
                 double gpsLongitude = st1.columnDouble(7);
                 double gpsAltitude = st1.columnDouble(8);
                 long collectedTs = st1.columnLong(9);
+                double calibratedVal = st1.columnDouble(10);
                 
                 SampleDataContainer data = new SampleDataContainer(sensorChannel);
                 data.setName(name);
                 data.updateSample(value, evvalue, sensorTimeStamp);
                 data.updateGPSValues(gpsTimeStamp, gpsLatitude, gpsLongitude, gpsAltitude);
                 data.setCollectedTimestamp(collectedTs);
+                data.setCalibratedVal(calibratedVal);
                 
                 result.add(data);
             }

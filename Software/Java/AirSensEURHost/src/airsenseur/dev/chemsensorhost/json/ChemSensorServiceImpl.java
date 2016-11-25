@@ -35,6 +35,7 @@ import expr.Parser;
 import expr.SyntaxException;
 import expr.Variable;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -98,7 +99,7 @@ public class ChemSensorServiceImpl implements ChemSensorService {
             // Time to wait?
             if  ((sent % chunkSize) == 0) {
                 try {
-                    Thread.sleep(3000);
+                    TimeUnit.SECONDS.sleep(3);
                 } catch (InterruptedException ex) {
                         break;
                 }

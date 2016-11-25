@@ -27,6 +27,7 @@ package airsenseur.dev.dataaggregator;
 
 import airsenseur.dev.dataaggregator.collectors.GPSDataCollector;
 import airsenseur.dev.exceptions.PersisterException;
+import airsenseur.dev.helpers.TaskScheduler;
 import airsenseur.dev.json.ChemSensorClient;
 import airsenseur.dev.json.FreeMemory;
 import airsenseur.dev.json.SampleData;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * Main data aggregation engine
  * @author marco
  */
-public class AirSensEURDataAggregatorEngine {
+public class AirSensEURDataAggregatorEngine extends TaskScheduler {
     
     private final GPSDataCollector gpsDataCollector = new GPSDataCollector();
     private final ChemSensorClient sensorDataCollector = new ChemSensorClient();
@@ -84,12 +85,11 @@ public class AirSensEURDataAggregatorEngine {
         return result;
     }
     
-    
     /**
      * Main task routine. It retrieve samples and persist them.
-     * It should be called periodically by the main process
      */
-    public void task() {
+    @Override
+    public void taskMain() {
         
         Configuration config = Configuration.getConfig();        
         
@@ -138,6 +138,10 @@ public class AirSensEURDataAggregatorEngine {
                 // Update sample value for that channel
                 if (sample.updateSample(lastSampleVal.value, lastSampleVal.evalSampleVal, lastSampleVal.timeStamp)) {
                     
+                    // Calibrated value is a placeholder for data that will be processed
+                    // in the future by a calibration algorithm. Populate with a dummy value.
+                    sample.setCalibratedVal(lastSampleVal.evalSampleVal);                    
+                    
                     double timeStamp = gpsDataCollector.getLastTimeStamp();
                     double longitude = gpsDataCollector.getLastLongitude();
                     double latitude = gpsDataCollector.getLastLatitude();
@@ -179,6 +183,8 @@ public class AirSensEURDataAggregatorEngine {
      * Termination routine
      */
     public void terminate() {
+        
+        stop();
         
         sensorDataCollector.stopSampling();
         gpsDataCollector.disconnect();

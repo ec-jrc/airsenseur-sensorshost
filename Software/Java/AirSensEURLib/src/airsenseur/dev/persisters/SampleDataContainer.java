@@ -37,12 +37,13 @@ public class SampleDataContainer {
     private int sampleRawVal;
     private int sensorTimeStamp;
     private double sampleEvaluatedVal;
+    private double calibratedVal;
     
     private double gpsTimestamp;
     private double latitude;
     private double longitude;
     private double altitude;
-
+    
     public SampleDataContainer() {
         this.name = "";
         this.channel = 0;
@@ -67,6 +68,7 @@ public class SampleDataContainer {
         other.sampleRawVal = sampleRawVal;
         other.sampleEvaluatedVal = sampleEvaluatedVal;
         other.sensorTimeStamp = sensorTimeStamp;
+        other.calibratedVal = calibratedVal;
         other.setCollectedTimestamp(getCollectedTimestamp());
         other.updateGPSValues(gpsTimestamp, latitude, longitude, altitude);
         return other;
@@ -207,5 +209,23 @@ public class SampleDataContainer {
      */
     public double getSampleEvaluatedVal() {
         return sampleEvaluatedVal;
+    }
+
+    /**
+     * Calibrated value is a placeholder for data that will be processed
+     * in the future by a calibration algorithm.
+     * @return the calibratedVal
+     */
+    public double getCalibratedVal() {
+        return calibratedVal;
+    }
+
+    /**
+     * Calibrated value is a placeholder for data that will be processed
+     * in the future by a calibration algorithm. Populate with a dummy value.
+     * @param calibratedVal the calibratedVal to set
+     */
+    public void setCalibratedVal(double calibratedVal) {
+        this.calibratedVal = calibratedVal;
     }
 }

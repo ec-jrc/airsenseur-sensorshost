@@ -55,11 +55,12 @@ public class AboutDialog extends javax.swing.JDialog {
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
 
-        jLabel1.setText("AirSensEURPanel R0.2");
+        jLabel1.setText("AirSensEURPanel R0.3");
 
         jLabel2.setText("www.airsenseur.org");
 
@@ -78,6 +79,8 @@ public class AboutDialog extends javax.swing.JDialog {
         jLabel8.setFont(new java.awt.Font("Lucida Grande", 0, 8)); // NOI18N
         jLabel8.setText("You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl");
 
+        jLabel9.setText("Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -92,7 +95,8 @@ public class AboutDialog extends javax.swing.JDialog {
                             .addComponent(jLabel5)
                             .addComponent(jLabel6)
                             .addComponent(jLabel7)
-                            .addComponent(jLabel8)))
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(124, 124, 124)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
@@ -114,13 +118,15 @@ public class AboutDialog extends javax.swing.JDialog {
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel5)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8)
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addGap(17, 17, 17))
         );
 
         pack();
@@ -135,5 +141,6 @@ public class AboutDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     // End of variables declaration//GEN-END:variables
 }

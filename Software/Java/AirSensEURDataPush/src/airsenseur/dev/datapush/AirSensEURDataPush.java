@@ -38,6 +38,7 @@ import airsenseur.dev.persisters.sosdb.SamplePersisterSOSDB;
 import airsenseur.dev.persisters.sql.SampleLoaderSQL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,9 @@ public class AirSensEURDataPush {
                                                            config.getInfluxDbPort(), 
                                                            config.getInfluxDbName(), 
                                                            config.getInfluxDbUsername(), 
-                                                           config.getInfluxDbPassword());
+                                                           config.getInfluxDbPassword(),
+                                                           config.getInfluxDbUseLineProtocol(),
+                                                           config.getUseHTTPSProtocol());
             channels.add(SampleLoader.CHANNEL_INVALID);
         } else {
             log.info("WorkingMode: 52°North SOS");
@@ -192,7 +195,7 @@ public class AirSensEURDataPush {
                     retry++;
                     
                     try {
-                        Thread.sleep(1333);
+                        TimeUnit.MILLISECONDS.sleep(1333);
                     } catch (InterruptedException ie){
                         retry = config.getMaxDatabaseRetry();
                     }

@@ -24,6 +24,7 @@
 
 package airsenseur.dev.persisters.influxdb;
 
+import airsenseur.dev.exceptions.PersisterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import java.util.List;
  * Serie is a container of points with associated metadata 
  * @author marco
  */
-public class Serie {
+public abstract class Serie {
     
     private String name = "";
     private final List<String> columns = new ArrayList<>();
@@ -55,4 +56,6 @@ public class Serie {
     public List<Point> getPoints() {
         return points;
     }
+    
+    public abstract String toLineProtocol() throws PersisterException;
 }

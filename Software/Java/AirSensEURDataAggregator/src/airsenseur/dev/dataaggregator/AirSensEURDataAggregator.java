@@ -25,6 +25,7 @@
 package airsenseur.dev.dataaggregator;
 
 import airsenseur.dev.exceptions.ConfigurationException;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public class AirSensEURDataAggregator {
         while (!engine.init()) {
             try {
                 log.error("AirSensEURDataAggregator initialization failed. Retrying in 5 seconds.");
-                Thread.sleep(5000);
+                TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException ex) {
                 return;
             }
@@ -66,15 +67,15 @@ public class AirSensEURDataAggregator {
         // Main task loop
         int pollingTime = config.getPollTime();
         log.info("AirSensEURDataAggregator main loop started with polling time (ms): " + pollingTime);
-        boolean terminate = false;
-        while (!terminate) {
-            
-            engine.task();
-            
+        engine.startPeriodic(pollingTime);
+        
+        // Loop in background (do nothing. All operations are made through callback)
+        boolean bContinue = true;
+        while (bContinue) {
             try {
-                Thread.sleep(pollingTime);
+                bContinue = !engine.waitForTermination(6000);
             } catch (InterruptedException ex) {
-                terminate = true;
+                bContinue = false;
             }
         }
         

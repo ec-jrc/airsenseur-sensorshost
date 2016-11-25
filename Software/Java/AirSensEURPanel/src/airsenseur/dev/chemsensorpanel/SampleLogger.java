@@ -57,6 +57,35 @@ public class SampleLogger extends javax.swing.JPanel {
         }
     };
 
+    // Other useful standard data processing
+    public final static SampleLogger.DataProcessing ur100CDTemperatureDataProcessing = new DataProcessing() {
+        @Override
+        public double processSample(double sample) {
+            return ((sample/16384*165) - 40.0);
+        }
+    };
+            
+    public final static SampleLogger.DataProcessing ur100CDPressureDataProcessing = new DataProcessing() {
+        @Override
+        public double processSample(double sample) {
+            return (sample/16384 * 100.0);
+        }
+    };
+            
+    public final static SampleLogger.DataProcessing sht31TemperatureDataProcessing = new DataProcessing() {
+        @Override
+        public double processSample(double sample) {
+            return ((sample/65535*175) - 45.0);
+        }
+    };
+              
+    public final static SampleLogger.DataProcessing sht31PressureDataProcessing = new DataProcessing() {
+        @Override
+        public double processSample(double sample) {
+            return (sample/65535 * 100.0);
+        }
+    };
+
     protected long lastSampleTimeStamp = 0;
     protected int sensorId = 0;  
     protected DataProcessing dataProcessing = null;

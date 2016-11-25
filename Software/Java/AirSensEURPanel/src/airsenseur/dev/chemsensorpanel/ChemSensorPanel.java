@@ -99,7 +99,7 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
     private final javax.swing.ImageIcon tickMark = new javax.swing.ImageIcon(getClass().getResource("/airsenseur/dev/chemsensorpanel/icons/accept.png"));
     
     private final List<SampleLogger> sampleLoggerPanels = new ArrayList<>();
-
+    
     /**
      * Creates new form ChemSensorPanel
      */
@@ -176,26 +176,16 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
         sampleLogger5.setLoggerProperties("Temperature", 0, 65535, 10);
         sampleLogger5.setSensorId(TEMP_SENSOR_CHANNEL_ID);
         sampleLogger5.setLogger(logger);
-        sampleLogger5.setDataProcessing(new SampleLogger.DataProcessing() {
-
-            @Override
-            public double processSample(double sample) {
-                return ((sample/16384*165) - 40.0);
-            }
-        });
         sampleLoggerPanels.add(sampleLogger5);        
         
         sampleLogger6.setLoggerProperties("Humidity", 0, 65535, 10);
         sampleLogger6.setSensorId(HUM_SENSOR_CHANNEL_ID);
         sampleLogger6.setLogger(logger);
-        sampleLogger6.setDataProcessing(new SampleLogger.DataProcessing() {
-
-            @Override
-            public double processSample(double sample) {
-                return (sample/16384 * 100.0);
-            }
-        });
         sampleLoggerPanels.add(sampleLogger6);
+        
+        // Define the default data sampling for humidity and pressure
+        jCBpthRevision.setSelectedIndex(0);
+        selectPTHRevision();
 
         // Start the refresh timer
         refreshTimer.setRepeats(true);
@@ -221,7 +211,10 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
         
         // Update the free memory label
         CommProtocolHelper.instance().renderGetFreeMemory();
-        chemSensorBoard.writeBufferToBoard();        
+        chemSensorBoard.writeBufferToBoard();
+        
+        // Get Pressure sensor name
+        CommProtocolHelper.instance().renderSensorInquiry(PRESS_SENSOR_CHANNEL_ID); 
     }
     
     public void onDataReceived() {
@@ -233,6 +226,16 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
             Integer freeMem = CommProtocolHelper.instance().evalFreeMemory(rxMessage);
             if (freeMem != null) {
                 jLabelFreeMem.setText(freeMem.toString() + " bytes");
+            }
+
+            // Check for PTH version (Rev < 1.4 have BMP180, Rev >= 1.4 have BMP280 pressure sensors)
+            String setupName = CommProtocolHelper.instance().evalSensorInquiry(rxMessage, PRESS_SENSOR_CHANNEL_ID);
+            if ((setupName != null) && !setupName.isEmpty()) {
+                if (setupName.contains("180")) {
+                    jCBpthRevision.setSelectedIndex(0);
+                } else if (setupName.contains("280")) {
+                    jCBpthRevision.setSelectedIndex(1);
+                }
             }
             
             // Loop on each panel and propagate this message
@@ -270,6 +273,7 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
         sampleLogger4 = new airsenseur.dev.chemsensorpanel.TextBasedSampleLoggerPanel();
         sampleLogger5 = new airsenseur.dev.chemsensorpanel.TextBasedSampleLoggerPanel();
         sampleLogger6 = new airsenseur.dev.chemsensorpanel.TextBasedSampleLoggerPanel();
+        jCBpthRevision = new javax.swing.JComboBox();
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemSaveConfig = new javax.swing.JMenuItem();
@@ -314,6 +318,13 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
         jLabel1.setText("Available RAM on the sensor board:");
 
         jLabelFreeMem.setText("--");
+
+        jCBpthRevision.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PTH Revision < 1.4", "PTH Revision >= 1.4" }));
+        jCBpthRevision.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCBpthRevisionActionPerformed(evt);
+            }
+        });
 
         jMenuFile.setText("File");
 
@@ -520,15 +531,21 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
                             .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sampleLogger5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sampleLogger6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(sampleLogger6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jCBpthRevision, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(sampleLogger5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(6, 6, 6)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabelFreeMem, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -550,9 +567,11 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
                             .addComponent(sampleLogger0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addComponent(sampleLogger1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jCBpthRevision, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -783,6 +802,24 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
         updateMenuItemVisibilityForDialog(sensorPresetManagerDialog);
     }//GEN-LAST:event_jMenuItemSensorDBEditActionPerformed
 
+    private void jCBpthRevisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCBpthRevisionActionPerformed
+        selectPTHRevision();
+    }
+
+    private void selectPTHRevision() {
+        
+        int selected = jCBpthRevision.getSelectedIndex();
+        SampleLogger.DataProcessing temperature = SampleLogger.sht31TemperatureDataProcessing;
+        SampleLogger.DataProcessing pressure = SampleLogger.sht31PressureDataProcessing;
+        if (selected == 0) {
+            temperature = SampleLogger.ur100CDTemperatureDataProcessing;
+            pressure = SampleLogger.ur100CDPressureDataProcessing;
+        }
+        
+        sampleLogger5.setDataProcessing(temperature);
+        sampleLogger6.setDataProcessing(pressure);
+    }//GEN-LAST:event_jCBpthRevisionActionPerformed
+
     protected List<DataMessage> getCurrentConfiguration(boolean forceRestartSampling) {
         
         List<DataMessage> currentConfiguration = new ArrayList<>();
@@ -882,6 +919,7 @@ public class ChemSensorPanel extends javax.swing.JFrame implements WindowListene
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox jCBpthRevision;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabelFreeMem;
     private javax.swing.JMenuBar jMenuBar;

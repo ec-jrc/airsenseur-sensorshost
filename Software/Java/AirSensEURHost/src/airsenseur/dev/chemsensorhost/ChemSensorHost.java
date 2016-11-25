@@ -29,10 +29,9 @@ import airsenseur.dev.chemsensorhost.comm.ChemSensorHostCommHandler.ChemSensorMe
 import airsenseur.dev.comm.CommProtocolHelper;
 import airsenseur.dev.comm.CommProtocolHelper.DataMessage;
 import airsenseur.dev.exceptions.ChemSensorBoardException;
+import airsenseur.dev.helpers.TaskScheduler;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +39,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author marco
  */
-public class ChemSensorHost extends TimerTask implements ChemSensorMessageHandler {
+public class ChemSensorHost extends TaskScheduler implements ChemSensorMessageHandler {
     
     private final ChemSensorHostCommHandler boardHandler = new ChemSensorHostCommHandler(this);
     private final CommProtocolHelper protocolHelper = CommProtocolHelper.instance();
     
     private final Logger log = LoggerFactory.getLogger(ChemSensorHost.class);
-    
-    private final Timer timer = new Timer();
     
     public static class SensorData {
         private int value;
@@ -111,19 +108,19 @@ public class ChemSensorHost extends TimerTask implements ChemSensorMessageHandle
         // Initialize the collected data
         collectedData.reset(numSensors);
         
-        timer.scheduleAtFixedRate(this, 0, pollMs);
+        startPeriodic(pollMs);
         
         return true;
     }
-    
+        
     public void exit() {
         
-        timer.cancel();        
+        stop();
         boardHandler.disConnectFromBoard();
     }
 
     @Override
-    public void run() {
+    public void taskMain() {
         
         // Ask for free memory
         protocolHelper.renderGetFreeMemory();

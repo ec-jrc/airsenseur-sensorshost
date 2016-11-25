@@ -99,4 +99,20 @@ public class Configuration extends ConfigurationSOSDB {
     public String getInfluxDbPassword() {
         return getProperty("influxdbpasswd", "password");
     }
+    
+    public boolean getInfluxDbUseLineProtocol() {
+        String value = getProperty("uselineprotocol", "false");
+        return getBooleanValue(value);
+    }
+    
+    public boolean getUseHTTPSProtocol() {
+        String value = getProperty("useHTTPS", "false");
+        return getBooleanValue(value);
+    }
+    
+    private boolean getBooleanValue(String value) {
+        return ((value.compareToIgnoreCase("true") == 0) ||
+                (value.compareToIgnoreCase("yes") == 0) || 
+                (value.compareToIgnoreCase("on") == 0));
+    }
 }
