@@ -31,11 +31,15 @@ import java.util.List;
  * @author marco
  */
 public interface ChemSensorService {
+    
+    public int getNumSensors();
+    public void takeOwnership();
+    public void releaseOnwnership();
         
     public FreeMemory getFreeMemory();
     public void startSampling();
     public void stopSampling();
-    public SampleData getLastSample(int channelId);
+    public SampleData getLastSample(int sensorId);
     
-    public void sendRawData(List<RawCommand> rawData);
+    public List<RawCommand> sendRawData(List<RawCommand> rawData);
 }

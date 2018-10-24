@@ -1,0 +1,148 @@
+#!/bin/sh
+
+# ===========================================================================
+# Copyright 2015 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or subsequent versions of the
+# EUPL (the "License"); You may not use this work except in compliance
+# with the License. You may obtain a copy of the License at
+# http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Date: 02/04/2015
+# Authors:
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+#   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+#                       European Commission - Joint Research Centre,
+# - Marco Signorini, marco.signorini@liberaintentio.com
+#
+# ===========================================================================
+# Safe data watchdog
+#
+
+AIRSENSEURFOLDER=/usr/local/airsenseur
+DATAFOLDER=$AIRSENSEURFOLDER/AirSensEURDataAggregator
+SAMPLING_ENABLEFILE=$AIRSENSEURFOLDER/sampling_enabled
+TIMEOUT=180
+FILELOG=/var/log/datawatchdog.log
+SLEEPSECS=120
+
+# ---------------------------------------------------------------------------
+
+logToFile() {
+	DATE=`date +%Y-%m-%d:%H:%M:%S`
+	echo "${DATE}: $1" >> $FILELOG
+}
+
+checkIfSamplingEnabled() {
+
+        SAMPLING_ENABLED=0
+        [ -r $SAMPLING_ENABLEFILE ] && . $SAMPLING_ENABLEFILE
+        if [ "$SAMPLING_ENABLED" = 0 ]; then
+                return 0
+        fi
+
+        return 1
+}
+
+checkForModifications() {
+
+	inotifywait -qq -r -t $1 -e MODIFY $2
+	RESULT=$?
+	if [ $RESULT -eq 2 ]; then
+		return 0
+	fi
+
+	return 1
+}
+
+restartSamplingProcess() {
+
+	$AIRSENSEURFOLDER/stop_samplingprocess
+	sleep 10
+
+        checkIfSamplingEnabled
+        if [ $? -eq 0 ]; then
+                return
+        fi
+
+	$AIRSENSEURFOLDER/on_sensor
+	$AIRSENSEURFOLDER/on_gps
+	$AIRSENSEURFOLDER/start_samplingprocess
+
+	logToFile "Sampling process restarted"
+}
+
+restartSamplingProcessWithPowerCycle() {
+
+	$AIRSENSEURFOLDER/stop_samplingprocess
+	sleep 10 
+	$AIRSENSEURFOLDER/off_sensor
+	sleep 30 
+
+        checkIfSamplingEnabled
+        if [ $? -eq 0 ]; then
+                return
+        fi
+
+	$AIRSENSEURFOLDER/on_sensor
+	sleep 10
+
+        checkIfSamplingEnabled
+        if [ $? -eq 0 ]; then
+		$AIRSENSEURFOLDER/off_sensor
+                return
+        fi
+
+	$AIRSENSEURFOLDER/on_gps
+	$AIRSENSEURFOLDER/start_samplingprocess
+
+	logToFile "Sampling process restarted with power cycle"
+}
+
+
+performDataMonitoringAndRestart() {
+
+	# Wait for max timeout time for MODIFY operations in the specified folder
+	checkForModifications $TIMEOUT $DATAFOLDER
+	RESULT=$?
+
+	if [ $RESULT -eq 0 ]; then
+
+		# A timeout has occurred with no modifications in the folder
+		# Let's try to restart the sampling process
+		restartSamplingProcess
+
+		# Check again for modifications
+		checkForModifications $TIMEOUT $DATAFOLDER
+		RESULT=$?
+
+		if [ $RESULT -eq 0 ]; then
+			restartSamplingProcessWithPowerCycle
+		fi
+	fi
+}
+
+
+cd "$(dirname "$0")"
+
+# Don't die if stdout/stderr can't be written to
+trap '' PIPE
+
+# Run continously
+while :; do
+	
+	checkIfSamplingEnabled
+	if [ $? -eq 1 ]; then
+		echo "Testing sampling processes"
+		performDataMonitoringAndRestart
+	fi
+
+	sleep $SLEEPSECS
+done
+

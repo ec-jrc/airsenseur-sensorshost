@@ -35,8 +35,9 @@ SOURCE_SCRIPT_DIR="../custom/Scripts"
 
 # Copy the Web Management Console files
 rm -r $TARGET_ROOTFS_DIR/var/www/*
-cp -a $SOURCE_APP_DIR/AirSensEURWebManager/* $TARGET_ROOTFS_DIR/var/www/.
+mkdir $TARGET_ROOTFS_DIR/var/www/html
+cp -a $SOURCE_APP_DIR/AirSensEURWebManager/* $TARGET_ROOTFS_DIR/var/www/html/.
 
 # Change flags and permissions
-chown -R root:root $TARGET_ROOTFS_DIR/var/www/*
+chown -R root:root $TARGET_ROOTFS_DIR/var/www/html/*
 

@@ -1,4 +1,5 @@
 #!/bin/sh
+cd "$(dirname "$0")"
 
 # ===========================================================================
 # Copyright 2015 EUROPEAN UNION
@@ -15,10 +16,10 @@
 #
 # Date: 02/04/2015
 # Authors:
-# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
-#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
 #   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
-#			European Commission - Joint Research Centre, 
+#                       European Commission - Joint Research Centre,
 # - Marco Signorini, marco.signorini@liberaintentio.com
 #
 # ===========================================================================
@@ -28,6 +29,8 @@ cd "$(dirname "$0")"
 # Update leds based on information retrieved 
 # by running several scripts and from the overall
 # led status found in the leds_enabled file
+# It also lock/unlock power on and reset capacitive
+# buttons on the front panel
 
 LEDS_ENABLED=0
 LEDS_ENABLEFILE=./leds_enabled
@@ -43,19 +46,31 @@ LEDS_CHECKFILE=./leds_checkfile
 # Set LED on
 # $1 is the LED name
 turnOn() {
+	echo none > /sys/class/leds/$1/trigger
 	echo 255 > /sys/class/leds/$1/brightness
 }
 
 # Set LED on
 # $1 is the LED name
 turnOff() {
-        echo 0 > /sys/class/leds/$1/brightness
 	echo none > /sys/class/leds/$1/trigger
+        echo 0 > /sys/class/leds/$1/brightness
+}
+
+# Set LED slow blinking
+# $1 is the LED name
+slowBlink() {
+	echo timer > /sys/class/leds/$1/trigger
+	echo 255 > /sys/class/leds/$1/brightness
+	sleep .2
+	echo 200 > /sys/class/leds/$1/delay_on
+	echo 6000 > /sys/class/leds/$1/delay_off
 }
 
 # Update the LED status on/off based on input parameters
 # $1 is the LED name
 # $2 when 0 the LED is off; the LED is on otherwise
+
 updateLedStatus() {
 	if [ "$2" = "" ] || [ "$2" = 0 ]; then
 		turnOff $1
@@ -69,6 +84,22 @@ updateLedStatus() {
 	fi
 }
 
+# Update the LED status forcing off or blinking based on input parameters
+# $1 is the LED name
+# $2 when 0 or evaluated as 0 the LED is off; the LED is slow blinking otherwise
+turnOffOrBlinking() {
+        if [ "$2" = "" ] || [ "$2" = 0 ]; then
+                turnOff $1
+        else
+                $2
+                if [ "$?" = 0 ]; then
+                        turnOff $1
+                else
+                        slowBlink $1
+                fi
+        fi
+}
+
 # Link LED with a trigger
 # $1 is the LED name
 # $2 is the required trigger name
@@ -78,13 +109,14 @@ triggerTo() {
 }
 
 if [ "$LEDS_ENABLED" = 0 ]; then
-	turnOff led_1
-	turnOff led_2
-	turnOff led_3
-	turnOff led_4
-	turnOff led_5
-	turnOff led_6
-	turnOff led_hb
+	turnOffOrBlinking led_1 $LED1_CHKSCRIPT
+	turnOffOrBlinking led_2 0
+	turnOffOrBlinking led_3 0
+	turnOffOrBlinking led_4 0
+	turnOffOrBlinking led_5 0
+	turnOffOrBlinking led_6 0
+	turnOffOrBlinking led_hb 0
+	./lock_onandreset
 else
 
 	updateLedStatus led_1 $LED1_CHKSCRIPT
@@ -94,6 +126,7 @@ else
 	updateLedStatus led_5 $LED5_CHKSCRIPT
 	updateLedStatus led_6 $LED6_CHKSCRIPT
 	triggerTo led_hb heartbeat
+	./unlock_onandreset
 fi
 
 

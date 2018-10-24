@@ -133,7 +133,7 @@ public class SampleLoaderSQL implements SampleLoader {
                 timestamp = st1.columnLong(0);
             }
         } catch (SQLiteException ex) {
-            log.error("Error loading minimum timestamp from samples database");
+            log.error("Error loading maximum timestamp from samples database");
             throw new PersisterException(ex.getMessage());
         } finally {
             if (st1 != null) {

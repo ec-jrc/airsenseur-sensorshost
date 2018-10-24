@@ -32,4 +32,9 @@
 
 /usr/local/bin/rpi_gpio_ntp -N 1 -G /sys/class/gpio/pioC28
 
+# Create usb links for NTP
+/bin/ln -s /dev/ttyS2 /dev/gps2
+
+# Restart NTP to force an update
+/usr/sbin/service ntp restart
 

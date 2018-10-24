@@ -27,9 +27,25 @@
 # voltage reaches the shutdown threshold
 #
 #
+
+CONFFILE=/etc/batterymonitor/batterymonitor.conf
+
+# Default parameters
+GAUGEID=ltc2942-0
+BATTERYMANAGERID=ltc4156-charger-0
+ALERTVOLTAGE=3000
+SHUTDOWNVOLTAGE=2900
+
+# Don't die if stdout/stderr can't be written to
+trap '' PIPE
+
+# Read configuration parameters
+if test -r ${CONFFILE} ; then
+        . ${CONFFILE}
+fi
+
 DATE=`date +%Y-%m-%d:%H:%M:%S`
-CHARGE=`cat /sys/class/power_supply/ltc2942-0/charge_counter`
-VOLTAGE=`cat /sys/class/power_supply/ltc2942-0/voltage_now`
+CHARGE=`cat /sys/class/power_supply/$GAUGEID/charge_counter`
+VOLTAGE=`cat /sys/class/power_supply/$GAUGEID/voltage_now`
 echo "Shut down requested by battery monitor at ${DATE} with voltage: ${VOLTAGE} and charge counter: ${CHARGE}" >> /var/log/batterymonitor.log
 shutdown -h now
-

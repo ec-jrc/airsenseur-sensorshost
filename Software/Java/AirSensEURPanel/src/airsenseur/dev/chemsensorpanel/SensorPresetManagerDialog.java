@@ -74,8 +74,8 @@ public class SensorPresetManagerDialog extends javax.swing.JDialog {
         jComboBoxPresets = new javax.swing.JComboBox();
         jButtonSave = new javax.swing.JButton();
         jButtonDelete = new javax.swing.JButton();
-        lMP91000Panel = new airsenseur.dev.chemsensorpanel.LMP91000Panel();
-        aD5694RPanel = new airsenseur.dev.chemsensorpanel.AD5694RPanel();
+        lMP91000Panel = new airsenseur.dev.chemsensorpanel.widgets.LMP91000Panel();
+        aD5694RPanel = new airsenseur.dev.chemsensorpanel.widgets.AD5694RPanel();
         jLabel1 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
 
@@ -273,13 +273,13 @@ public class SensorPresetManagerDialog extends javax.swing.JDialog {
     
             
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private airsenseur.dev.chemsensorpanel.AD5694RPanel aD5694RPanel;
+    private airsenseur.dev.chemsensorpanel.widgets.AD5694RPanel aD5694RPanel;
     private javax.swing.JButton jButtonDelete;
     private javax.swing.JButton jButtonSave;
     private javax.swing.JComboBox jComboBoxPresets;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JSeparator jSeparator1;
-    private airsenseur.dev.chemsensorpanel.LMP91000Panel lMP91000Panel;
+    private airsenseur.dev.chemsensorpanel.widgets.LMP91000Panel lMP91000Panel;
     private airsenseur.dev.chemsensorpanel.dataModel.SensorPresetsDataModel sensorPresetsDataModel;
     // End of variables declaration//GEN-END:variables
 }

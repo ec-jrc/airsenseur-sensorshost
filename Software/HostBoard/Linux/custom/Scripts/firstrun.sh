@@ -53,5 +53,11 @@
 /usr/sbin/lighty-enable-mod fastcgi-php
 /etc/init.d/lighttpd force-reload
 
+# Configure the GPRS dongle
+/usr/local/airsenseur/on_gprs
+/bin/sleep 30
+/usr/bin/wvdialconf
+/usr/local/airsenseur_off_gprs
+
 # Delete me so I'll never run again
 rm /firstrun.sh

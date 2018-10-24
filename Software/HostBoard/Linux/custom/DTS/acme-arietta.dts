@@ -25,14 +25,12 @@
 /dts-v1/;
 #include "at91sam9g25.dtsi"
 / {
-	model = "AirSensEUR - Host";
+	model = "AirSensEUR - Host v2";
 	compatible = "acme,ariettag25", "atmel,at91sam9x5ek","atmel,at91sam9x5", "atmel,at91sam9";
 	aliases {
 		serial0 = &dbgu;
 		serial1 = &usart0;
 		serial2 = &usart1;
-		serial3 = &usart2;
-		serial4 = &usart3;
 		serial5 = &uart0;
 		serial6 = &uart1;
 	};
@@ -71,22 +69,85 @@
 					bus-width = <4>;
 				};
 			};
+
 			i2c0: i2c@f8010000 {
 				status ="okay";
-				clock-frequency = <350000>;
+				clock-frequency = <100000>;
 
-                                gpiom1: gpiom1 {
-                                        compatible = "microchip,mcp23017";
-                                        gpio-controller;
-                                        #gpio-cells = <2>;
-                                        reg = <0x20>;
-                                };
+				cap1188: cap1188 {
+					compatible = "microchip,cap1188";
+					interrupt-parent = <&pioA>;
+					microchip,irq-active-high;
+					interrupts = <29 IRQ_TYPE_NONE>;
+					reg = <0x2b>;
+					microchip,sensor-gain = <1>;
+
+					linux,keycodes = <2>, /* KEY_1 */
+							<3>, /* KEY_2 */
+							<4>, /* KEY_3 */
+							<5>, /* KEY_4 */
+							<6>, /* KEY_5 */
+							<7>, /* KEY_6 */
+							<8>, /* KEY_7 */
+							<9>; /* KEY_8 */
+					
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+			                led_user_1 {
+			                        label = "led_1";
+						reg = <0>;
+			                        linux,default-trigger = "none";
+			                };
+
+			                led_user_2 {
+			                        label = "led_2";
+						reg = <1>;
+			                        linux,default-trigger = "none";
+			                };
+
+			                led_user_3 {
+			                        label = "led_3";
+						reg = <2>;
+			                        linux,default-trigger = "none";
+			                };
+
+			                led_user_4 {
+			                        label = "led_4";
+						reg = <3>;
+			                        linux,default-trigger = "none";
+			                };
+
+			                led_user_5 {
+			                        label = "led_5";
+						reg = <4>;
+			                        linux,default-trigger = "none";
+			                };
+
+			                led_user_6 {
+			                        label = "led_6";
+						reg = <5>;
+			                        linux,default-trigger = "none";
+			                };
+
+			                hb_led {
+			                        label = "led_hb";
+						reg = <6>;
+			                        linux,default-trigger = "timer"; /* Start timer. Will be changed at userlevel */
+			                };
+
+			                charge_led {
+			                        label = "led_charge";
+						reg = <7>;
+			                        linux,default-trigger = "ltc4156-charger-0-charging-blink-full-solid";
+			                };
+				};
 
 				battery_charger: ltc4156 {
 					reg = <0x09>;
 					compatible="ltc4156-charger";
 					usb,currentlimit = <500000>;
-					wal,currentlimit = <2250000>;
+					wal,currentlimit = <3000000>;
 					safety-timer = <14400>;
 					battery-voltage = <3600000>;
 				};
@@ -98,6 +159,53 @@
 					lltc,prescaler-exponent = <7>; 
 				};
 
+				bootflash: 24AA256 {
+					compatible = "24c256";
+					reg = <0x50>;
+					pagesize = <64>;
+				};
+
+			};
+
+                        i2c1: i2c@f8014000 {
+                                status ="okay";
+                                clock-frequency = <100000>;
+
+				idflash: 24AA02E48T {
+                                        compatible = "24c02";
+                                        reg = <0x50>;
+                                        pagesize = <8>;
+                                };
+			};
+
+			spi1: spi@f0004000 {
+                                status = "okay";
+                                pinctrl-0 = <&pinctrl_spi1 &pinctrl_spi1_cs>;
+
+				flash: spinor@0 {
+                                        #address-cells = <1>;
+                                        #size-cells = <1>;
+                                        compatible = "jedec,spi-nor";
+                                        spi-max-frequency = <50000000>;
+                                        reg = <0>;
+					m25p,fast-read;
+
+					partitions {
+						compatible = "fixed-partitions";
+						#address-cells = <1>;
+						#size-cells = <1>;
+
+						boot@0 {
+							label = "boot";
+							reg = <0x0000000 0x00410000>;
+						};
+
+				 		rootfs@00410000 {
+							label = "rootfs";
+							reg = <0x00410000 0x01bf0000>;
+						};
+                                	};
+				};
 			};
 			usart0: serial@f801c000 {
 				pinctrl-0 = <&pinctrl_usart0>;
@@ -111,10 +219,6 @@
 				atmel,use-dma-rx;
 				atmel,use-dma-tx;
 			};
-			usart2: serial@f8024000 {
-				pinctrl-0 = <&pinctrl_usart2>;
-				status ="okay";
-			};
 			ssc0: ssc@f0010000 {
 				status = "okay";
 			};
@@ -125,9 +229,24 @@
 				status = "okay";
 			};
 			pinctrl@fffff400 {
-
+				pwm0 {
+					pinctrl_pwm0_0: pwm0_0-0 {
+						atmel,pins = < AT91_PIOB 11 AT91_PERIPH_B AT91_PINCTRL_NONE>;
+					};
+				};
+				spi1 {
+                                        pinctrl_spi1_cs: sp1-0-cs {
+                                                atmel,pins =
+                                                        <AT91_PIOA 8 AT91_PERIPH_B AT91_PINCTRL_NONE>;
+					};
+				};
 			};
 			rtc@fffffeb0 {
+				status = "okay";
+			};
+			pwm0: pwm@f8034000 {
+				pinctrl-names = "default";
+				pinctrl-0 = <&pinctrl_pwm0_0>;
 				status = "okay";
 			};
 		};
@@ -150,58 +269,10 @@
 		};
 	};
 
-	leds_exp {
-		compatible = "gpio-leds";
-
-                led_user_1 {
-                        label = "led_1";
-                        gpios = <&gpiom1 0 GPIO_ACTIVE_HIGH>;
-                        linux,default-trigger = "none";
-                };
-
-                led_user_2 {
-                        label = "led_2";
-                        gpios = <&gpiom1 1 GPIO_ACTIVE_HIGH>;
-                        linux,default-trigger = "none";
-                };
-
-                led_user_3 {
-                        label = "led_3";
-                        gpios = <&gpiom1 2 GPIO_ACTIVE_HIGH>;
-                        linux,default-trigger = "none";
-                };
-
-                led_user_4 {
-                        label = "led_4";
-                        gpios = <&gpiom1 3 GPIO_ACTIVE_HIGH>;
-                        linux,default-trigger = "none";
-                };
-
-                led_user_5 {
-                        label = "led_5";
-                        gpios = <&gpiom1 4 GPIO_ACTIVE_HIGH>;
-                        linux,default-trigger = "none";
-                };
-
-                led_user_6 {
-                        label = "led_6";
-                        gpios = <&gpiom1 5 GPIO_ACTIVE_HIGH>;
-                        linux,default-trigger = "none";
-                };
-
-                hb_led {
-                        label = "led_hb";
-                        gpios = <&gpiom1 6 GPIO_ACTIVE_HIGH>;
-                        linux,default-trigger = "timer"; /* Start timer. Will be changed at userlevel */
-                };		
-
-		charge_led {
-			label = "led_charge";
-			gpios = <&gpiom1 7 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "ltc4156-charger-0-charging-blink-full-solid";
-		};
+	beeper {
+		compatible = "pwm-beeper";
+		pwms = <&pwm0>;
 	};
-
 
 	gpio_keys_direct {
 		compatible = "gpio-keys";
@@ -213,68 +284,24 @@
 		};
  
                 button_module {
-                    label = "BtnModule";
-                    gpios = <&pioC 17 GPIO_ACTIVE_HIGH>;
-                    linux,code = <10>; /* KEY_9 */
+                	label = "BtnModule";
+                	gpios = <&pioC 17 GPIO_ACTIVE_HIGH>;
+                	linux,code = <10>; /* KEY_9 */
                 };
+
+		button_s50 {
+			label = "BtnS50";
+			gpios = <&pioB 14 GPIO_ACTIVE_LOW>;
+			linux,code = <11>; /* KEY_10 */
+		};
+
+		button_s51 {
+			label = "BtnS51";
+			gpios = <&pioB 13 GPIO_ACTIVE_LOW>;
+			linux,code = <12>; /* KEY_11 */
+		};
 	};
 
-	gpio_keys {
-	        compatible = "gpio-keys-polled";
-		#address-cells = <1>;
-		#size-cells = <0>;
-		poll-interval = <250>;
-
-                button@1 {
-                    label = "btn1";
-                    gpios = <&gpiom1 15 GPIO_ACTIVE_LOW>;
-                    linux,code = <2>; /* KEY_1 */
-                };
-
-                button@2 {
-                    label = "btn2";
-                    gpios = <&gpiom1 14 GPIO_ACTIVE_LOW>;
-                    linux,code = <3>; /* KEY_2 */
-                };
-
-                button@3 {
-                    label = "btn3";
-                    gpios = <&gpiom1 13 GPIO_ACTIVE_LOW>;
-                    linux,code = <4>; /* KEY_3 */
-                };
-
-                button@4 {
-                    label = "btn4";
-                    gpios = <&gpiom1 12 GPIO_ACTIVE_LOW>;
-                    linux,code = <5>; /* KEY_4 */
-                };
-
-                button@5 {
-                    label = "btn5";
-                    gpios = <&gpiom1 11 GPIO_ACTIVE_LOW>;
-                    linux,code = <6>; /* KEY_5 */
-                };
-
-                button@6 {
-                    label = "btn6";
-                    gpios = <&gpiom1 10 GPIO_ACTIVE_LOW>;
-                    linux,code = <7>; /* KEY_6 */
-                };
-
-                button@7 {
-                    label = "btn7";
-                    gpios = <&gpiom1 9 GPIO_ACTIVE_LOW>;
-                    linux,code = <8>; /* KEY_7 */
-                };
-
-	        button@8 {
-	            label = "btn8";
-	            gpios = <&gpiom1 8 GPIO_ACTIVE_LOW>;
-	            linux,code = <9>; /* KEY_8 */
-        	};
-	};
-	
-	
 	battery {
 		power-supplies = <&battery_charger>;
 	};

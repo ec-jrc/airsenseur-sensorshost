@@ -34,9 +34,11 @@ echo timer > /sys/class/leds/led_2/trigger
 $SCRIPTBASE/check_wlan $INTERFACE
 RESULT=$?
 if [ "$RESULT" = 1 ]; then
+	echo WLAN_ENABLED=0 > $SCRIPTBASE/wlan_enabled
         ifdown $INTERFACE
 	$SCRIPTBASE/off_usben
 else
+	echo WLAN_ENABLED=1 > $SCRIPTBASE/wlan_enabled
 	ifdown $INTERFACE
 	$SCRIPTBASE/off_usben
 	sleep 1

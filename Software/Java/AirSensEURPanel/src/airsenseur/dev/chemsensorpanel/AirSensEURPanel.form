@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+  <NonVisualComponents>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem1"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem2"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem3"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem4"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem5">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem5"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem6">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem6"/>
+      </Properties>
+    </Component>
+    <Menu class="javax.swing.JMenuBar" name="jMenuBar">
+      <SubComponents>
+        <Menu class="javax.swing.JMenu" name="jMenuFile">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="File"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemSaveConfig">
+              <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                  <KeyStroke key="Shift+Alt+S"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Save Config"/>
+                <Property name="toolTipText" type="java.lang.String" value="Save configuration to file"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemSaveConfigActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemReadConfig">
+              <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                  <KeyStroke key="Shift+Alt+R"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Read Config"/>
+                <Property name="toolTipText" type="java.lang.String" value="Read configuration from file"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemReadConfigActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator5">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemSaveSensorProperties">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Save sensor.properties"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemSaveSensorPropertiesActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemAbout">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="About"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemAboutActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemExit">
+              <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                  <KeyStroke key="Shift+Alt+X"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/airsenseur/dev/chemsensorpanel/icons/door_out.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Exit"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemExitActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenuSensorBus">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Sensor Bus"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemConnectSerial">
+              <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/airsenseur/dev/chemsensorpanel/icons/connect.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Connect via Serial Line"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemConnectSerialActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemConnectNetwork">
+              <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/airsenseur/dev/chemsensorpanel/icons/connect.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Connect via Network"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemConnectNetworkActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemDisconnect">
+              <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/airsenseur/dev/chemsensorpanel/icons/disconnect.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Disconnect"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemDisconnectActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemReadFromBoard">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Read From Board"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemReadFromBoardActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemWriteToBoard">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Write To Board"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemWriteToBoardActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemStartSampling">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Start sampling"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemStartSamplingActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemStopSampling">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Stop sampling"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemStopSamplingActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenuChemSensors">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Chemical Shield"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemChemSetup1">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="ChemSensor 1 Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemChemSetup1ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemChemSetup2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="ChemSensor 2 Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemChemSetup2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemChemSetup3">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="ChemSensor 3 Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemChemSetup3ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemChemSetup4">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="ChemSensor 4 Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemChemSetup4ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemPressSetup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Pressure Sensor Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemPressSetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemTempSetup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Temperature Sensor Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemTempSetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemHumSetup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Humidity Sensor Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemHumSetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator6">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuChemShieldInfo">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Generic Information"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuChemShieldInfoActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenuOPCN2">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="OPC-N2 Shield"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemOPCN2Setup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="OPC-N2 Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemOPCN2SetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemMOXSetup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="MOX Setup"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemMOXSetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenuExpShield1">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="ExpShield1"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemRD200MSetup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="RD200M"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemRD200MSetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemD300Setup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="D300"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemD300SetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemPMS5003Setup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="PMS5003"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemPMS5003SetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemOPCN3Setup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="OPC-N3"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemOPCN3SetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemExpShieldInfo">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Generic Information"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemExpShieldInfoActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenuSensorsDB">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Database"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemSensorDBEdit">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Sensors Database Editor"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemSensorDBEditActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+      </SubComponents>
+    </Menu>
+  </NonVisualComponents>
+  <Properties>
+    <Property name="defaultCloseOperation" type="int" value="2"/>
+    <Property name="title" type="java.lang.String" value="AirSensEUR Panel"/>
+    <Property name="locationByPlatform" type="boolean" value="true"/>
+  </Properties>
+  <SyntheticProperties>
+    <SyntheticProperty name="menuBar" type="java.lang.String" value="jMenuBar"/>
+    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
+  </SyntheticProperties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Component id="jTabbedPane1" min="-2" max="-2" attributes="0"/>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Container class="javax.swing.JTabbedPane" name="jTabbedPane1">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="airsenseur.dev.chemsensorpanel.ChemShieldPanel" name="chemSensorPanel">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new airsenseur.dev.chemsensorpanel.ChemShieldPanel(this, shieldProtocolLayer, logger)&#xa;"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Chemical Sensor Shield">
+                <Property name="tabTitle" type="java.lang.String" value="Chemical Sensor Shield"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.OPCN2ShieldPanel" name="oPCN2SensorPanel">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new airsenseur.dev.chemsensorpanel.OPCN2ShieldPanel(this, shieldProtocolLayer, logger)"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="OPC-N2 Sensor Shield">
+                <Property name="tabTitle" type="java.lang.String" value="OPC-N2 Sensor Shield"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.ExpShield1Panel" name="expShield1Panel">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new airsenseur.dev.chemsensorpanel.ExpShield1Panel(this, shieldProtocolLayer, logger)"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="ExpShield1">
+                <Property name="tabTitle" type="java.lang.String" value="ExpShield1"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+      </SubComponents>
+    </Container>
+  </SubComponents>
+</Form>

@@ -96,32 +96,37 @@ public class SampleDataSerie extends Serie {
             // Get the time value
             Object timeVal = point.get(TIME_TOKEN_OFFSET);
             
-            // Measurement
-            sb.append(getName()).append(",");
+            // Skip samples with invalid name. This should never happens but it's better to check
+            String name = safeEscape((String)point.get(NAME_TOKEN_OFFSET));
+            if (!name.isEmpty()) {
             
-            // - Generate the tags string -
-            // Tag: Name
-            sb.append(getColumns().get(NAME_TOKEN_OFFSET)).append("=").append(safeEscape((String)point.get(NAME_TOKEN_OFFSET))).append(",");
-            
-            // Tag: channel
-            sb.append(getColumns().get(CHANNEL_TOKEN_OFFSET)).append("=").append(point.get(CHANNEL_TOKEN_OFFSET)).append(" ");
-            
-            // Values:
-            for (int n = 0; n < getColumns().size(); n++) {
-                
-                // Skip known tokens
-                if ((n == TIME_TOKEN_OFFSET) || (n == NAME_TOKEN_OFFSET) || (n == CHANNEL_TOKEN_OFFSET)) {
-                    continue;
+                // Measurement
+                sb.append(getName()).append(",");
+
+                // - Generate the tags string -
+                // Tag: Name
+                sb.append(getColumns().get(NAME_TOKEN_OFFSET)).append("=").append(safeEscape((String)point.get(NAME_TOKEN_OFFSET))).append(",");
+
+                // Tag: channel
+                sb.append(getColumns().get(CHANNEL_TOKEN_OFFSET)).append("=").append(point.get(CHANNEL_TOKEN_OFFSET)).append(" ");
+
+                // Values:
+                for (int n = 0; n < getColumns().size(); n++) {
+
+                    // Skip known tokens
+                    if ((n == TIME_TOKEN_OFFSET) || (n == NAME_TOKEN_OFFSET) || (n == CHANNEL_TOKEN_OFFSET)) {
+                        continue;
+                    }
+
+                    sb.append(getColumns().get(n)).append("=").append(point.get(n));
+                    if (n != getColumns().size()-1) {
+                        sb.append(",");
+                    }
                 }
-                
-                sb.append(getColumns().get(n)).append("=").append(point.get(n));
-                if (n != getColumns().size()-1) {
-                    sb.append(",");
-                }
+
+                // Timestamp
+                sb.append(" ").append(timeVal).append("\n");
             }
-            
-            // Timestamp
-            sb.append(" ").append(timeVal).append("\n");
         }
         
         return sb.toString();

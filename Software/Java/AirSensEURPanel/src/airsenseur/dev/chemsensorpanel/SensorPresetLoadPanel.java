@@ -24,6 +24,7 @@
 
 package airsenseur.dev.chemsensorpanel;
 
+import airsenseur.dev.chemsensorpanel.widgets.PresetDrivenPanel;
 import airsenseur.dev.chemsensorpanel.dataModel.SensorPresetsDataModel;
 import airsenseur.dev.chemsensorpanel.exceptions.PresetException;
 import airsenseur.dev.chemsensorpanel.sensorsdb.PresetDao;

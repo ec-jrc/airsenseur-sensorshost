@@ -15,10 +15,10 @@
 #
 # Date: 02/04/2015
 # Authors:
-# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
-#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
 #   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
-#			European Commission - Joint Research Centre, 
+#                       European Commission - Joint Research Centre,
 # - Marco Signorini, marco.signorini@liberaintentio.com
 #
 # ===========================================================================
@@ -27,5 +27,10 @@
 cd "$(dirname "$0")"
 
 echo LEDS_ENABLED=1 > ./leds_enabled
+if [ "$1" = "timeron" ]; then
+	RANDOM=`awk -v min=10000 -v max=1000000 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
+        echo LEDS_RANDOMCHECK=$RANDOM >> ./leds_enabled
+	./timeout_ledstatus $RANDOM&
+fi
 ./update_leds
 

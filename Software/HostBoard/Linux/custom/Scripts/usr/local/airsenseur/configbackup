@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# ========================================================================
+# Copyright 2016 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or - as soon they will be approved by
+# the European Commission - subsequent versions of the EUPL (the "Licence");
+# You may not use this work except in compliance with the Licence.
+# You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the Licence is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied. See the Licence for the
+# specific language governing permissions and limitations under the Licence.
+# Date: 01/02/2016
+# Authors
+# - Marco Signorini  - marco.signorini@liberaintentio.com
+# - Michel Gerboles  - michel.gerboles@jrc.ec.europa.eu,
+#                     European Commission - Joint Research Centre,
+# - Laurent Spinelle - laurent.spinelle@jrc.ec.europa.eu,
+#                     European Commission - Joint Research Centre,
+#
+# ========================================================================
+# Backup main AirSensEUR configurations data file
+
+# Here is the folder destination used by this script
+TGTFOLDER=/usr/local/asbackup
+ASFOLDER=/usr/local/airsenseur
+ASCONFIGFOLDER=/usr/local/etc
+
+# Remove any target folder, if any
+rm -rf $TGTFOLDER
+
+# Generate the target folder
+mkdir -p $TGTFOLDER
+
+# Backing up airsenseur configuration files
+tar -czvf - $ASCONFIGFOLDER/* > $TGTFOLDER/airsenseurconfig.tar.gz
+
+# Backing up other system configuration files
+tar -czvf - /etc/cron.d/datapushcron /etc/hostapd/hostapd.conf /etc/wvdial.conf > $TGTFOLDER/sysetc.tar.gz
+
+# Backing up WiFiClient configuration files
+tar -czvf - /etc/network/interfaces /etc/network/ifcfg-wlan1 /etc/eventmonitor/handler_5 $ASFOLDER/check_wlan1 $ASFOLDER/event_clwlan $ASFOLDER/leds_checkfile $ASFOLDER/runDataPush > $TGTFOLDER/wificlient.tar.gz
+
+# Backing up log files
+tar -czvf - /var/log/* > $TGTFOLDER/varlog.tar.gz
+
+# Backing up database files
+tar -czvf - $ASFOLDER/AirSensEURDataAggregator/airsenseur.db $ASFOLDER/AirSensEURDataAggregator/*.csv $ASFOLDER/AirSensEURDataPush/history.db > $TGTFOLDER/airsenseurdata.tar.gz
+
+# Merge together in a single tar file
+tar -cvf - $TGTFOLDER/*.tar.gz > $TGTFOLDER/asfullbackup.tar
+
+# Remove temporary files
+rm -f $TGTFOLDER/*.tar.gz
+

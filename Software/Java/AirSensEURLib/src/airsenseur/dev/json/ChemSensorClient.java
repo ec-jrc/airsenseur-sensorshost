@@ -126,15 +126,47 @@ public class ChemSensorClient {
         }
     }
     
-    public void sendRawData(List<RawCommand> rawData) {
+    public List<RawCommand> sendRawData(List<RawCommand> rawData) {
         
         if (service == null) {
-            return;
+            return null;
         }
         
         try {
-            service.sendRawData(rawData);
+            return service.sendRawData(rawData);
         } catch (UndeclaredThrowableException ex) {
+            return null;
+        }
+    }
+    
+    public Integer getNumSensors() {
+        if (service == null) {
+            return null;
+        }
+        
+        try {
+            return service.getNumSensors();
+        } catch (UndeclaredThrowableException ex) {
+            return null;
+        }
+    }
+    
+    
+    public void takeOwnership() {
+        if (service != null) {
+            try {
+                service.takeOwnership();
+            } catch (UndeclaredThrowableException ex) {
+            }
+        }
+    }
+    
+    public void releaseOwnership() {
+        if (service != null) {
+            try {
+                service.releaseOnwnership();
+            } catch (UndeclaredThrowableException ex) {
+            }
         }
     }
     

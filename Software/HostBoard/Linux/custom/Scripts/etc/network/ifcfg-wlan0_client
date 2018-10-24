@@ -1,0 +1,13 @@
+#WiFi Configuration: Client
+auto wlan0
+iface wlan0 inet dhcp
+wpa-driver wext
+
+wpa-ssid YOURACCESSPOINT
+wpa-psk 8045932348907547652872abbcdd1e56fca3a83e669fd
+
+#wpa-ap-scan 2
+#wpa-proto RSN
+#wpa-pairwise CCMP
+#wpa-group CCMP
+#wpa-key-mgmt WPA-PSK

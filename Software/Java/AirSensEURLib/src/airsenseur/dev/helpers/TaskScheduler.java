@@ -27,6 +27,7 @@ package airsenseur.dev.helpers;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,10 +36,30 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class TaskScheduler implements Runnable {
     
-    ScheduledExecutorService worker;
-    ScheduledFuture scheduled;
+    private static class TaskSchedulerThreadFactory implements ThreadFactory {
+        
+        private final String taskName;
+        
+        private TaskSchedulerThreadFactory() {
+            this.taskName = "AirSensEUR-Thread";
+        }
+        
+        public TaskSchedulerThreadFactory(String taskName) {
+            this.taskName = taskName;
+        }
+        
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, taskName);
+        }
+    }
+    
+    private ScheduledExecutorService worker;
+    private ScheduledFuture scheduled;
+    private ThreadFactory threadFactory;
     
     public abstract void taskMain();
+    public abstract String getTaskName();
     
     public void startPeriodic(long milliSeconds) {
         
@@ -46,8 +67,19 @@ public abstract class TaskScheduler implements Runnable {
             scheduled.cancel(true);
         }
         
-        worker = Executors.newScheduledThreadPool(1);
+        threadFactory = new TaskSchedulerThreadFactory(getTaskName());
+        worker = Executors.newScheduledThreadPool(1, threadFactory);
         scheduled = worker.scheduleAtFixedRate(this, 0, milliSeconds, TimeUnit.MILLISECONDS);
+    }
+    
+    public void startNow() {
+        if (scheduled != null) {
+            scheduled.cancel(true);
+        }
+        
+        threadFactory = new TaskSchedulerThreadFactory(getTaskName());
+        worker = Executors.newScheduledThreadPool(1, threadFactory);
+        scheduled = worker.schedule(this, 0, TimeUnit.MILLISECONDS);
     }
     
     public boolean waitForTermination(long milliSeconds) throws InterruptedException {
@@ -56,6 +88,10 @@ public abstract class TaskScheduler implements Runnable {
         }
         
         return true;
+    }
+    
+    public boolean isShutdown() {
+        return (worker != null) && worker.isShutdown();
     }
     
     public void stop() {

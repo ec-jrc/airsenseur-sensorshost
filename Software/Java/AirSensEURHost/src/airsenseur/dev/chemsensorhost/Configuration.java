@@ -25,14 +25,13 @@
 package airsenseur.dev.chemsensorhost;
 
 import airsenseur.dev.chemsensorhost.exceptions.ConfigurationException;
+import airsenseur.dev.comm.AppDataMessage;
 import expr.Parser;
 import expr.SyntaxException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -44,9 +43,6 @@ public class Configuration extends Properties{
     public final static int DEBUG_VERBOSE_DUMP_SERIAL = 5;
     
     private static final Configuration singleton = new Configuration();
-    
-    private final List<String> mathExpressions = new ArrayList<>();
-    private final List<String> sensorNames = new ArrayList<>();
     
     public static Configuration getConfig() {
         return singleton;
@@ -65,18 +61,9 @@ public class Configuration extends Properties{
         }
         
         // Check for math expressions
-        mathExpressions.clear();
         for (int sensor = 0; sensor < getNumSensors(); sensor++) {
-            String mathExpression = loadMathExpressionForChannel(sensor);
+            String mathExpression = getMathExpressionForSensor(sensor);
             checkMathExpression(mathExpression);
-            mathExpressions.add(mathExpression);
-        }
-        
-        // Load sensor names
-        sensorNames.clear();
-        for (int sensor = 0; sensor < getNumSensors(); sensor++) {
-            String name = loadSensorNameForChannel(sensor);
-            sensorNames.add(name);
         }
     }
     
@@ -99,6 +86,11 @@ public class Configuration extends Properties{
         return Integer.valueOf(pollTime);
     }
     
+    public boolean getUseBusProtocol() {
+        String useBusProtocol = getProperty("useBusProtocol", "0");
+        return useBusProtocol.equalsIgnoreCase("1") || useBusProtocol.equalsIgnoreCase("Yes") || useBusProtocol.equalsIgnoreCase("true");
+    }
+    
     public int getNumSensors() {
         String numSensors = getProperty("numSensors", "7");
         return Integer.valueOf(numSensors);
@@ -113,16 +105,9 @@ public class Configuration extends Properties{
         return Integer.valueOf(port);
     }
     
-    public String getMathExpressionForChannel(int channel) {
-        if (channel < mathExpressions.size()) {
-            return mathExpressions.get(channel);
-        }
-        
-        return "x";
-    }
     
-    private String loadMathExpressionForChannel(int channel) {
-        String key = String.format("sensorexpression_%02d", channel);
+    public String getMathExpressionForSensor(int sensor) {
+        String key = String.format("sensorexpression_%02d", sensor);
         return getProperty(key, "x");
     }
     
@@ -142,16 +127,45 @@ public class Configuration extends Properties{
         return expression;
     }
     
-    private String loadSensorNameForChannel(int channel) {
-        String key = String.format("sensorname_%02d", channel);
-        return getProperty(key, "unspecified");
-    }
-
     public String getSensorNameForChannel(int channel) {
-        if (channel < sensorNames.size()) {
-            return sensorNames.get(channel);
+        String key = String.format("sensorname_%02d", channel);
+        return getProperty(key, "");
+    }
+    
+    public Integer getBoardIdForSensor(int sensor) {
+        String key = String.format("sensorboarid_%02d", sensor);
+        String valString = getProperty(key, "" + AppDataMessage.BOARD_ID_UNDEFINED);
+        try {
+            return Integer.parseInt(valString);
+        } catch (NumberFormatException e) {
+            return AppDataMessage.BOARD_ID_UNDEFINED;
+        }
+    }
+    
+    public Integer getChannelForSensor(int sensor) {
+        String key = String.format("sensorchannel_%02d", sensor);
+        String valString = getProperty(key, "" + sensor);
+        try {
+            return Integer.parseInt(valString);
+        } catch (NumberFormatException e) {
+            return sensor;
+        }
+    }
+    
+    public boolean getHiResSample(int sensor) {
+        String key = String.format("sensorhires_%02d", sensor);
+        String valString = getProperty(key, "false");
+        
+        if ((valString.compareToIgnoreCase("true") == 0) || (valString.compareToIgnoreCase("yes") == 0)) {
+            return true;
+        } else if ((valString.compareToIgnoreCase("false") == 0) || (valString.compareToIgnoreCase("no") == 0)){
+            return false;
         }
         
-        return "Unknown";
+        try {
+            return Integer.parseInt(key) > 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

@@ -53,7 +53,7 @@ $GPRSON
 sleep 60
 
 # Start PPP connection
-route del default
+/sbin/route del default
 wvdial &
 sleep 20
 

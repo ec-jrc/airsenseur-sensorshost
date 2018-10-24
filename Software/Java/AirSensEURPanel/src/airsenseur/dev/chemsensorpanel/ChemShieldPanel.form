@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="sampleLogger0" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="sampleLogger2" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="sampleLogger1" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="sampleLogger3" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="sampleLogger4" max="32767" attributes="0"/>
+                  <Component id="sampleLogger5" max="32767" attributes="0"/>
+                  <Component id="sampleLogger6" max="32767" attributes="0"/>
+                  <Component id="jCBpthRevision" min="-2" pref="190" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="1" attributes="0">
+              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jCBBoardId" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
+              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabelFreeMem" min="-2" pref="93" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
+              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabelBoardSerialNumber" min="-2" pref="159" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="143" max="-2" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabelFreeMem" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jCBBoardId" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabelBoardSerialNumber" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="sampleLogger4" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="sampleLogger5" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="sampleLogger6" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jCBpthRevision" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="sampleLogger1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLogger0" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="sampleLogger2" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLogger3" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+              </Group>
+              <EmptySpace max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLogger0">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLogger1">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLogger2">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLogger3">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLogger4">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLogger5">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLogger6">
+    </Component>
+    <Component class="javax.swing.JComboBox" name="jCBpthRevision">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="2">
+            <StringItem index="0" value="PTH Revision &lt; 1.4"/>
+            <StringItem index="1" value="PTH Revision &gt;= 1.4"/>
+          </StringArray>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCBpthRevisionActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Available board RAM:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabelFreeMem">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="--"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="jCBBoardId">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="16">
+            <StringItem index="0" value="Not Connected"/>
+            <StringItem index="1" value="ID 0"/>
+            <StringItem index="2" value="ID 1"/>
+            <StringItem index="3" value="ID 2"/>
+            <StringItem index="4" value="ID 3"/>
+            <StringItem index="5" value="ID 4"/>
+            <StringItem index="6" value="ID 5"/>
+            <StringItem index="7" value="ID 6"/>
+            <StringItem index="8" value="ID 7"/>
+            <StringItem index="9" value="ID 8"/>
+            <StringItem index="10" value="ID 9"/>
+            <StringItem index="11" value="ID 10"/>
+            <StringItem index="12" value="ID 11"/>
+            <StringItem index="13" value="ID 12"/>
+            <StringItem index="14" value="ID 13"/>
+            <StringItem index="15" value="ID 14"/>
+          </StringArray>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCBBoardIdActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Board ID:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Board serial number:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabelBoardSerialNumber">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="--"/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>

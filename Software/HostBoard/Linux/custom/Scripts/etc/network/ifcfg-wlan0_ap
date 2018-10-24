@@ -1,0 +1,17 @@
+#WiFi Configuration: AP
+
+auto wlan0
+iface wlan0 inet static
+address 192.168.100.1
+netmask 255.255.255.0
+broadcast 192.168.100.255
+network 192.168.100.0
+post-up /etc/init.d/hostapd start
+post-up /etc/init.d/udhcpd start
+post-down /etc/init.d/hostapd stop
+post-down /etc/init.d/udhcpd stop
+#pre-up modprobe -r rt2800usb
+#pre-up modprobe rt2800usb autocreate=none
+#pre-up wlanconfig ath create wlandev wifi0 wlanmode ap
+#post-down wlanconfig wlan0 destroy
+#post-down modprobe -r ath_pci

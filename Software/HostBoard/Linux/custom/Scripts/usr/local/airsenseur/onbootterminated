@@ -42,5 +42,11 @@ $SCRIPTDIR/start_eventmonitor
 # BatteryMonitor daemon
 $SCRIPTDIR/safe_batterymonitor
 
+# Sampling watchdog daemon
+$SCRIPTDIR/safe_datawatchdog
+
 # LEDS panel
-$SCRIPTDIR/on_ledsstatus
+$SCRIPTDIR/on_ledsstatus "timeron"
+
+# Other user services
+$SCRIPTDIR/restore_services

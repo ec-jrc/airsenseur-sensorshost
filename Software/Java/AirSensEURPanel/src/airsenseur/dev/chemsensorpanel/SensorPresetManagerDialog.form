@@ -104,9 +104,9 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonDeleteActionPerformed"/>
       </Events>
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.LMP91000Panel" name="lMP91000Panel">
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.LMP91000Panel" name="lMP91000Panel">
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.AD5694RPanel" name="aD5694RPanel">
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.AD5694RPanel" name="aD5694RPanel">
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>

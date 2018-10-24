@@ -31,6 +31,7 @@ package airsenseur.dev.persisters;
 public class SampleDataContainer {
     
     private String name;
+    private String serial;
     private int channel;
     private long collectedTimestamp;
     
@@ -62,9 +63,12 @@ public class SampleDataContainer {
         updateGPSValues(0.0, 0.0, 0.0, 0.0);
     }
     
-    public SampleDataContainer clone() {
+    @Override
+    public SampleDataContainer clone() throws CloneNotSupportedException {
+        super.clone();
         SampleDataContainer other = new SampleDataContainer(channel);
         other.name = name;
+        other.serial = serial;
         other.sampleRawVal = sampleRawVal;
         other.sampleEvaluatedVal = sampleEvaluatedVal;
         other.sensorTimeStamp = sensorTimeStamp;
@@ -227,5 +231,19 @@ public class SampleDataContainer {
      */
     public void setCalibratedVal(double calibratedVal) {
         this.calibratedVal = calibratedVal;
+    }
+
+    /**
+     * @return the serial
+     */
+    public String getSerial() {
+        return serial;
+    }
+
+    /**
+     * @param serial the serial to set
+     */
+    public void setSerial(String serial) {
+        this.serial = serial;
     }
 }

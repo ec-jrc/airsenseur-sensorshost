@@ -24,14 +24,26 @@
 
 package airsenseur.dev.chemsensorpanel;
 
-import airsenseur.dev.comm.CommProtocolHelper;
+import airsenseur.dev.chemsensorpanel.helpers.FileLogger;
+import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.comm.AppDataMessage;
 import java.util.List;
 
 /**
  *
  * @author marco
  */
-public class SampleLogger extends javax.swing.JPanel {
+public abstract class SampleLogger extends javax.swing.JPanel {
+    
+    private String name = "NA";
+    private String serial = "NA";
+
+    /**
+     * @return the serial
+     */
+    public String getSerial() {
+        return serial;
+    }
     
     // This interface could be used to apply a specific post-processing
     // on each incoming sample
@@ -85,11 +97,26 @@ public class SampleLogger extends javax.swing.JPanel {
             return (sample/65535 * 100.0);
         }
     };
+    
+    public final static SampleLogger.DataProcessing highResSampleBaseDefaultDataProcessing = new DataProcessing() {
+
+        @Override
+        public double processSample(double sample) {
+            return sample / 10000;
+        }
+    };
 
     protected long lastSampleTimeStamp = 0;
+    protected int boardId = AppDataMessage.BOARD_ID_UNDEFINED;
     protected int sensorId = 0;  
     protected DataProcessing dataProcessing = null;
     protected FileLogger fileLogger = null;
+    protected ShieldProtocolLayer shieldProtocolLayer = null;
+    protected boolean highResEnabled = false;
+    
+    public void setBoardId(int boardId) {
+        this.boardId = boardId;
+    }
     
     public void setSensorId(int sensorId) {
         this.sensorId = sensorId;
@@ -99,37 +126,68 @@ public class SampleLogger extends javax.swing.JPanel {
         this.fileLogger = logger;
     }
     
-    public void setLoggerProperties(String title, int minVal, int maxVal, int historyLength) {
+    public void setShieldProtocolLayer(ShieldProtocolLayer shieldProtocolLayer) {
+        this.shieldProtocolLayer = shieldProtocolLayer;
     }
+    
+    public abstract void setLoggerProperties(String title, int minVal, int maxVal, int historyLength);
     
     public void setDataProcessing(DataProcessing dataProcessing) {
         this.dataProcessing = dataProcessing;
     }
     
-    public void readFromBoard() {
-        
-        CommProtocolHelper.instance().renderGetLastSample(sensorId);
+    public void setHighResolutionMode() {
+        highResEnabled = true;
     }
     
-    public void evaluateRxMessage(CommProtocolHelper.DataMessage rxMessage) {
+    public void readFromBoard() {
+        
+        if (shieldProtocolLayer != null) {
+            if (highResEnabled) {
+                shieldProtocolLayer.renderGetLastSampleHRes(boardId, sensorId);
+            } else {
+                shieldProtocolLayer.renderGetLastSample(boardId, sensorId);
+            }
+        }
+    }
+    
+    public void evaluateRxMessage(AppDataMessage rxMessage) {
 
-        List<Integer> resultList = CommProtocolHelper.instance().evalLastSampleInquiry(rxMessage, sensorId);
-        if (resultList != null) {
+        if (shieldProtocolLayer != null) {
             
-            int sample = resultList.get(0);
-            int timestamp = resultList.get(1);
+            // Setup name
+            String setupName = shieldProtocolLayer.evalSensorInquiry(rxMessage, boardId, sensorId);
+            if ((setupName != null) && !setupName.isEmpty()) {
+                name = setupName;
+            }
             
-            if (timestamp != lastSampleTimeStamp) {
-                lastSampleTimeStamp = timestamp;
-                
-                // Process the sample
-                double processed = onNewSample(sample, timestamp);
-                
-                // Log the sample to the board
-                if (fileLogger != null) {
-                    fileLogger.appendSample(processed, sensorId, timestamp);
-                }
-            }        
+            // Setup serial
+            String setupSerial = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, boardId, sensorId);
+            if ((setupSerial != null) && !setupSerial.isEmpty()) {
+                serial = setupSerial;
+            }
+            
+            List<Integer> resultList = shieldProtocolLayer.evalLastSampleInquiry(rxMessage, boardId, sensorId);
+            if ((resultList == null) && highResEnabled) {
+                resultList = shieldProtocolLayer.evalLastSampleHResInquiry(rxMessage, boardId, sensorId);
+            }
+            if (resultList != null) {
+
+                int sample = resultList.get(0);
+                int timestamp = resultList.get(1);
+
+                if (timestamp != lastSampleTimeStamp) {
+                    lastSampleTimeStamp = timestamp;
+
+                    // Process the sample
+                    double processed = onNewSample(sample, timestamp);
+
+                    // Log the sample to the board
+                    if (fileLogger != null) {
+                        fileLogger.appendSample(processed, name, getSerial(), boardId, sensorId, timestamp);
+                    }
+                }        
+            }
         }
     }
     

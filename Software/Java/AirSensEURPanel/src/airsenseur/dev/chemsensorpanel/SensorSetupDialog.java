@@ -24,7 +24,8 @@
 
 package airsenseur.dev.chemsensorpanel;
 
-import airsenseur.dev.comm.CommProtocolHelper;
+import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.comm.ShieldProtocolLayer;
 
 /**
  *
@@ -32,14 +33,33 @@ import airsenseur.dev.comm.CommProtocolHelper;
  */
 public abstract class SensorSetupDialog extends javax.swing.JDialog {
     
-    public SensorSetupDialog(java.awt.Frame parent, boolean modal) {
+    protected int boardId = AppDataMessage.BOARD_ID_UNDEFINED;
+    protected int sensorId = 0;
+    protected ShieldProtocolLayer shieldProtocolLayer = null;
+    
+    public SensorSetupDialog(MainApplicationFrame parent, boolean modal, int sensorId) {
         super(parent, modal);
+        
+        this.sensorId = sensorId;
+    }
+    
+    public void setShieldProtocolLayer(ShieldProtocolLayer shieldProtocolLayer) {
+        this.shieldProtocolLayer = shieldProtocolLayer;
+    }
+    
+    public void setBoardId(int boardId) {
+        this.boardId = boardId;
+    }
+    
+    public void setChannelId(int sensorId) {
+        this.sensorId = sensorId;
     }
     
     public abstract void storeToBoard();
     public abstract void readFromBoard();
     
-    public abstract void evaluateRxMessage(CommProtocolHelper.DataMessage rxMessage);
+    public abstract void evaluateRxMessage(AppDataMessage rxMessage);
+    public abstract void onDataMessageFromConfiguration(AppDataMessage rxMessage);
     
     public abstract void onSensorPresetDatabaseChanged();
 }

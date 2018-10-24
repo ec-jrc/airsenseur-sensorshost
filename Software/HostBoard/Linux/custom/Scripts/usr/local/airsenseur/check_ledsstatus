@@ -26,6 +26,8 @@
 # Returns 1 if active, 0 if not
 # ========================================================================
 
+cd "$(dirname "$0")"
+
 LEDS_ENABLED=0
 LEDS_ENABLEFILE=./leds_enabled
 

@@ -25,11 +25,12 @@
 package airsenseur.dev.json;
 
 /**
- *
+ * RawCommand implements a message flowing through the JSON RPC
  * @author marco
  */
 public class RawCommand {
     
+    public int boardId = 0xFF;
     public String commandString = "";
     public String comandComment = "";
 
@@ -39,5 +40,11 @@ public class RawCommand {
     public RawCommand(String commandString, String comandComment) {
         this.commandString = commandString;
         this.comandComment = comandComment;
+    }
+    
+    public RawCommand(int boardId, String commandString, String commandComment) {
+        this.boardId = boardId;
+        this.commandString = commandString; 
+        this.comandComment = commandComment;
     }
 }

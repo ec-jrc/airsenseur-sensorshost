@@ -50,11 +50,16 @@ echo "27" > /sys/class/gpio/export
 echo "out" > /sys/class/gpio/pioA27/direction
 echo "0" > /sys/class/gpio/pioA27/value
 
+# PC31 (PLOCK) is output
+echo "95" > /sys/class/gpio/export
+echo "out" > /sys/class/gpio/pioC31/direction
+echo "0" > /sys/class/gpio/pioC31/value
+
 # Turn off the LED on the board module
 echo "none" > /sys/class/leds/led_module/trigger
 
 # This should solve some problems with WiFi dongles running in host mode
 # prematurely disconnecting
-echo "Falling back to full speed on USBB socket"
-echo 2 >/sys/bus/usb/drivers/usb/usb1/../companion
+#echo "Falling back to full speed on USBB socket"
+#echo 2 >/sys/bus/usb/drivers/usb/usb1/../companion
 

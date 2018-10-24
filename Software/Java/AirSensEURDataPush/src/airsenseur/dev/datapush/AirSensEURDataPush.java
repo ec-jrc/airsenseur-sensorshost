@@ -153,9 +153,35 @@ public class AirSensEURDataPush {
     private static boolean processChannelSamples(int channel) throws NumberFormatException, PersisterException {
 
         // Retrieve the minimum and maximum timestamp present in the database for that channel
-        long minTs = sampleLoader.getMinimumTimestamp(channel);
-        long maxTs = sampleLoader.getMaximumTimestamp(channel);
+        // Retry several times before aborting. This way we will be able to 
+        // handle table locks in a safer way
+        int retry = 0;
+        long minTs = 0;
+        long maxTs = 0;
+        boolean bValid = false;
+        while (retry < config.getMaxDatabaseRetry()) {
+            try {
+                minTs = sampleLoader.getMinimumTimestamp(channel);
+                maxTs = sampleLoader.getMaximumTimestamp(channel);
+                retry = config.getMaxDatabaseRetry();
+                bValid = true;
                 
+            } catch (PersisterException ex) {
+                log.info("Error retrieving minimum and maximum timestamp in the database. Database locked? Retrying.");
+                retry++;
+
+                try {
+                    TimeUnit.MILLISECONDS.sleep(1333);
+                } catch (InterruptedException ie){
+                    retry = config.getMaxDatabaseRetry();
+                }
+            }
+        }
+        
+        if (!bValid) {
+            throw new PersisterException("Impossible to retrieve minimum and maximum timestamp in the database.");
+        }
+        
         long latestAddedTs = 0;
         HistoryEventContainer event = history.loadEvent(getPersisterMarker(channel));
         if (event != null) {

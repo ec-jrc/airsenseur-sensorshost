@@ -61,6 +61,15 @@ run_batterymonitor() {
 }
 
 
+GAUGEFOLDER=/sys/class/power_supply/$GAUGEID
+if [ -d $GAUGEFOLDER ]; then
+        run_batterymonitor &
+else
+        # Disable LED blinking
+        echo none > /sys/class/leds/led_charge/trigger
 
-run_batterymonitor &
+	# Disable input current limit
+        echo 3000000 > /sys/class/power_supply/ltc4156-charger-0/input_current_limit
+        sleep 10
+fi
 

@@ -67,13 +67,8 @@ public class Configuration extends Properties{
     }
     
     public int getPollTime() {
-        String pollTime = getProperty("sensorPollTime", "1000");
+        String pollTime = getProperty("sensorPollTime", "5000");
         return Integer.valueOf(pollTime);
-    }
-    
-    public int getNumSensors() {
-        String numSensors = getProperty("numSensors", "7");
-        return Integer.valueOf(numSensors);
     }
     
     public String getSensorHostname() {

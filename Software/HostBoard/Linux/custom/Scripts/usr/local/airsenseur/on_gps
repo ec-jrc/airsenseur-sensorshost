@@ -28,3 +28,8 @@ echo "Powering up GPS device"
 
 # PA25 (GPS) is output
 echo "1" > /sys/class/gpio/pioA25/value
+
+# Update NTP in order to initialize GPS Module
+sleep 1
+/usr/sbin/service ntp restart
+

@@ -15,10 +15,10 @@
 #
 # Date: 02/04/2015
 # Authors:
-# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu, 
-#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and 
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
 #   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
-#			European Commission - Joint Research Centre, 
+#                       European Commission - Joint Research Centre,
 # - Marco Signorini, marco.signorini@liberaintentio.com
 #
 # ===========================================================================
@@ -33,7 +33,7 @@ RESULT=$?
 if [ "$RESULT" = 1 ]; then
 	$SCRIPTBASE/off_ledsstatus
 else
-	$SCRIPTBASE/on_ledsstatus
+	$SCRIPTBASE/on_ledsstatus "timeron"
 fi
 
 

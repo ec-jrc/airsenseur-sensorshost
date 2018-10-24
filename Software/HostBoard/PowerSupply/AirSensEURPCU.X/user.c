@@ -36,12 +36,16 @@
 #include "mcc_generated_files/tmr2.h"
 #include "mcc_generated_files/adc1.h"
 
+// #define HWREV_20
+
 // RA0: Output -> Shutdown Request
-// RA1: Unused
+// RA1: Unused in HWREV < 20; VBat in HWREV > 20
 // RA2: Output -> Power supply
 // RA3: Input <- In Power On Pushbutton
-// RA4: Input <- 3v3 available (Analog In)
+// RA4: Input <- 3v3 available 
 // RA5: Output -> WakeUp pulse
+
+#define FW_REVISION             "R1.4"
 
 #define POWERONPRESSED          !RA3
 
@@ -111,6 +115,73 @@ static void setNextStatus(status nextStatus) {
     commonData.curStatus = nextStatus;
 }
 
+// High-Endurance Flash Addresses
+// 0380h-03FFh
+#define HEF_ONSTATUS_VALUE    0x00
+#define HEF_OFFSTATUS_VALUE   0xFF
+#define HEF_POWERSTATUS_ADDRESS   0x0380
+
+void unlockHEF (void) {
+#asm
+    BANKSEL PMCON2
+    MOVLW   0x55
+    MOVWF   PMCON2 & 0x7F
+    MOVLW   0xAA
+    MOVWF   PMCON2 & 0x7F
+    BSF     PMCON1 & 0x7F, 1
+    NOP
+    NOP
+#endasm
+}
+
+// Check if the system was ON when power loss occurred
+// If yes, turn on the device
+static void checkLastPowerStatus(void) {
+    
+    // Read HEF at HEF_POWERSTATUS_ADDRESS
+    PMADR = HEF_POWERSTATUS_ADDRESS;
+    PMCON1bits.CFGS = 0;
+    PMCON1bits.RD = 1;
+    NOP();
+    NOP();
+    
+    unsigned char flashReadValue = PMDAT;
+    if (flashReadValue == HEF_ONSTATUS_VALUE) {
+        commonData.curStatus = STATUS_PON_REQ;
+        commonData.stopPwOnCurTmr = 1;
+    }
+}
+
+// Persists current system power status so it will be
+// resumed after each power loss if any
+static void saveLastPowerStatus(bool on) {
+    
+    INTERRUPT_GlobalInterruptDisable();
+    
+    // Erase Flash at HEF_POWERSTATUS_ADDRESS
+    PMADR = HEF_POWERSTATUS_ADDRESS;
+    PMCON1bits.CFGS = 0;
+    PMCON1bits.FREE = 1;
+    PMCON1bits.WREN = 1;
+    unlockHEF();
+    PMCON1bits.WREN = 0;
+    
+    if (on) {
+        
+        // Write HEF_ONSTATUS_VALUE at HEF_POWERSTATUS_ADDRESS
+        PMADR = HEF_POWERSTATUS_ADDRESS;
+        PMDAT = HEF_ONSTATUS_VALUE;
+        PMCON1bits.LWLO = 0;
+        PMCON1bits.CFGS = 0;
+        PMCON1bits.FREE = 0;
+        PMCON1bits.WREN = 1;
+        unlockHEF();
+        PMCON1bits.WREN = 0;
+    }
+
+    INTERRUPT_GlobalInterruptEnable();    
+}
+
 void InitApp() {
 
     // Low power sleep mode
@@ -128,6 +199,10 @@ void InitApp() {
     commonData.vLossTmr = 0;
     commonData.shutDownTmr = 0;
     commonData.shutDownTimeoutTmr = 0;
+    
+    // Check overall system power status
+    // stored at previous run
+    checkLastPowerStatus();
 
     // Initialize interrupts
     INTERRUPT_PeripheralInterruptEnable();
@@ -155,6 +230,10 @@ void Loop() {
                 commonData.pwOnCurTmr = 0;
                 commonData.stopPwOnCurTmr = 1;
                 commonData.dcWaitTmr = 0;
+                
+                // Save last power status as ON so the device
+                // will start up automatically each power loss
+                saveLastPowerStatus(true);
             }
         }
         break;
@@ -207,6 +286,10 @@ void Loop() {
                 commonData.pwOnCurTmr = 0;
                 commonData.stopPwOnCurTmr = 1;
                 commonData.shutDownTmr = 0;
+                
+                // Save last power status as OFF so the device
+                // will not start up automatically each power loss
+                saveLastPowerStatus(false);
             }
             
             // Shutdown triggered from CPU

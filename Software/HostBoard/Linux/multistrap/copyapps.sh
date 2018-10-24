@@ -54,11 +54,17 @@ chmod 755 $TARGET_ROOTFS_DIR/usr/local/bin/batterymonitor
 cp -a $SOURCE_APP_DIR/rpi_gpio_ntp $TARGET_ROOTFS_DIR/usr/local/bin/.
 chmod 755 $TARGET_ROOTFS_DIR/usr/local/bin/rpi_gpio_ntp
 
+# Crontab for DataPush
+cp -a $SOURCE_SCRIPT_DIR/usr/local/etc/datapushcron $TARGET_ROOTFS_DIR/etc/cron.d/.
+
 # Change flags and permissions
 chown -R root:root $TARGET_ROOTFS_DIR/usr/local/airsenseur
 chmod 755 -R $TARGET_ROOTFS_DIR/usr/local/airsenseur/
 
 chown -R root:root $TARGET_ROOTFS_DIR/usr/local/bin
+
+chown root:root $TARGET_ROOTFS_DIR/etc/cron.d/datapushcron
+chmod 644 $TARGET_ROOTFS_DIR/etc/cron.d/datapushcron
 
 chmod 755 $TARGET_ROOTFS_DIR/etc/eventmonitor/*
 chmod 755 $TARGET_ROOTFS_DIR/etc/batterymonitor/lowvoltage_*

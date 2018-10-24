@@ -43,19 +43,22 @@ public class ChemSensorHostMain {
         
         Logger log = LoggerFactory.getLogger(ChemSensorHostMain.class);
         
+        log.info("Starting");        
+        
         Configuration config = Configuration.getConfig();
         
         // Take the configuration
         try {
             config.init(args[0]);
         } catch (ConfigurationException ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getErrorMessage());
             return;
         }
 
         // Start the sensor host manager by connecting to the external board
         ChemSensorHost chemSensorHost = new ChemSensorHost();
         if (!chemSensorHost.start(config.getPollTime(), config.getNumSensors())) {
+            log.error("Exiting from the main thread when starting main host thread");
             return;
         }
         
@@ -66,7 +69,7 @@ public class ChemSensorHostMain {
                             config.getJSONBindAddress(), 
                             config.getJSONBindPort());
         } catch (JSONServerException ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getErrorMessage());
             return;
         }
         
@@ -83,5 +86,7 @@ public class ChemSensorHostMain {
         // Exit gracefully
         jsonServer.stop();        
         chemSensorHost.exit();
+        
+        log.info("Exiting from the main thread");
     }
 }

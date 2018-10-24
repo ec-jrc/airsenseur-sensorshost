@@ -25,17 +25,11 @@
 package airsenseur.dev.chemsensorhost.json;
 
 import airsenseur.dev.chemsensorhost.ChemSensorHost;
-import airsenseur.dev.chemsensorhost.Configuration;
 import airsenseur.dev.json.ChemSensorService;
 import airsenseur.dev.json.FreeMemory;
 import airsenseur.dev.json.RawCommand;
 import airsenseur.dev.json.SampleData;
-import expr.Expr;
-import expr.Parser;
-import expr.SyntaxException;
-import expr.Variable;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -69,61 +63,35 @@ public class ChemSensorServiceImpl implements ChemSensorService {
     }
 
     @Override
-    public SampleData getLastSample(int channelId) {
+    public SampleData getLastSample(int sensorId) {
         
-        if (channelId < sensorHost.getCollectedData().getSensors().size()) {
-            ChemSensorHost.SensorData data = sensorHost.getCollectedData().getSensors().get(channelId);
-            String name = Configuration.getConfig().getSensorNameForChannel(channelId);            
-            
-            // Evaluate the mathematical expression
-            String mathExpression = Configuration.getConfig().getMathExpressionForChannel(channelId);
-            double evalSampleVal = evaluateMath(mathExpression, data.getValue());
-            
-            return new SampleData(name, data.getValue(), data.getTimeStamp(), evalSampleVal);
+        if (sensorId < sensorHost.getCollectedData().getSensors().size()) {
+            ChemSensorHost.SensorData data = sensorHost.getCollectedData().getSensors().get(sensorId);
+                        
+            return new SampleData(data.getChannelName(), data.getChannelSerial(), data.getValue(), data.getTimeStamp(), data.getEvalSampleVal());
         }
         
         return null;
     }
 
     @Override
-    public void sendRawData(List<RawCommand> rawData) {
+    public List<RawCommand> sendRawData(List<RawCommand> rawData) {
         
-        // Send raw data list by set of chunks
-        int chunkSize = 5;
-        int sent = 0;
-        for (RawCommand command:rawData) {
-            
-            sensorHost.sendRawData(command.commandString, command.comandComment);
-            sent++;
-            
-            // Time to wait?
-            if  ((sent % chunkSize) == 0) {
-                try {
-                    TimeUnit.SECONDS.sleep(3);
-                } catch (InterruptedException ex) {
-                        break;
-                }
-            }
-        }
+        return sensorHost.sendRawData(rawData);
     }
-    
-    /** 
-     * Evaluate a mathematical expression
-     * @param mathExpression
-     * @param rawData
-     * @return 
-     */
-    private double evaluateMath(String mathExpression, int rawData) {
-        
-        Expr expr;
-        try {
-            expr = Parser.parse(mathExpression);
-        } catch (SyntaxException ex) {
-            return rawData;
-        }
-        
-        Variable x = Variable.make("x");
-        x.setValue(rawData);
-        return expr.value();
-    }    
+
+    @Override
+    public int getNumSensors() {
+        return sensorHost.getCollectedData().getSensors().size();
+    }
+
+    @Override
+    public void takeOwnership() {
+        sensorHost.takeOwnership();
+    }
+
+    @Override
+    public void releaseOnwnership() {
+        sensorHost.releaseOwnership();
+    }
 }

@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# ========================================================================
+# Copyright 2016 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or - as soon they will be approved by 
+# the European Commission - subsequent versions of the EUPL (the "Licence"); 
+# You may not use this work except in compliance with the Licence. 
+# You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software distributed 
+# under the Licence is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR 
+# CONDITIONS OF ANY KIND, either express or implied. See the Licence for the 
+# specific language governing permissions and limitations under the Licence.
+# Date: 01/02/2016
+# Authors
+# - Marco Signorini  - marco.signorini@liberaintentio.com
+# - Michel Gerboles  - michel.gerboles@jrc.ec.europa.eu,  
+#                     European Commission - Joint Research Centre, 
+# - Laurent Spinelle - laurent.spinelle@jrc.ec.europa.eu,
+#                     European Commission - Joint Research Centre, 
+# 
+# ========================================================================
+# Event handler for start/stop wlan1 interface
+
+cd "$(dirname "$0")"
+
+INTERFACE=wlan1
+SCRIPTBASE="."
+
+echo timer > /sys/class/leds/led_4/trigger
+
+# Check for current wlan status
+$SCRIPTBASE/check_wlan $INTERFACE
+RESULT=$?
+
+# Turn off the interface each time
+# to prevent problems when turning up
+ifdown $INTERFACE
+$SCRIPTBASE/off_gprs
+
+# Remove dhcp leases (this could generate problems when time is not aligned)
+rm /var/lib/dhcp/dhclient.wlan1.leases
+#/sbin/dhclient -r wlan1
+
+# Turn on the interface if required
+if [ "$RESULT" = 0 ]; then
+	echo CLWLAN_ENABLED=1 > clwlan_enabled
+	$SCRIPTBASE/on_gprs
+	sleep 5
+	ifup $INTERFACE
+else
+	echo CLWLAN_ENABLED=0 > clwlan_enabled
+fi
+
+echo none > /sys/class/leds/led_4/trigger
+
+$SCRIPTBASE/update_leds
