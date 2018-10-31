@@ -35,7 +35,7 @@
 		serial6 = &uart1;
 	};
 	chosen {
-		bootargs = "mem=256M console=ttyS0,115200 root=/dev/mmcblk0p1 rw rootfstype=ext4 rootwait";
+		bootargs = "mem=256M console=ttyS0,115200 root=/dev/mtdblock1 rw rootfstype=jffs2 rootwait";
 	};
 	memory {
 		reg = <0x20000000 0x10000000>;

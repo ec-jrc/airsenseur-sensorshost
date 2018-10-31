@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# ========================================================================
+# Copyright 2016 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or - as soon they will be approved by
+# the European Commission - subsequent versions of the EUPL (the "Licence");
+# You may not use this work except in compliance with the Licence.
+# You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the Licence is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied. See the Licence for the
+# specific language governing permissions and limitations under the Licence.
+# Date: 01/02/2016
+# Authors
+# - Marco Signorini  - marco.signorini@liberaintentio.com
+# - Michel Gerboles  - michel.gerboles@jrc.ec.europa.eu,
+#                     European Commission - Joint Research Centre,
+# - Laurent Spinelle - laurent.spinelle@jrc.ec.europa.eu,
+#                     European Commission - Joint Research Centre,
+#
+# ========================================================================
+
+/bin/echo 0 > /sys/class/leds/led_6/brightness
+/bin/mkdir /tmp/microsd
+
+# Try to mount the 2nd partition (AirSensEURs R1.0)
+/bin/mount /dev/mmcblk0p2 /tmp/microsd
+if mount | grep /tmp/microsd > /dev/null; then
+        /bin/echo "mmc0" > /sys/class/leds/led_6/trigger
+	exit 1
+fi
+
+# Try to mount the 1st partition (AirSensEURs R2.0)
+/bin/mount /dev/mmcblk0p1 /tmp/microsd
+if mount | grep /tmp/microsd > /dev/null; then
+        /bin/echo "mmc0" > /sys/class/leds/led_6/trigger
+        exit 1
+fi
+
+exit 0

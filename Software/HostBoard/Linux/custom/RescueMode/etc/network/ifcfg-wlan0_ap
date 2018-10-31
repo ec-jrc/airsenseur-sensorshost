@@ -1,0 +1,7 @@
+auto wlan0
+iface wlan0 inet static
+
+address 192.168.100.1
+netmask 255.255.255.0
+broadcast 192.168.100.255
+network 192.168.100.0

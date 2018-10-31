@@ -1,0 +1,133 @@
+#!/bin/sh
+
+# ===========================================================================
+# Copyright 2015 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or subsequent versions of the
+# EUPL (the "License"); You may not use this work except in compliance
+# with the License. You may obtain a copy of the License at
+# http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Date: 02/04/2015
+# Authors:
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+#   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+#                       European Commission - Joint Research Centre,
+# - Marco Signorini, marco.signorini@liberaintentio.com
+#
+# ===========================================================================
+
+# Create a microSD from image
+
+SCRIPTDIR=/usr/local/airsenseur
+
+SOURCEDEVICE=/dev/sda1
+TARGETDEVICE=/dev/mmcblk0
+
+SOURCE=/tmp/pendrive
+TARGET=/tmp/microsd
+
+SOURCEFILE=$SOURCE/airsenseur_img.tar
+
+# -- Internal functions ------------------
+
+signal_start () {
+	/bin/echo "0" > /sys/class/leds/led_4/brightness
+	/bin/echo "timer" > /sys/class/leds/led_4/trigger
+}
+
+signal_end () {
+	/bin/echo "0" > /sys/class/leds/led_4/brightness
+	/bin/echo "none" > /sys/class/leds/led_4/trigger
+}
+
+signalerror () {
+
+        /usr/bin/beep
+        /bin/sleep 1
+        /usr/bin/beep
+        /bin/sleep 1
+        /usr/bin/beep
+        signal_end
+        /bin/echo "1" > /sys/class/leds/led_4/brightness
+
+        exit 0
+}
+
+# -----------------------------------------
+
+## Start from here ###
+signal_start
+
+# Mount the source usb stick
+# It should be a single partition formatted device identified as /dev/sda1
+
+$SCRIPTDIR/mount_pendrive
+
+# Check for source device availability
+if [ ! -e $SOURCEDEVICE ]
+then
+	/bin/echo "Source device not found"
+	signalerror
+fi
+
+/bin/mount $SOURCEDEVICE $SOURCE
+
+# Check for target device availability
+if [ ! -e $TARGETDEVICE ]
+then
+	/bin/echo "Target device not found"
+	signalerror
+fi
+
+# Check for source file availability
+if [ ! -e $SOURCEFILE ]
+then
+	/bin/echo "Source file not found"
+	signalerror
+fi
+
+# microSD partitioning
+echo "Partitioning the microSD"
+/bin/sed -e 's/\t\([\+0-9a-zA-Z]*\)[ \t].*/\1/' << EOF | /sbin/fdisk ${TARGETDEVICE}
+	o # clear the in memory partition table
+	n # new partition
+	p # primary partition
+	1 # partition number 1
+		# default - start at beginning of disk
+		# default, extend partition to end of disk
+	p # print the in-memory partition table
+	w # write the partition table
+	q # and we're done
+EOF
+
+/bin/sleep 5
+
+# Partition formatting
+/bin/echo "Formatting the partition"
+mkfs.ext4 -F -L rootfs ${TARGETDEVICE}p1
+
+/bin/sleep 5
+
+# Mount the newly formatted partition
+$SCRIPTDIR/mount_microsd
+
+# Populate the partition
+/bin/echo "Start copying data"
+/bin/tar -xvf $SOURCEFILE --strip-components=3 -C ${TARGET}/ ./output/rootfs
+
+/bin/sleep 30
+
+$SCRIPTDIR/umount_microsd
+$SCRIPTDIR/umount_pendrive
+
+# Terminate
+/bin/echo "Terminated"
+signal_end
+/usr/bin/beep 

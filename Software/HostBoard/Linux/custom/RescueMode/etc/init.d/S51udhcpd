@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Start udhcpd
+#
+
+SYSLOGD_ARGS=-n
+KLOGD_ARGS=-n
+
+start() {
+        printf "Starting udhcpd: "
+        start-stop-daemon -b -S -q -m -p /var/run/udhcpd.pid --exec /usr/sbin/udhcpd 
+        echo "OK"
+}
+
+stop() {
+        printf "Stopping udhcpd: "
+        start-stop-daemon -K -q -p /var/run/udhcpd.pid
+        echo "OK"
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        start
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart|reload}"
+        exit 1
+esac
+
+exit $?

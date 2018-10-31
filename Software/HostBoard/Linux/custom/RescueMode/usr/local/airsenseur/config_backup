@@ -1,0 +1,112 @@
+#!/bin/sh
+
+# ========================================================================
+# Copyright 2016 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or - as soon they will be approved by
+# the European Commission - subsequent versions of the EUPL (the "Licence");
+# You may not use this work except in compliance with the Licence.
+# You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the Licence is distributed on an "AS IS" basis, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied. See the Licence for the
+# specific language governing permissions and limitations under the Licence.
+# Date: 01/02/2016
+# Authors
+# - Marco Signorini  - marco.signorini@liberaintentio.com
+# - Michel Gerboles  - michel.gerboles@jrc.ec.europa.eu,
+#                     European Commission - Joint Research Centre,
+# - Laurent Spinelle - laurent.spinelle@jrc.ec.europa.eu,
+#                     European Commission - Joint Research Centre,
+#
+# ========================================================================
+# Backup main AirSensEUR configurations data file
+
+# Here is the folder destination used by this script
+TGTFOLDER=/tmp/pendrive/asbackup
+SRCDEVICE=/tmp/microsd/
+ASFOLDER=usr/local/airsenseur
+ASCONFIGFOLDER=usr/local/etc
+
+
+signalerror () {
+
+	sleep 1        
+	/usr/bin/beep
+        sleep 1
+        /usr/bin/beep
+        sleep 1
+        /usr/bin/beep
+	/bin/echo "none" > /sys/class/leds/led_1/trigger
+        /bin/echo "0" > /sys/class/leds/led_1/brightness
+
+        exit 0
+}
+
+
+# Signal start
+/bin/echo "timer" > /sys/class/leds/led_1/trigger
+
+# Mount devices
+/usr/local/airsenseur/mount_pendrive
+if [ $? -eq 0 ]
+then
+	/bin/echo "Source device not found"
+	signalerror
+fi
+
+/usr/local/airsenseur/mount_microsd
+if [ $? -eq 0 ]
+then
+	/bin/echo "Target device not found"
+	/usr/local/airsenseur/umount_pendrive
+	signalerror
+fi
+
+# Check for source device availability
+if [ ! -e $SRCDEVICE/$ASCONFIGFOLDER ]
+then
+        /bin/echo "Source device not found"
+	/usr/local/airsenseur/umount_pendrive
+	/usr/local/airsenseur/umount_microsd
+        signalerror
+fi
+
+# Remove any target folder, if any
+rm -rf $TGTFOLDER
+
+# Generate the target folder
+mkdir -p $TGTFOLDER
+
+# Move to the new root folder
+cd ${SRCDEVICE}
+
+# Backing up airsenseur configuration files
+tar -czvf - $ASCONFIGFOLDER/* > $TGTFOLDER/airsenseurconfig.tar.gz
+
+# Backing up other system configuration files
+tar -czvf - etc/cron.d/datapushcron etc/hostapd/hostapd.conf etc/wvdial.conf > $TGTFOLDER/sysetc.tar.gz
+
+# Backing up WiFi configuration files
+tar -czvf - etc/network/* $ASFOLDER/runDataPush > $TGTFOLDER/wifi.tar.gz
+
+# Backing up database files
+tar -czvf - $ASFOLDER/AirSensEURDataAggregator/airsenseur.db $ASFOLDER/AirSensEURDataAggregator/*.csv $ASFOLDER/AirSensEURDataPush/history.db > $TGTFOLDER/airsenseurdata.tar.gz
+
+# Merge together in a single tar file
+tar -cvf - $TGTFOLDER/*.tar.gz > $TGTFOLDER/asfullbackup.tar
+
+# Remove temporary files
+rm -f $TGTFOLDER/*.tar.gz
+
+/bin/sleep 50
+
+# Remove devices
+/usr/local/airsenseur/umount_microsd
+/usr/local/airsenseur/umount_pendrive
+
+# Signal end
+/bin/echo "none" > /sys/class/leds/led_1/trigger
+beep
+
+exit 1
