@@ -207,7 +207,7 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
                 
             } catch (PersisterException ex) {
                 Date date = new Date();
-                log.info(date.toString() + ": Error when persisting read sample for sensor " + channel);
+                log.info(date.toString() + ": Error when persisting read sample for sensor " + channel + " (" + ex.getErrorMessage() + ")");
             }
         }
     }

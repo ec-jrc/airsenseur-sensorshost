@@ -65,7 +65,6 @@ public class SampleDataContainer {
     
     @Override
     public SampleDataContainer clone() throws CloneNotSupportedException {
-        super.clone();
         SampleDataContainer other = new SampleDataContainer(channel);
         other.name = name;
         other.serial = serial;
