@@ -80,7 +80,7 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="AirSensEURPanel R0.6"/>
+        <Property name="text" type="java.lang.String" value="AirSensEURPanel R0.7"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">

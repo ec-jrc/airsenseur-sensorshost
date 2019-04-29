@@ -77,7 +77,7 @@ public abstract class SampleLogger extends javax.swing.JPanel {
         }
     };
             
-    public final static SampleLogger.DataProcessing ur100CDPressureDataProcessing = new DataProcessing() {
+    public final static SampleLogger.DataProcessing ur100CDHumidityDataProcessing = new DataProcessing() {
         @Override
         public double processSample(double sample) {
             return (sample/16384 * 100.0);
@@ -91,7 +91,7 @@ public abstract class SampleLogger extends javax.swing.JPanel {
         }
     };
               
-    public final static SampleLogger.DataProcessing sht31PressureDataProcessing = new DataProcessing() {
+    public final static SampleLogger.DataProcessing sht31HumidityDataProcessing = new DataProcessing() {
         @Override
         public double processSample(double sample) {
             return (sample/65535 * 100.0);

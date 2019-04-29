@@ -92,7 +92,7 @@ public class HistogramGraphSampleLoggerPanel extends SampleLogger {
         
         
         // Evaluate samples on all sensible channels
-        for (int channel = 1; channel < numOfChannels; channel++) {
+        for (int channel = 0; channel < numOfChannels; channel++) {
             List<Integer> resultList = shieldProtocolLayer.evalLastSampleHResInquiry(rxMessage, boardId, sensorId+channel);
             if (resultList == null) {
                 resultList = shieldProtocolLayer.evalLastSampleInquiry(rxMessage, boardId, sensorId+channel);

@@ -54,10 +54,11 @@ public class ChemShieldPanel extends GenericTabPanel {
     
     private final static String CHEM_SENSOR_CHANNEL_MATH_EXPRESSION = "if(x>32767,x-32768,x+32768)";
     private final static String UR100CD_TEMP_CHANNEL_MATH_EXPRESSION = "((x/16384)*165)-40.0";
+    private final static String UR100CD_HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/16384 * 100.0)";
     private final static String SHT31_TEMP_CHANNEL_MATH_EXPRESSION = "((x/65535*175) - 45.0)";
-    private final static String UR100CD_PRESS_CHANNEL_MATH_EXPRESSION = "x/48.0";
-    private final static String SHT31_PRESS_CHANNEL_MATH_EXPRESSION = "(x/65535 * 100.0)";
-    private final static String HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/16384)*100.0";
+    private final static String SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/65535)*100.0";
+    private final static String PRESSURE_CHANNEL_MATH_EXPRESSION = "x/48.0";
+    
     
     private final static String TEMP_SENSOR_NAME = "Temp";
     private final static String PRESS_SENSOR_NAME = "Press";
@@ -144,7 +145,7 @@ public class ChemShieldPanel extends GenericTabPanel {
         sampleLogger6.setSensorId(HUM_SENSOR_CHANNEL_ID);       
         
         // Define the default data sampling for humidity and pressure
-        jCBpthRevision.setSelectedIndex(0);
+        jCBpthRevision.setSelectedIndex(1);
         selectPTHRevision();
         
         // Board ID handling
@@ -354,16 +355,16 @@ public class ChemShieldPanel extends GenericTabPanel {
         }
         
         // Pressure
-        int selected = jCBpthRevision.getSelectedIndex();
         HostConfigSensorProperties sensorProperties = hostConfigWriter.addNewSensor();
         sensorProperties.setSensorName(PRESS_SENSOR_NAME);
         sensorProperties.setSensorBoardId(selectedBoardId);
         sensorProperties.setSensorChannel(PRESS_SENSOR_CHANNEL_ID);
         sensorProperties.setSensorHiRes(false);
-        sensorProperties.setSensorExpression((selected==0)? UR100CD_PRESS_CHANNEL_MATH_EXPRESSION : SHT31_PRESS_CHANNEL_MATH_EXPRESSION);
+        sensorProperties.setSensorExpression(PRESSURE_CHANNEL_MATH_EXPRESSION);
         
         
         // Temperature 
+        int selected = jCBpthRevision.getSelectedIndex();        
         sensorProperties = hostConfigWriter.addNewSensor();
         sensorProperties.setSensorName(TEMP_SENSOR_NAME);
         sensorProperties.setSensorBoardId(selectedBoardId);
@@ -376,9 +377,9 @@ public class ChemShieldPanel extends GenericTabPanel {
         sensorProperties = hostConfigWriter.addNewSensor();
         sensorProperties.setSensorName(HUM_SENSOR_NAME);
         sensorProperties.setSensorBoardId(selectedBoardId);
-        sensorProperties.setSensorBoardId(HUM_SENSOR_CHANNEL_ID);
+        sensorProperties.setSensorChannel(HUM_SENSOR_CHANNEL_ID);
         sensorProperties.setSensorHiRes(false);
-        sensorProperties.setSensorExpression(HUMIDITY_CHANNEL_MATH_EXPRESSION);
+        sensorProperties.setSensorExpression((selected==0)? UR100CD_TEMP_CHANNEL_MATH_EXPRESSION : SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION);
     }
     
 
@@ -507,14 +508,14 @@ public class ChemShieldPanel extends GenericTabPanel {
 
         int selected = jCBpthRevision.getSelectedIndex();
         SampleLogger.DataProcessing temperature = SampleLogger.sht31TemperatureDataProcessing;
-        SampleLogger.DataProcessing pressure = SampleLogger.sht31PressureDataProcessing;
+        SampleLogger.DataProcessing humidity = SampleLogger.sht31HumidityDataProcessing;
         if (selected == 0) {
             temperature = SampleLogger.ur100CDTemperatureDataProcessing;
-            pressure = SampleLogger.ur100CDPressureDataProcessing;
+            humidity = SampleLogger.ur100CDHumidityDataProcessing;
         }
 
         sampleLogger5.setDataProcessing(temperature);
-        sampleLogger6.setDataProcessing(pressure);
+        sampleLogger6.setDataProcessing(humidity);
     }//GEN-LAST:event_jCBpthRevisionActionPerformed
 
     private void jCBBoardIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCBBoardIdActionPerformed
