@@ -110,6 +110,11 @@ public class Configuration extends ConfigurationSOSDB {
         return getBooleanValue(value);
     }
     
+    public int getConnectionTimeout() {
+        String value = getProperty("connectionTimeout", "60");
+        return Integer.valueOf(value);
+    }
+    
     private boolean getBooleanValue(String value) {
         return ((value.compareToIgnoreCase("true") == 0) ||
                 (value.compareToIgnoreCase("yes") == 0) || 

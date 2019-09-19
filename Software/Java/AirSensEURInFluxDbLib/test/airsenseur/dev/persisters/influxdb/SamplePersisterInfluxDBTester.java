@@ -57,7 +57,7 @@ public class SamplePersisterInfluxDBTester {
         
     public static void testSendWithLineProtocol() throws PersisterException {
         
-        SamplePersisterInfluxDB dbTester = new SamplePersisterInfluxDB(dataSetName, dbHost, dbPort, dbName, dbUser, dbPassword, true, false);
+        SamplePersisterInfluxDB dbTester = new SamplePersisterInfluxDB(dataSetName, dbHost, dbPort, dbName, dbUser, dbPassword, true, false, 200);
         dbTester.startNewLog();
         
         List<SampleDataContainer> samples = new ArrayList<>();

@@ -99,7 +99,8 @@ public class AirSensEURDataPush {
                                                            config.getInfluxDbUsername(), 
                                                            config.getInfluxDbPassword(),
                                                            config.getInfluxDbUseLineProtocol(),
-                                                           config.getUseHTTPSProtocol());
+                                                           config.getUseHTTPSProtocol(),
+                                                           config.getConnectionTimeout());
             channels.add(SampleLoader.CHANNEL_INVALID);
         } else {
             log.info("WorkingMode: 52°North SOS");

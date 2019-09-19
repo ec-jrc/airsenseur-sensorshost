@@ -40,6 +40,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.ssl.SSLContexts;
@@ -49,7 +50,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,15 +67,17 @@ public class SamplePersisterInfluxDB implements SamplesPersister {
     private final String dbPassword;
     private final boolean useLineProtocol;
     private final boolean useSSL;
+    private final int timeout;
     
     private final ObjectMapper mapper = new ObjectMapper();
     
-    public SamplePersisterInfluxDB(String dataSetName, String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, boolean useLineProtocol, boolean useSSL) {
+    public SamplePersisterInfluxDB(String dataSetName, String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, boolean useLineProtocol, boolean useSSL, int timeout) {
         this.dataSetName = dataSetName;
         this.dbUser = dbUser;
         this.dbPassword = dbPassword;
         this.useLineProtocol = useLineProtocol;
         this.useSSL = useSSL;
+        this.timeout = timeout;
         
         String protocol = "http://";
         if (this.useSSL) {
@@ -204,19 +206,23 @@ public class SamplePersisterInfluxDB implements SamplesPersister {
         try {
             
             // Initialize proper HTTP client
+            RequestConfig config = RequestConfig.custom()
+                  .setConnectTimeout(timeout * 1000)
+                  .setConnectionRequestTimeout(timeout * 1000)
+                  .setSocketTimeout(timeout * 1000).build();
             CloseableHttpClient httpClient;
             if (useSSL) {
                 SSLContext sslContext = SSLContexts.custom()
                         .loadTrustMaterial(null, new TrustSelfSignedStrategy())
                         .build();
                 SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
-                httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+                httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).setSSLSocketFactory(sslsf).build();
                 
             } else {
-                httpClient = HttpClients.createDefault();
+                httpClient = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
             }
             
-            HttpPost postRequest = new HttpPost(url);
+            HttpPost postRequest = new HttpPost(url);         
             StringEntity input = new StringEntity(queryString, ContentType.DEFAULT_BINARY);
             input.setContentType("text/plain");
             postRequest.setEntity(input);
