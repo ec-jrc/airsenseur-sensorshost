@@ -35,7 +35,7 @@
     "dependencies": {
         "react-dom": "0.14.3",
         "react": "0.14.3",
-        "bootstrap": "3.3.6",
+        "bootstrap": "3.4.1",
         "jquery": "2.2.0"
     }
 }
