@@ -25,6 +25,7 @@
 package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.List;
 
 /**
@@ -41,7 +42,7 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
     }
     
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         
         int prescaler = sampleRatePrescaler.getRegisterSelectedValue();
         int postscaler = sampleRatePostscaler.getRegisterSelectedValue();
@@ -60,7 +61,7 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
     }
     
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         
         shieldProtocolLayer.renderSamplerPrescalerRead(boardId, channelId);
         shieldProtocolLayer.renderSamplerPostscalerRead(boardId, channelId);
@@ -117,6 +118,11 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
         evaluateRxMessage(rxMessage);
     }
     
+    public void disablePrescaler() {
+        jLabelCBPre.setEnabled(false);
+        jCBPre.setEnabled(false);
+    }
+    
     public void disableIIRSection() {
         IIRSectionDisabled = true;
         jCBIIR1.setEnabled(false);
@@ -139,7 +145,7 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
         sampleRateDecimation = new airsenseur.dev.chemsensorpanel.dataModel.SampleRateDecimation();
         iIRDenominator1 = new airsenseur.dev.chemsensorpanel.dataModel.IIRDenominator();
         iIRDenominator2 = new airsenseur.dev.chemsensorpanel.dataModel.IIRDenominator();
-        jLabel1 = new javax.swing.JLabel();
+        jLabelCBPre = new javax.swing.JLabel();
         jLabelIIR1 = new javax.swing.JLabel();
         jLabelIIR2 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -150,7 +156,7 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
         jCBIIR1 = new javax.swing.JComboBox();
         jCBIIR2 = new javax.swing.JComboBox();
 
-        jLabel1.setText("Sample Rate Prescaler:");
+        jLabelCBPre.setText("Sample Rate Prescaler:");
 
         jLabelIIR1.setText("IIR1 Coefficient:");
 
@@ -178,7 +184,7 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel4)
-                    .addComponent(jLabel1)
+                    .addComponent(jLabelCBPre)
                     .addComponent(jLabelIIR1)
                     .addComponent(jLabelIIR2)
                     .addComponent(jLabel5))
@@ -200,7 +206,7 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jCBPre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabelCBPre))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jCBIIR1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -231,9 +237,9 @@ public class IIRAndAvgPanel extends SensorBusInteractingPanel {
     private javax.swing.JComboBox jCBIIR2;
     private javax.swing.JComboBox jCBPost;
     private javax.swing.JComboBox jCBPre;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabelCBPre;
     private javax.swing.JLabel jLabelIIR1;
     private javax.swing.JLabel jLabelIIR2;
     private airsenseur.dev.chemsensorpanel.dataModel.SampleRateDecimation sampleRateDecimation;

@@ -25,7 +25,6 @@
 package airsenseur.dev.chemsensorpanel.comm;
 
 import airsenseur.dev.chemsensorpanel.*;
-import airsenseur.dev.comm.SensorBus;
 import airsenseur.dev.exceptions.SensorBusException;
 
 /**

@@ -52,6 +52,8 @@ public class CommChannelSerialPort implements CommChannel {
 
     private final String appName = "AirSensEURSerialChannel";
 
+    private long numOfTxMessages = 0;
+
     private class SerialReceiverListener implements SerialPortEventListener {
 
         @Override
@@ -135,6 +137,7 @@ public class CommChannelSerialPort implements CommChannel {
                 serialPort.notifyOnDataAvailable(true);
                 serialPort.setSerialPortParams(baudrate, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
                 
+                numOfTxMessages = 0;                
                 result = true;
 
             } catch (UnsupportedCommOperationException | PortInUseException | TooManyListenersException | IOException e) {
@@ -195,6 +198,15 @@ public class CommChannelSerialPort implements CommChannel {
     public void writeMessage(CommChannelDataMessage message) throws IOException {
         if (outputStream != null) {
             outputStream.write(message.getMessage().getBytes());
+            numOfTxMessages++;            
+            
+            // Avoid flooding devices with messages
+            if ((numOfTxMessages % 10) == 0) {
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ex) {
+                }
+            }
         }
     }
 }

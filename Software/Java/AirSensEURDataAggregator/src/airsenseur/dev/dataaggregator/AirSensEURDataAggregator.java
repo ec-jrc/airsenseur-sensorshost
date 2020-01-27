@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AirSensEURDataAggregator {
     
+    static final String VERSION = "AirSensEURDataAggregator V2.0.0";
     static final Logger log = LoggerFactory.getLogger(AirSensEURDataAggregator.class);
     
     /**
@@ -43,7 +44,7 @@ public class AirSensEURDataAggregator {
      */
     public static void main(String[] args) {
         
-        log.info("AirSensEURDataAggregator started");
+        log.info(VERSION + " started");
 
         // Load the configuration file
         Configuration config = Configuration.getConfig();

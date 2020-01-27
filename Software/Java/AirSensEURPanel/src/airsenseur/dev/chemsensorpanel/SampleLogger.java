@@ -27,6 +27,8 @@ package airsenseur.dev.chemsensorpanel;
 import airsenseur.dev.chemsensorpanel.helpers.FileLogger;
 import airsenseur.dev.comm.ShieldProtocolLayer;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
+import airsenseur.dev.helpers.Pair;
 import java.util.List;
 
 /**
@@ -140,7 +142,7 @@ public abstract class SampleLogger extends javax.swing.JPanel {
         highResEnabled = true;
     }
     
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         
         if (shieldProtocolLayer != null) {
             if (highResEnabled) {
@@ -166,15 +168,16 @@ public abstract class SampleLogger extends javax.swing.JPanel {
             if ((setupSerial != null) && !setupSerial.isEmpty()) {
                 serial = setupSerial;
             }
-            
-            List<Integer> resultList = shieldProtocolLayer.evalLastSampleInquiry(rxMessage, boardId, sensorId);
-            if ((resultList == null) && highResEnabled) {
-                resultList = shieldProtocolLayer.evalLastSampleHResInquiry(rxMessage, boardId, sensorId);
-            }
-            if (resultList != null) {
 
-                int sample = resultList.get(0);
-                int timestamp = resultList.get(1);
+            List<Integer> resultList = shieldProtocolLayer.evalLastSampleInquiry(rxMessage, boardId, sensorId);
+            Pair<Integer, Float> resultPair = null;
+            if ((resultList == null) && highResEnabled) {
+                resultPair = shieldProtocolLayer.evalLastSampleHResInquiry(rxMessage, boardId, sensorId);
+            }
+            if ((resultList != null) || (resultPair != null)) {
+
+                float sample = (resultList != null)? resultList.get(0) : resultPair.second;
+                int timestamp = (resultList != null)? resultList.get(1) : resultPair.first;
 
                 if (timestamp != lastSampleTimeStamp) {
                     lastSampleTimeStamp = timestamp;

@@ -26,12 +26,15 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.chemsensorpanel.SampleLogger;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  *
  * @author marco
  */
 public class TextBasedSampleLoggerPanel extends SampleLogger {
+    
+    private String units = "";
 
     /**
      * Creates new form TextBasedSampleLoggerPanel
@@ -47,11 +50,17 @@ public class TextBasedSampleLoggerPanel extends SampleLogger {
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         super.readFromBoard(); 
        
         // Ask for name
         shieldProtocolLayer.renderSensorInquiry(boardId, sensorId);
+        
+        // Ask for the sensor units
+        shieldProtocolLayer.renderReadUnits(boardId, sensorId);
+        
+        // Ask for sample time
+        shieldProtocolLayer.renderReadSamplePeriod(boardId, sensorId);
     }
 
     @Override
@@ -63,13 +72,25 @@ public class TextBasedSampleLoggerPanel extends SampleLogger {
         if ((setupName != null) && !setupName.isEmpty()) {
             jLblTitle.setText(setupName);
         }
+        
+        // Units
+        String _units = shieldProtocolLayer.evalReadUnits(rxMessage, boardId, sensorId);
+        if ((_units != null) && !_units.isEmpty()) {
+            units = _units;
+        }        
+        
+        // Sample time
+        Integer sampleTime = shieldProtocolLayer.evalReadSamplePeriod(rxMessage, boardId, sensorId);
+        if (sampleTime != null) {
+            jLblSampleTime.setText(sampleTime.toString());
+        }        
     }
 
     @Override
     protected double onNewSample(double sample, int timestamp) {
         sample = super.onNewSample(sample, timestamp);
         
-        String newSample = String.format("%.2f", sample);
+        String newSample = String.format("%.2f %s", sample, units);
         jLblValue.setText(newSample);
         jLblTimeStamp.setText("" + timestamp);
         
@@ -91,6 +112,8 @@ public class TextBasedSampleLoggerPanel extends SampleLogger {
         jLblValue = new javax.swing.JLabel();
         jLblTimeStamp = new javax.swing.JLabel();
         jLblTitle = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLblSampleTime = new javax.swing.JLabel();
 
         jLabel1.setText("Value:");
 
@@ -103,6 +126,10 @@ public class TextBasedSampleLoggerPanel extends SampleLogger {
         jLblTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLblTitle.setText("--");
 
+        jLabel3.setText("SampleTime:");
+
+        jLblSampleTime.setText("n/a");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -113,12 +140,18 @@ public class TextBasedSampleLoggerPanel extends SampleLogger {
                     .addComponent(jLblTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLblValue, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLblTimeStamp, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel1))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLblValue, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLblTimeStamp, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLblSampleTime)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -138,6 +171,10 @@ public class TextBasedSampleLoggerPanel extends SampleLogger {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jLblTimeStamp))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLblSampleTime))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -146,6 +183,8 @@ public class TextBasedSampleLoggerPanel extends SampleLogger {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLblSampleTime;
     private javax.swing.JLabel jLblTimeStamp;
     private javax.swing.JLabel jLblTitle;
     private javax.swing.JLabel jLblValue;

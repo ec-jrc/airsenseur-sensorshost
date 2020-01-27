@@ -19,37 +19,41 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="sampleLogger0" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="sampleLogger2" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="sampleLogger0" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLogger2" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="sampleLogger1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLogger3" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="sampleLogger4" min="-2" max="-2" attributes="0"/>
+                          <Component id="jSeparator1" max="32767" attributes="0"/>
+                          <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="sampleLogger5" max="32767" attributes="0"/>
+                              <Component id="sampleLogger7" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="sampleLogger6" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLogger8" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="jSeparator2" alignment="1" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jCBBoardId" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jLabelBoardSerialNumber" min="-2" pref="159" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="sampleLogger1" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="sampleLogger3" alignment="0" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="sampleLogger4" max="32767" attributes="0"/>
-                  <Component id="sampleLogger5" max="32767" attributes="0"/>
-                  <Component id="sampleLogger6" max="32767" attributes="0"/>
-                  <Component id="jCBpthRevision" min="-2" pref="190" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="32767" attributes="0"/>
-          </Group>
-          <Group type="102" alignment="1" attributes="0">
-              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
-              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jCBBoardId" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
-              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabelFreeMem" min="-2" pref="93" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
-              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabelBoardSerialNumber" min="-2" pref="159" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="143" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -58,8 +62,6 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabelFreeMem" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jCBBoardId" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -67,15 +69,6 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="sampleLogger4" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="sampleLogger5" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="sampleLogger6" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jCBpthRevision" min="-2" max="-2" attributes="0"/>
-                  </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="sampleLogger1" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -86,6 +79,21 @@
                           <Component id="sampleLogger2" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="sampleLogger3" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="sampleLogger4" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLogger5" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLogger6" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jSeparator2" min="-2" pref="10" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
+                      <Component id="sampleLogger7" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLogger8" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
@@ -106,30 +114,7 @@
     </Component>
     <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLogger5">
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLogger6">
-    </Component>
-    <Component class="javax.swing.JComboBox" name="jCBpthRevision">
-      <Properties>
-        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="2">
-            <StringItem index="0" value="PTH Revision &lt; 1.4"/>
-            <StringItem index="1" value="PTH Revision &gt;= 1.4"/>
-          </StringArray>
-        </Property>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCBpthRevisionActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLabel1">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Available board RAM:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLabelFreeMem">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="--"/>
-      </Properties>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLogger7">
     </Component>
     <Component class="javax.swing.JComboBox" name="jCBBoardId">
       <Properties>
@@ -172,6 +157,14 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="--"/>
       </Properties>
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLogger6">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLogger8">
+    </Component>
+    <Component class="javax.swing.JSeparator" name="jSeparator1">
+    </Component>
+    <Component class="javax.swing.JSeparator" name="jSeparator2">
     </Component>
   </SubComponents>
 </Form>

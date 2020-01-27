@@ -24,7 +24,9 @@
 
 package airsenseur.dev.comm;
 
+import airsenseur.dev.exceptions.SensorBusException;
 import airsenseur.dev.helpers.CodecHelper;
+import airsenseur.dev.helpers.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,8 +43,7 @@ public class ShieldProtocolLayer {
     public static final int COMMPROTOCOL_CHANNEL_LENGTH = 2;
     public static final int COMMPROTOCOL_COMMAND_CHANNEL_PATTERNLENGTH = COMMPROTOCOL_COMMANDID_LENGTH + COMMPROTOCOL_CHANNEL_LENGTH;
     
-    private static final int HIGH_RES_SAMPLE_MULTIPLIER_FACTOR = 10000;
-        
+    
     private static final char COMMPROTOCOL_SENSOR_INQUIRY = 'I';
     private static final char COMMPROTOCOL_ECHO = 'E';
     private static final char COMMPROTOCOL_SAMPLE_ENABLE = 'S';
@@ -69,6 +70,11 @@ public class ShieldProtocolLayer {
     private static final char COMMPROTOCOL_WRITE_BOARDSERIAL = 'U';
     private static final char COMMPROTOCOL_READ_BOARDSERIAL = 'V';
     private static final char COMMPROTOCOL_READ_FWVERSION = 'Z';
+    private static final char COMMPROTOCOL_READ_SAMPLEPERIOD = 'a';
+    private static final char COMMPROTOCOL_READ_UNITS = 'b';
+    private static final char COMMPROTOCOL_READ_BOARDTYPE = 'c';
+    private static final char COMMPROTOCOL_WRITE_CHANENABLE = 'd';
+    private static final char COMMPROTOCOL_READ_CHANENABLE = 'e';
     
     private static final Map<String,String> fromRequestToAnswerIdentifiers = new HashMap<String, String>() {{
         put(String.valueOf(COMMPROTOCOL_SET_SAMPLEPRESC), String.valueOf(COMMPROTOCOL_GET_SAMPLEPRESC));
@@ -80,6 +86,14 @@ public class ShieldProtocolLayer {
         put(String.valueOf(COMMPROTOCOL_SAVEPRESET), String.valueOf(COMMPROTOCOL_SENSOR_INQUIRY));
         put(String.valueOf(COMMPROTOCOL_WRITE_SSERIAL), String.valueOf(COMMPROTOCOL_READ_SSERIAL));
         put(String.valueOf(COMMPROTOCOL_WRITE_BOARDSERIAL), String.valueOf(COMMPROTOCOL_READ_BOARDSERIAL)); 
+        put(String.valueOf(COMMPROTOCOL_WRITE_CHANENABLE), String.valueOf(COMMPROTOCOL_READ_CHANENABLE));
+    }};
+    
+    private static final List<String> boardTypesString = new ArrayList<String>() {{
+        add("Unknown");
+        add("Chemical Shield R3.x"); 
+        add("Exp1Shield R1.x");
+        add("HostBoard R2.x");
     }};
     
     private final SensorBus sensorBus;
@@ -88,7 +102,7 @@ public class ShieldProtocolLayer {
         this.sensorBus = sensorBus;
     }
     
-    public void renderLMP9100RegSetup(int boardId, int channelId, int tiaReg, int refReg, int modeReg) {
+    public void renderLMP9100RegSetup(int boardId, int channelId, int tiaReg, int refReg, int modeReg) throws SensorBusException {
         
         StringBuilder sb = new StringBuilder(10);
         sb.append(COMMPROTOCOL_WRITE_AFE_REG);
@@ -100,7 +114,7 @@ public class ShieldProtocolLayer {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, sb.toString(), "LMP9100 Register Setup for channel " + channelId));
     }
     
-    public void renderSavePresetWithName(int boardId, int channelId, String name) {
+    public void renderSavePresetWithName(int boardId, int channelId, String name) throws SensorBusException {
         StringBuilder sb = new StringBuilder(3+(2*name.length()));
         sb.append(COMMPROTOCOL_SAVEPRESET);
         sb.append(CodecHelper.encodeValue((char)channelId));
@@ -109,12 +123,12 @@ public class ShieldProtocolLayer {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, sb.toString(), "Write Preset Name for channel " + channelId));
     }
     
-    public void renderLMP9100ReadSetup(int boardId, int channelId) {
+    public void renderLMP9100ReadSetup(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_READ_AFE_REG), 
                                                     "LMP9100 Read configuration registers for channel " + channelId));
     }
     
-    public void renderDAC5694RegSetup(int boardId, int channelId, int subChannel, int value, int gain) {
+    public void renderDAC5694RegSetup(int boardId, int channelId, int subChannel, int value, int gain) throws SensorBusException {
         StringBuilder sb = new StringBuilder(12);
         sb.append(COMMPROTOCOL_WRITE_DAC_REG);
         sb.append(CodecHelper.encodeValue((char)channelId));
@@ -125,42 +139,42 @@ public class ShieldProtocolLayer {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, sb.toString(), "DAC5694R Register Setup for channel " + channelId + " subchannel " + subChannel));
     }
     
-    public void renderDAC5694ReadSetup(int boardId, int channelId, char subChannel) {
+    public void renderDAC5694ReadSetup(int boardId, int channelId, char subChannel) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_READ_DAC_REG, subChannel),
                                                     "DAC5694R Read configuration registers for channel " + channelId + " subChannel "+ subChannel));
     }
     
-    public synchronized void renderSamplerPrescaler(int boardId, int channelId, int prescaler) {
+    public synchronized void renderSamplerPrescaler(int boardId, int channelId, int prescaler) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_SET_SAMPLEPRESC, (char)prescaler), 
                                                         "Set Prescaler for channel " + channelId));
     }
     
-    public void renderSamplerPrescalerRead(int boardId, int channelId) {
+    public void renderSamplerPrescalerRead(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_GET_SAMPLEPRESC),
                                                         "Read Prescaler for channel " + channelId));
     }
     
-    public void renderSamplerPostscaler(int boardId, int channelId, int postscaler) {
+    public void renderSamplerPostscaler(int boardId, int channelId, int postscaler) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_SET_SAMPLEPOSTS, (char)postscaler), 
                                                         "Set Postscaler for channel " + channelId));
     }
     
-    public void renderSamplerPostscalerRead(int boardId, int channelId) {
+    public void renderSamplerPostscalerRead(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_GET_SAMPLEPOSTS),
                                                         "Read Postscaler for channel  " + channelId));
     }
     
-    public void renderSamplerDecimation(int boardId, int channelId, int decimation) {
+    public void renderSamplerDecimation(int boardId, int channelId, int decimation) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_SET_SAMPLEDECIM, (char)decimation), 
                                                         "Set Decimation for channel " + channelId));
     }
     
-    public void renderSamplerDecimationRead(int boardId, int channelId) {
+    public void renderSamplerDecimationRead(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_GET_SAMPLEDECIM),
                                                         "Read Decimation for channel " + channelId));
     }
     
-    public void renderSamplerIIRDenom(int boardId, int channelID, int denom1, int denom2) {
+    public void renderSamplerIIRDenom(int boardId, int channelID, int denom1, int denom2) throws SensorBusException {
         
         List<Integer> parameters = new ArrayList<>();
         parameters.add(denom1);
@@ -170,36 +184,47 @@ public class ShieldProtocolLayer {
                                                         "Set IIR Parameters for channel " + channelID));
     }
     
-    public void renderSamplerIIRDenomRead(int boardId, int channelId) {
+    public void renderSamplerIIRDenomRead(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_GET_IIRDENOMVALUES),
                                                         "Read IIR parameters for channel " + channelId));
     }
     
-    public void renderStartSample(int boardId) {
+    public void renderWriteChannelEnable(int boardId, int channelID, boolean enabled) throws SensorBusException {
+        
+        sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelID, COMMPROTOCOL_WRITE_CHANENABLE, (char)((enabled)? 1:0)), 
+                                                        "Write channel enabled " + channelID));
+    }
+    
+    public void renderReadChannelEnable(int boardId, int channelID) throws SensorBusException {
+        sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelID, COMMPROTOCOL_READ_CHANENABLE),
+                                                        "Read channel enabled " + channelID));
+    }
+    
+    public void renderStartSample(int boardId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderGenericCmd(COMMPROTOCOL_SAMPLE_ENABLE), "Start Sampling"));
     }
     
-    public void renderStopSample(int boardId) {
+    public void renderStopSample(int boardId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderGenericCmd(COMMPROTOCOL_SAMPLE_DISABLE), "Stop Sampling"));
     }
     
-    public void renderGetFreeMemory(int boardId) {
+    public void renderGetFreeMemory(int boardId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderGenericCmd(COMMPROTOCOL_FREEMEMORY), "Get Free Memory"));
     }
     
-    public void renderSensorInquiry(int boardId, int channelId) {
+    public void renderSensorInquiry(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_SENSOR_INQUIRY), "Inquiry sensor channel " + channelId));
     }
     
-    public void renderGetLastSample(int boardId, int channelId) {
+    public void renderGetLastSample(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_LASTSAMPLE), "Get Last Sample for channel " + channelId));
     }
     
-    public void renderGetLastSampleHRes(int boardId, int channelId) {
+    public void renderGetLastSampleHRes(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_LASTSAMPLE_HRES), "Get Last HiRes Sample for channel " + channelId));
     }
     
-    public void renderSaveSensorSerialNumber(int boardId, int channelId, String serialNumber) {
+    public void renderSaveSensorSerialNumber(int boardId, int channelId, String serialNumber) throws SensorBusException {
         StringBuilder sb = new StringBuilder(3+(2*serialNumber.length()));
         sb.append(COMMPROTOCOL_WRITE_SSERIAL);
         sb.append(CodecHelper.encodeValue((char)channelId));
@@ -208,11 +233,11 @@ public class ShieldProtocolLayer {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, sb.toString(), "Write Serial Number for channel " + channelId));
     }
     
-    public void renderReadSensorSerialNumber(int boardId, int channelId) {
+    public void renderReadSensorSerialNumber(int boardId, int channelId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_READ_SSERIAL), "Read serial number for channel " + channelId));
     }
 
-    public void renderSaveBoardSerialNumber(int boardId, String serialNumber) {
+    public void renderSaveBoardSerialNumber(int boardId, String serialNumber) throws SensorBusException {
         StringBuilder sb = new StringBuilder(3*(2*serialNumber.length()));
         sb.append(COMMPROTOCOL_WRITE_BOARDSERIAL);
         sb.append(CodecHelper.encodeString(serialNumber));
@@ -220,15 +245,27 @@ public class ShieldProtocolLayer {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, sb.toString(), "Write board serial number"));
     }
     
-    public void renderReadBoardSerialNumber(int boardId) {
+    public void renderReadBoardSerialNumber(int boardId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderGenericCmd(COMMPROTOCOL_READ_BOARDSERIAL), "Read board serial number"));
     }
     
-    public void renderReadFirmwareVersion(int boardId) {
+    public void renderReadFirmwareVersion(int boardId) throws SensorBusException {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderGenericCmd(COMMPROTOCOL_READ_FWVERSION), "Read board firmware version"));
     }
     
-    public void renderRawData(AppDataMessage dataMessage) {
+    public void renderReadSamplePeriod(int boardId, int channelId) throws SensorBusException {
+        sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_READ_SAMPLEPERIOD), "Read sample period for channel " + channelId));
+    }
+    
+    public void renderReadUnits(int boardId, int channelId) throws SensorBusException {
+        sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_READ_UNITS), "Read measurement units for channel " + channelId));
+    }
+    
+    public void renderReadBoardType(int boardId) throws SensorBusException {
+        sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderGenericCmd(COMMPROTOCOL_READ_BOARDTYPE), "Read board type"));
+    }
+    
+    public void renderRawData(AppDataMessage dataMessage) throws SensorBusException {
         sensorBus.writeMessageToBus(dataMessage);
     }
     
@@ -250,6 +287,15 @@ public class ShieldProtocolLayer {
         return false;
     }
     
+    // Convert the board type in a human readable format
+    public static String getBoardTypeString(int boardTypeID) {
+        if (boardTypeID >= boardTypesString.size()) {
+            return "Unknown";
+        }
+        
+        return boardTypesString.get(boardTypeID);
+    }
+    
 
     // Returns an integer if the rxMessage matches the required command; null otherwise
     public Integer evalFreeMemory(AppDataMessage rxMessage, int boardId) {
@@ -269,7 +315,7 @@ public class ShieldProtocolLayer {
         }
         
         Integer rxChan = CodecHelper.decodeCharAt(rxMessage.getCommandString(), 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
@@ -284,7 +330,7 @@ public class ShieldProtocolLayer {
         }
         
         Integer rxChan = CodecHelper.decodeCharAt(rxMessage.getCommandString(), 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
@@ -299,7 +345,7 @@ public class ShieldProtocolLayer {
         }
         
         Integer rxChan = CodecHelper.decodeCharAt(rxMessage.getCommandString(), 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
@@ -314,7 +360,7 @@ public class ShieldProtocolLayer {
         }
 
         Integer rxChan = CodecHelper.decodeCharAt(rxMessage.getCommandString(), 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
 
@@ -340,7 +386,7 @@ public class ShieldProtocolLayer {
         }
         
         Integer rxChan = CodecHelper.decodeCharAt(rxMessage.getCommandString(), 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
@@ -357,7 +403,7 @@ public class ShieldProtocolLayer {
         
         String commandString = rxMessage.getCommandString();
         Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
@@ -384,7 +430,7 @@ public class ShieldProtocolLayer {
         
         String commandString = rxMessage.getCommandString();
         Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
 
@@ -410,7 +456,7 @@ public class ShieldProtocolLayer {
         
         String commandString = rxMessage.getCommandString();
         Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
@@ -429,10 +475,7 @@ public class ShieldProtocolLayer {
         return result;
     }
     
-    // NOTE: float values are sent from shields to the host but samples are treated as 32 bit long int
-    // For this reason, each HResInquiry value will be multiplied by HIGH_RES_SAMPLE_MULTIPLIER_FACTOR
-    // in order to maintain 4 decimal places in a fixed bit values persisted on the database.
-    public List<Integer> evalLastSampleHResInquiry(AppDataMessage rxMessage, int boardId, int channel) {
+    public Pair<Integer, Float> evalLastSampleHResInquiry(AppDataMessage rxMessage, int boardId, int channel) {
         
         if (!rxMessage.matches(boardId, COMMPROTOCOL_LASTSAMPLE_HRES)) {
             return null;
@@ -440,7 +483,7 @@ public class ShieldProtocolLayer {
         
         String commandString = rxMessage.getCommandString();
         Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
@@ -448,15 +491,11 @@ public class ShieldProtocolLayer {
         if (sample == null)
             return null;
         
-        sample = sample * HIGH_RES_SAMPLE_MULTIPLIER_FACTOR;
-        
         Integer timestamp = CodecHelper.decodeIntAt(commandString, 11);
         if (timestamp == null) 
             return null;
         
-        List<Integer> result = new ArrayList<>();
-        result.add(sample.intValue());
-        result.add(timestamp);
+        Pair<Integer, Float> result = new Pair<>(timestamp, sample);
         
         return result;
     }
@@ -491,11 +530,89 @@ public class ShieldProtocolLayer {
         
         String commandString = rxMessage.getCommandString();
         Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
-        if ((rxChan == null) || (rxChan.intValue() != channel)) {
+        if ((rxChan == null) || (rxChan != channel)) {
             return null;
         }
         
         return CodecHelper.decodeStringAt(rxMessage.getCommandString(), 3);
+    }
+    
+    // Returns an Integer if the rxMessage matches the required command and channel; null otherwise
+    public Integer evalReadSamplePeriod(AppDataMessage rxMessage, int boardId, int channel) {
+        
+        if (!rxMessage.matches(boardId, COMMPROTOCOL_READ_SAMPLEPERIOD)) {
+            return null;
+        }
+        
+        String commandString = rxMessage.getCommandString();
+        Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
+        if ((rxChan == null) || (rxChan != channel)) {
+            return null;
+        }
+        
+        return CodecHelper.decodeIntAt(commandString, 3);
+    }
+    
+    // Returns a string if the rxMessage matches the required command and channel; null otherwise
+    public String evalReadUnits(AppDataMessage rxMessage, int boardId, int channel) {
+
+        if (!rxMessage.matches(boardId, COMMPROTOCOL_READ_UNITS)) {
+            return null;
+        }
+        
+        String commandString = rxMessage.getCommandString();
+        Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
+        if ((rxChan == null) || (rxChan != channel)) {
+            return null;
+        }
+        
+        return CodecHelper.decodeStringAt(commandString, 3);
+    }
+    
+    // Returns a list of integer if the rxMessage matched the required command; null otherwise
+    // The first integer is the board type ID
+    // The second integer is the numnber of channels supported by the board itself
+    public List<Integer> evalReadBoardType(AppDataMessage rxMessage, int boardId) {
+        if(!rxMessage.matches(boardId, COMMPROTOCOL_READ_BOARDTYPE)) {
+            return null;
+        }
+        
+        List<Integer> result = new ArrayList<>();
+        String commandString = rxMessage.getCommandString();
+        Integer boardType = CodecHelper.decodeShortAt(commandString, 1);
+        if (boardType == null) {
+            return null;
+        }
+        result.add(boardType);
+        
+        Integer numChannels = CodecHelper.decodeShortAt(commandString, 5);
+        if (numChannels == null) {
+            return null;
+        }
+        
+        result.add(numChannels);
+        
+        return result;
+    }
+    
+    // Returns a boolean representing the status of specified channel; null if boardId,channel does not match
+    public Boolean evalReadChannelEnable(AppDataMessage rxMessage, int boardId, int channel) {
+        if (!rxMessage.matches(boardId, COMMPROTOCOL_READ_CHANENABLE)) {
+            return null;
+        }
+        
+        String commandString = rxMessage.getCommandString();
+        Integer rxChan = CodecHelper.decodeCharAt(commandString, 1);
+        if ((rxChan == null) || (rxChan != channel)) {
+            return null;
+        }
+        
+        Integer value = CodecHelper.decodeCharAt(commandString, 3);
+        if (value == null) {
+            return null;
+        }
+        
+        return (value.byteValue() != 0)? Boolean.TRUE : Boolean.FALSE;
     }
        
     private String renderGenericCmd(char command) {

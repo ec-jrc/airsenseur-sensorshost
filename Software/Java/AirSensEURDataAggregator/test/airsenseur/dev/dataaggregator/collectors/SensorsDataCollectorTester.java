@@ -23,7 +23,7 @@
 package airsenseur.dev.dataaggregator.collectors;
 
 import airsenseur.dev.json.ChemSensorClient;
-import airsenseur.dev.json.FreeMemory;
+import airsenseur.dev.json.HostStatus;
 import airsenseur.dev.json.SampleData;
 
 /**
@@ -40,7 +40,7 @@ public class SensorsDataCollectorTester {
             return;
         }
         
-        FreeMemory freeMemory = collector.getFreeMemory();
+        HostStatus hostStatus = collector.getHostStatus();
         SampleData sample = collector.getLastSample(0);
         sample = collector.getLastSample(1);
         sample = collector.getLastSample(2);

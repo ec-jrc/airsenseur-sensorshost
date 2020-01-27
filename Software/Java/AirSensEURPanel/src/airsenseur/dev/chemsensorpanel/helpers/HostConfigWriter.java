@@ -127,9 +127,6 @@ public class HostConfigWriter {
 
                 // Sensor Channel
                 writer.append(renderKeyVal(renderKey("sensorchannel", n), sensorProperty.sensorChannel));
-
-                // Sensor High Res
-                writer.append(renderKeyVal(renderKey("sensorhires", n), sensorProperty.sensorHiRes));
             }
         } catch (IOException ex) {
             throw new ChemSensorPanelException(ex.getMessage());

@@ -24,7 +24,7 @@
 
 package airsenseur.dev.chemsensorhost.json;
 
-import airsenseur.dev.chemsensorhost.ChemSensorHost;
+import airsenseur.dev.chemsensorhost.engine.ChemSensorHostEngine;
 import airsenseur.dev.chemsensorhost.exceptions.JSONServerException;
 import airsenseur.dev.json.ChemSensorService;
 import com.googlecode.jsonrpc4j.JsonRpcServer;
@@ -43,7 +43,7 @@ public class JSONServer {
     private final JsonRpcServer jsonRpcServer = new JsonRpcServer(sensorService, ChemSensorService.class);
     private StreamServer streamServer = null;
     
-    public boolean init(ChemSensorHost sensorHost, String address, int port) throws JSONServerException {
+    public boolean init(ChemSensorHostEngine sensorHost, String address, int port) throws JSONServerException {
         
         try {
             int maxThreads = 10;

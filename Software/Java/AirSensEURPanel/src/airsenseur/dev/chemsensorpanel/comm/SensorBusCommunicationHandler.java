@@ -74,7 +74,11 @@ public class SensorBusCommunicationHandler extends SensorBusBase implements Sens
     @Override
     public void disConnectFromBus() {
         
-        releaseBusOwnership();
+        try {
+            releaseBusOwnership();
+        } catch (SensorBusException ex) {
+        }
+        
         super.disConnectFromBus(); 
     }
     
@@ -97,7 +101,7 @@ public class SensorBusCommunicationHandler extends SensorBusBase implements Sens
     // bus on an external file. This is used to generate a configuration file that can
     // be used to reload configurations from external persistence
     @Override
-    public void writeMessageToBus(AppDataMessage message) {
+    public void writeMessageToBus(AppDataMessage message) throws SensorBusException {
         
         log.debug("T> [" + message.getBoardId() + "] (" + message.getCommandString() + ")" );
         

@@ -27,6 +27,7 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.chemsensorpanel.dataModel.OPCN2SampleRatePostscaler;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  *
@@ -257,7 +258,7 @@ public class OPCN2PreAndPostPanel extends SensorBusInteractingPanel {
     }
     
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         
         // There is only one prescaler for each channels in the OPCN2-Shield
         shieldProtocolLayer.renderSamplerPrescaler(boardId, channelId, prescalerFactor);
@@ -269,7 +270,7 @@ public class OPCN2PreAndPostPanel extends SensorBusInteractingPanel {
     }
     
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         
         // There is only one prescaler for each channels in the OPCN2-Shield
         shieldProtocolLayer.renderSamplerPrescalerRead(boardId, channelId);

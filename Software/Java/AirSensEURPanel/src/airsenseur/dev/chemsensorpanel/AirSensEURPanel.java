@@ -33,6 +33,7 @@ import airsenseur.dev.chemsensorpanel.comm.SerialConnectionDialog;
 import airsenseur.dev.chemsensorpanel.exceptions.ChemSensorPanelException;
 import airsenseur.dev.chemsensorpanel.helpers.HostConfigWriter;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -74,12 +75,12 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     
     // We need to understand if the board has been connected or not
     private boolean connected = false;
-    
-    // We need to understand if the board has been connected through serial line or network
-    private boolean networked = false;
-    
+        
     // We need to knwow if we're using Point to Point or SensorBusEnabled adapters
     private final boolean useMultiPoint = true;
+    
+    // Don't flood with error messages
+    private boolean showingErrorDialog = false;
     
     // Timer to periodically update the sample diagrams
     private final Timer refreshTimer = new Timer(REFRESH_TIMER_FOR_NETWORKED_DEVICES, new ActionListener() {
@@ -130,8 +131,10 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.CHEM_SENSOR_CHANNEL_ID_3), jMenuItemChemSetup3);
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.CHEM_SENSOR_CHANNEL_ID_4), jMenuItemChemSetup4);
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.PRESS_SENSOR_CHANNEL_ID), jMenuItemPressSetup);
-        menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.TEMP_SENSOR_CHANNEL_ID), jMenuItemTempSetup);
-        menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_SENSOR_CHANNEL_ID), jMenuItemHumSetup);
+        menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.TEMP_EXT_SENSOR_CHANNEL_ID), jMenuItemExtTempSetup);
+        menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_EXT_SENSOR_CHANNEL_ID), jMenuItemExtHumSetup);
+        menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.TEMP_INT_SENSOR_CHANNEL_ID), jMenuItemIntTempSetup);
+        menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_INT_SENSOR_CHANNEL_ID), jMenuItemIntHumSetup);
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.GENERIC_INFO_CHANNEL_ID), jMenuChemShieldInfo);
 
         menuFromWindow.put(oPCN2SensorPanel.getSensorSetupDialogs().get(OPCN2ShieldPanel.OPCN2_SETUP_DIALOG_OPC), jMenuItemOPCN2Setup);
@@ -180,6 +183,8 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         refreshOwnership.start();
         
         // Initialize the configuration file chooser
+        File workingDirectory = new File(System.getProperty("user.dir"));
+        fChooser.setCurrentDirectory(workingDirectory);
         fChooser.setFileFilter(new FileNameExtensionFilter("AirSensEUR Configuration Files (*.asc)", "asc"));
         fChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fChooser.setMultiSelectionEnabled(false);     
@@ -190,9 +195,12 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         if (!connected) {
             return;
         }
-        
-        for (GenericTabPanel panel:tabPanelsList) {
-            panel.onRefreshTimer();
+        try {
+            for (GenericTabPanel panel:tabPanelsList) {
+                panel.onRefreshTimer();
+            }
+        } catch (SensorBusException ex) {
+            signalErrorAndDisconnect("Communication with remote board was lost.", ex);            
         }
     }
     
@@ -201,8 +209,27 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         if (!connected) {
             return;
         }
+        try {
+            sensorBusCommunicationHandler.takeBusOwnership();
+        } catch (SensorBusException ex) {
+            
+            signalErrorAndDisconnect("Communication with remote board was lost.", ex);
+       }
+    }
+    
+    private void signalErrorAndDisconnect(String error, Exception ex) {
         
-        sensorBusCommunicationHandler.takeBusOwnership();
+        sensorBusCommunicationHandler.disConnectFromBus();
+        setConnected(false, false);
+
+        if (!showingErrorDialog) {
+            showingErrorDialog = true;
+            if (ex != null) {
+                error += ex.getMessage();
+            }
+            JOptionPane.showMessageDialog(rootPane, error, "Connection Error", JOptionPane.ERROR_MESSAGE);
+            showingErrorDialog = false;
+        }
     }
     
     public void onDataReceived(AppDataMessage rxMessage) {
@@ -227,6 +254,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         chemSensorPanel = new airsenseur.dev.chemsensorpanel.ChemShieldPanel(this, shieldProtocolLayer, logger)
         ;
@@ -257,8 +285,10 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuItemChemSetup3 = new javax.swing.JMenuItem();
         jMenuItemChemSetup4 = new javax.swing.JMenuItem();
         jMenuItemPressSetup = new javax.swing.JMenuItem();
-        jMenuItemTempSetup = new javax.swing.JMenuItem();
-        jMenuItemHumSetup = new javax.swing.JMenuItem();
+        jMenuItemExtTempSetup = new javax.swing.JMenuItem();
+        jMenuItemExtHumSetup = new javax.swing.JMenuItem();
+        jMenuItemIntTempSetup = new javax.swing.JMenuItem();
+        jMenuItemIntHumSetup = new javax.swing.JMenuItem();
         jSeparator6 = new javax.swing.JPopupMenu.Separator();
         jMenuChemShieldInfo = new javax.swing.JMenuItem();
         jMenuOPCN2 = new javax.swing.JMenu();
@@ -285,6 +315,8 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuItem5.setText("jMenuItem5");
 
         jMenuItem6.setText("jMenuItem6");
+
+        jMenuItem7.setText("jMenuItem7");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("AirSensEUR Panel");
@@ -458,21 +490,37 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         });
         jMenuChemSensors.add(jMenuItemPressSetup);
 
-        jMenuItemTempSetup.setText("Temperature Sensor Setup");
-        jMenuItemTempSetup.addActionListener(new java.awt.event.ActionListener() {
+        jMenuItemExtTempSetup.setText("External Temperature Sensor Setup");
+        jMenuItemExtTempSetup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemTempSetupActionPerformed(evt);
+                jMenuItemExtTempSetupActionPerformed(evt);
             }
         });
-        jMenuChemSensors.add(jMenuItemTempSetup);
+        jMenuChemSensors.add(jMenuItemExtTempSetup);
 
-        jMenuItemHumSetup.setText("Humidity Sensor Setup");
-        jMenuItemHumSetup.addActionListener(new java.awt.event.ActionListener() {
+        jMenuItemExtHumSetup.setText("External Humidity Sensor Setup");
+        jMenuItemExtHumSetup.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemHumSetupActionPerformed(evt);
+                jMenuItemExtHumSetupActionPerformed(evt);
             }
         });
-        jMenuChemSensors.add(jMenuItemHumSetup);
+        jMenuChemSensors.add(jMenuItemExtHumSetup);
+
+        jMenuItemIntTempSetup.setText("Internal Temperature Sensor Setup");
+        jMenuItemIntTempSetup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemIntTempSetupActionPerformed(evt);
+            }
+        });
+        jMenuChemSensors.add(jMenuItemIntTempSetup);
+
+        jMenuItemIntHumSetup.setText("Internal Humidity Sensor Setup");
+        jMenuItemIntHumSetup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemIntHumSetupActionPerformed(evt);
+            }
+        });
+        jMenuChemSensors.add(jMenuItemIntHumSetup);
         jMenuChemSensors.add(jSeparator6);
 
         jMenuChemShieldInfo.setText("Generic Information");
@@ -582,7 +630,15 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
 
     private void jMenuItemConnectSerialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemConnectSerialActionPerformed
         
-        SerialConnectionDialog connectionDialog = new SerialConnectionDialog(this, true);
+        // Counts how many boards are enabled by the ID dropdown 
+        int boardsEnabled = 0;
+        for (GenericTabPanel panel : tabPanelsList) {
+            if (panel.getIsEnabled()) {
+                boardsEnabled++;
+            }
+        }
+
+        SerialConnectionDialog connectionDialog = new SerialConnectionDialog(this, boardsEnabled, true);
         connectionDialog.init(sensorBusCommunicationHandler);
         connectionDialog.setVisible(true);
         
@@ -631,21 +687,25 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.PRESS_SENSOR_CHANNEL_ID));
     }//GEN-LAST:event_jMenuItemPressSetupActionPerformed
 
-    private void jMenuItemTempSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemTempSetupActionPerformed
-        updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.TEMP_SENSOR_CHANNEL_ID));
-    }//GEN-LAST:event_jMenuItemTempSetupActionPerformed
+    private void jMenuItemExtTempSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExtTempSetupActionPerformed
+        updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.TEMP_EXT_SENSOR_CHANNEL_ID));
+    }//GEN-LAST:event_jMenuItemExtTempSetupActionPerformed
 
-    private void jMenuItemHumSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemHumSetupActionPerformed
-        updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_SENSOR_CHANNEL_ID));
-    }//GEN-LAST:event_jMenuItemHumSetupActionPerformed
+    private void jMenuItemExtHumSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExtHumSetupActionPerformed
+        updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_EXT_SENSOR_CHANNEL_ID));
+    }//GEN-LAST:event_jMenuItemExtHumSetupActionPerformed
 
     private void jMenuItemWriteToBoardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemWriteToBoardActionPerformed
         
         if (connected) {
             refreshTimer.stop();
             
-            for (GenericTabPanel panel:tabPanelsList) {
-                panel.storeToBoard();
+            try {            
+                for (GenericTabPanel panel:tabPanelsList) {
+                        panel.storeToBoard();
+                }
+            } catch (SensorBusException ex) {
+                signalErrorAndDisconnect("Communication with remote board was lost.", ex);
             }
             
             refreshTimer.start();
@@ -657,8 +717,12 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         if (connected) {
             refreshTimer.stop();
             
-            for (GenericTabPanel panel:tabPanelsList) {
-                panel.readFromBoard();
+            try {
+                for (GenericTabPanel panel:tabPanelsList) {
+                    panel.readFromBoard();
+                }
+            } catch (SensorBusException ex) {
+                signalErrorAndDisconnect("Communication with remote board was lost.", ex);
             }
             
             refreshTimer.start();
@@ -668,32 +732,37 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private void jMenuItemStartSamplingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemStartSamplingActionPerformed
         
         if (connected) {
-            
-            // The filename will contain all known board IDs and serial numbers
-            StringBuilder boardIDs = new StringBuilder();
-            boardIDs.append("Samples");
-            for (GenericTabPanel panel:tabPanelsList) {
-                
-                if (panel.getIsEnabled()) {
-                    String serialBoard = panel.getBoardSerialNumber();
-                    String boardId = "" + panel.getSelectedBoardId();
-                    
-                    if (serialBoard.isEmpty()) {
-                        serialBoard = "NA";
+
+            try {
+                // The filename will contain all known board IDs and serial numbers
+                StringBuilder boardIDs = new StringBuilder();
+                boardIDs.append("Samples");
+                for (GenericTabPanel panel:tabPanelsList) {
+
+                    if (panel.getIsEnabled()) {
+                        String serialBoard = panel.getBoardSerialNumber();
+                        String boardId = "" + panel.getSelectedBoardId();
+
+                        if (serialBoard.isEmpty()) {
+                            serialBoard = "NA";
+                        }
+
+                        boardIDs.append("_(").append(boardId).append("_").append(serialBoard).append(")");
                     }
-                    
-                    boardIDs.append("_(").append(boardId).append("_").append(serialBoard).append(")");
+                }            
+
+                // Start a new logger
+                if (logger != null) {
+                    String fileName = boardIDs.toString();
+                    logger.openFile(fileName);
                 }
-            }            
-            
-            // Start a new logger
-            if (logger != null) {
-                String fileName = boardIDs.toString();
-                logger.openFile(fileName);
-            }
-            
-            for (GenericTabPanel panel:tabPanelsList) {
-                panel.startSample();
+
+                for (GenericTabPanel panel:tabPanelsList) {
+                    panel.startSample();
+                }
+                
+            } catch (SensorBusException ex) {
+                signalErrorAndDisconnect("Communication with remote board was lost.", ex);                
             }
         }
     }//GEN-LAST:event_jMenuItemStartSamplingActionPerformed
@@ -701,9 +770,13 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private void jMenuItemStopSamplingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemStopSamplingActionPerformed
         
         if (connected) {
-            
-            for (GenericTabPanel panel:tabPanelsList) {
-                panel.stopSample();
+
+            try {
+                for (GenericTabPanel panel:tabPanelsList) {
+                    panel.stopSample();
+                }
+            } catch (SensorBusException ex) {
+                signalErrorAndDisconnect("Communication with remote board was lost.", ex);
             }
             
             // Close the log file, if any
@@ -745,7 +818,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     }//GEN-LAST:event_jMenuItemSaveConfigActionPerformed
 
     private void jMenuItemReadConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemReadConfigActionPerformed
-        
+
         // Retrieve the file name
         File selectedFile;
         int returnVal = fChooser.showOpenDialog(this);
@@ -885,6 +958,14 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         updateMenuItemVisibilityForDialog(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_GENERIC_INFO));
     }//GEN-LAST:event_jMenuItemExpShieldInfoActionPerformed
 
+    private void jMenuItemIntTempSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemIntTempSetupActionPerformed
+        updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.TEMP_INT_SENSOR_CHANNEL_ID));
+    }//GEN-LAST:event_jMenuItemIntTempSetupActionPerformed
+
+    private void jMenuItemIntHumSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemIntHumSetupActionPerformed
+        updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_INT_SENSOR_CHANNEL_ID));
+    }//GEN-LAST:event_jMenuItemIntHumSetupActionPerformed
+
     protected List<AppDataMessage> getCurrentConfiguration(int tabPanelIndex, boolean forceRestartSampling) {
         
         List<AppDataMessage> currentConfiguration = new ArrayList<>();
@@ -898,8 +979,11 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
             // Start dumping to buffer
             sensorBusCommunicationHandler.startDumpingToBuffer(currentConfiguration);
 
-            // Propagate to the selected panel
-            tabPanelsList.get(tabPanelIndex).onGetCurrentConfiguation(forceRestartSampling);
+            try {
+                // Propagate to the selected panel
+                tabPanelsList.get(tabPanelIndex).onGetCurrentConfiguation(forceRestartSampling);
+            } catch (SensorBusException ex) {
+            }
 
             // Restore normal communication
             sensorBusCommunicationHandler.stopDumpingToBuffer();
@@ -931,7 +1015,6 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private void setConnected(boolean connected, boolean networked) {
         
         this.connected = connected;
-        this.networked = networked;
         
         jMenuItemConnectSerial.setEnabled(!connected);
         jMenuItemConnectNetwork.setEnabled(!connected);
@@ -999,6 +1082,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItemAbout;
     private javax.swing.JMenuItem jMenuItemChemSetup1;
     private javax.swing.JMenuItem jMenuItemChemSetup2;
@@ -1010,7 +1094,10 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItemDisconnect;
     private javax.swing.JMenuItem jMenuItemExit;
     private javax.swing.JMenuItem jMenuItemExpShieldInfo;
-    private javax.swing.JMenuItem jMenuItemHumSetup;
+    private javax.swing.JMenuItem jMenuItemExtHumSetup;
+    private javax.swing.JMenuItem jMenuItemExtTempSetup;
+    private javax.swing.JMenuItem jMenuItemIntHumSetup;
+    private javax.swing.JMenuItem jMenuItemIntTempSetup;
     private javax.swing.JMenuItem jMenuItemMOXSetup;
     private javax.swing.JMenuItem jMenuItemOPCN2Setup;
     private javax.swing.JMenuItem jMenuItemOPCN3Setup;
@@ -1024,7 +1111,6 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItemSensorDBEdit;
     private javax.swing.JMenuItem jMenuItemStartSampling;
     private javax.swing.JMenuItem jMenuItemStopSampling;
-    private javax.swing.JMenuItem jMenuItemTempSetup;
     private javax.swing.JMenuItem jMenuItemWriteToBoard;
     private javax.swing.JMenu jMenuOPCN2;
     private javax.swing.JMenu jMenuSensorBus;

@@ -31,6 +31,7 @@ import airsenseur.dev.chemsensorpanel.setupdialogs.MOXSensorSetupDialog;
 import airsenseur.dev.chemsensorpanel.setupdialogs.OPCN2SensorSetupDialog;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -155,7 +156,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     }
     
     @Override
-    public void onRefreshTimer() {
+    public void onRefreshTimer() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -200,7 +201,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -221,7 +222,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -242,7 +243,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void startSample() {
+    public void startSample() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }
@@ -252,7 +253,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void stopSample() {
+    public void stopSample() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }
@@ -274,7 +275,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void onGetCurrentConfiguation(boolean forceRestartSampling) {
+    public void onGetCurrentConfiguation(boolean forceRestartSampling) throws SensorBusException {
         
         // Add the stop sample command to the buffer, if required
         if (forceRestartSampling) {
@@ -313,7 +314,6 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
             HostConfigSensorProperties sensorProperties = hostConfigWriter.addNewSensor();
             sensorProperties.setSensorBoardId(selectedBoardId);
             sensorProperties.setSensorChannel(n);
-            sensorProperties.setSensorHiRes(true);
             sensorProperties.setSensorExpression(DEFAULT_CHANNEL_MATH_EXPRESSION);
         }
     }
@@ -364,7 +364,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
                                 .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(15, 15, 15)
+                        .addContainerGap()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))

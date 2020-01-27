@@ -64,7 +64,7 @@ public class SensorBusCommunicationHandler extends SensorBusBase {
 
     // From SensorBus
     @Override
-    public void writeMessageToBus(AppDataMessage message) {
+    public void writeMessageToBus(AppDataMessage message) throws SensorBusException {
         
         log.debug("T> [" + message.getBoardId() + "] (" + message.getCommandString() + ")" );
         super.writeMessageToBus(message);

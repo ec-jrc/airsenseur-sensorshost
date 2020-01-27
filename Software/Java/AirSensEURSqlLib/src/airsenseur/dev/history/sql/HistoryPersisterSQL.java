@@ -165,7 +165,7 @@ public class HistoryPersisterSQL implements HistoryPersister {
             st0.step();
         } catch (SQLiteException ex) {
             log.error(ex.getMessage());
-            throw new PersisterException("Error creating SQL table for hstory");
+            throw new PersisterException("Error creating SQL table for history");
         } finally {
             if (st0 != null) {
                 st0.dispose();

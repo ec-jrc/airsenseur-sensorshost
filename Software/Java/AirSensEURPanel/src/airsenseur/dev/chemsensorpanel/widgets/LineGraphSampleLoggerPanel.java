@@ -26,6 +26,7 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.chemsensorpanel.SampleLogger;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.awt.Graphics;
 
 /**
@@ -34,6 +35,10 @@ import java.awt.Graphics;
  */
 public class LineGraphSampleLoggerPanel extends SampleLogger {
     
+    private String name = "";
+    private String units = "";
+    private boolean showUnits = true;
+    
     /**
      * Creates new form SampleLoggerPanel
      */
@@ -41,6 +46,9 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
         initComponents();        
     }
     
+    public void disableUnits() {
+        showUnits = false;
+    }
     
     @Override
     public void setLoggerProperties(String title, int minVal, int maxVal, int historyLength) {
@@ -51,7 +59,7 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         super.readFromBoard(); 
         
         // Ask for the channel name
@@ -59,6 +67,14 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
         
         // Ask for the sensor serial number
         shieldProtocolLayer.renderReadSensorSerialNumber(boardId, sensorId);
+        
+        // Ask for the sensor units
+        if (showUnits) {
+            shieldProtocolLayer.renderReadUnits(boardId, sensorId);
+        }
+        
+        // Ask for the sample time
+        shieldProtocolLayer.renderReadSamplePeriod(boardId, sensorId);
     }
     
     
@@ -69,13 +85,33 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
         // Setup name
         String setupName = shieldProtocolLayer.evalSensorInquiry(rxMessage, boardId, sensorId);
         if ((setupName != null) && !setupName.isEmpty()) {
-            lineGraph.setTitle(setupName);
+            name = setupName;
+            String unitsToken = "";
+            if (showUnits && !units.isEmpty()) {
+                unitsToken = " (" + units + ")";
+            }
+            lineGraph.setTitle(name + unitsToken);
         }
         
         // Setup serial number
         String serialNumber = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, boardId, sensorId);
         if ((serialNumber != null) && !serialNumber.isEmpty()) {
             lineGraph.setSubTitle(serialNumber);
+        }
+        
+        // Units
+        if (showUnits) {
+            String _units = shieldProtocolLayer.evalReadUnits(rxMessage, boardId, sensorId);
+            if ((_units != null) && !_units.isEmpty()) {
+                units = _units;
+                lineGraph.setTitle(name + " (" + units + ")");
+            }
+        }
+        
+        // Sample time
+        Integer sampleTime = shieldProtocolLayer.evalReadSamplePeriod(rxMessage, boardId, sensorId);
+        if (sampleTime != null) {
+            jLabelOveralSampleTime.setText(sampleTime.toString());
         }
     }
 
@@ -109,6 +145,8 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
         lineGraph = new airsenseur.dev.chemsensorpanel.widgets.LineGraphPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabelLastTimestamp = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabelOveralSampleTime = new javax.swing.JLabel();
 
         lineGraph.setPreferredSize(new java.awt.Dimension(296, 214));
 
@@ -116,16 +154,20 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
         lineGraph.setLayout(lineGraphLayout);
         lineGraphLayout.setHorizontalGroup(
             lineGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 296, Short.MAX_VALUE)
+            .addGap(0, 297, Short.MAX_VALUE)
         );
         lineGraphLayout.setVerticalGroup(
             lineGraphLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 214, Short.MAX_VALUE)
+            .addGap(0, 194, Short.MAX_VALUE)
         );
 
         jLabel1.setText("Last Sample Timestamp:");
 
         jLabelLastTimestamp.setText("n/a");
+
+        jLabel2.setText("Sample Time (ms):");
+
+        jLabelOveralSampleTime.setText("n/a");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -134,22 +176,30 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lineGraph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lineGraph, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabelLastTimestamp, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(12, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelLastTimestamp, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabelOveralSampleTime))))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lineGraph, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lineGraph, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabelLastTimestamp))
+                .addGap(4, 4, 4)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabelOveralSampleTime))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -157,7 +207,9 @@ public class LineGraphSampleLoggerPanel extends SampleLogger {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabelLastTimestamp;
+    private javax.swing.JLabel jLabelOveralSampleTime;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphPanel lineGraph;
     // End of variables declaration//GEN-END:variables
 }

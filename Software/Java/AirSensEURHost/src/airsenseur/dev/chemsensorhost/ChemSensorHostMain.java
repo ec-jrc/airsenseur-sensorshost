@@ -24,6 +24,7 @@
 
 package airsenseur.dev.chemsensorhost;
 
+import airsenseur.dev.chemsensorhost.engine.ChemSensorHostEngine;
 import airsenseur.dev.chemsensorhost.exceptions.ConfigurationException;
 import airsenseur.dev.chemsensorhost.exceptions.JSONServerException;
 import airsenseur.dev.chemsensorhost.json.JSONServer;
@@ -35,7 +36,9 @@ import org.slf4j.LoggerFactory;
  * @author marcos
  */
 public class ChemSensorHostMain {
-
+    
+    private static final String VERSION = "AirSensEUR Host R2.0.0";
+    
     /**
      * @param args the command line arguments
      */
@@ -43,7 +46,7 @@ public class ChemSensorHostMain {
         
         Logger log = LoggerFactory.getLogger(ChemSensorHostMain.class);
         
-        log.info("Starting");        
+        log.info("Starting " + VERSION);        
         
         Configuration config = Configuration.getConfig();
         
@@ -56,16 +59,16 @@ public class ChemSensorHostMain {
         }
 
         // Start the sensor host manager by connecting to the external board
-        ChemSensorHost chemSensorHost = new ChemSensorHost();
-        if (!chemSensorHost.start(config.getPollTime(), config.getNumSensors())) {
-            log.error("Exiting from the main thread when starting main host thread");
+        ChemSensorHostEngine chemSensorHostEngine = new ChemSensorHostEngine();
+        if (!chemSensorHostEngine.start(1000)) {
+            log.error("Exiting from the main thread when starting host engine thread");
             return;
         }
         
         // Start the JSON service
         JSONServer jsonServer = new JSONServer();
         try {
-            jsonServer.init(chemSensorHost, 
+            jsonServer.init(chemSensorHostEngine, 
                             config.getJSONBindAddress(), 
                             config.getJSONBindPort());
         } catch (JSONServerException ex) {
@@ -77,7 +80,7 @@ public class ChemSensorHostMain {
         boolean bContinue = true;
         while (bContinue) {
             try {
-                bContinue = !chemSensorHost.waitForTermination(6000);
+                bContinue = !chemSensorHostEngine.waitForTermination(6000);
             } catch (InterruptedException ex) {
                 bContinue = false;
             }
@@ -85,7 +88,7 @@ public class ChemSensorHostMain {
         
         // Exit gracefully
         jsonServer.stop();        
-        chemSensorHost.exit();
+        chemSensorHostEngine.exit();
         
         log.info("Exiting from the main thread");
     }

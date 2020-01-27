@@ -33,6 +33,9 @@ public class AppDataMessage {
 
     public static final int BOARD_ID_UNDEFINED = 0xFF;
 
+    public static final int MIN_VALID_BOARD_ID_ON_SBUS = 0x00;
+    public static final int MAX_VALID_BOARD_ID_ON_SBUS = 0x0F;
+
     private int boardId = BOARD_ID_UNDEFINED;
     private String commandString = "";
     private String commandComment = "";
@@ -126,11 +129,13 @@ public class AppDataMessage {
             return false;
         }
         
-        if (commandString.startsWith(r.getCommandString())) {
+        if (commandString.startsWith(r.getCommandString()) ||
+                r.getCommandString().startsWith(commandString)) {
             return true;
         }
         
         AppDataMessage c = r.clone();
-        return commandString.startsWith(c.getCommandString());
+        return (commandString.startsWith(c.getCommandString()) ||
+                c.getCommandString().startsWith(commandString));
     }    
 };

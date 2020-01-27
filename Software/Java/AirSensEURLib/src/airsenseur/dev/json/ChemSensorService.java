@@ -36,9 +36,11 @@ public interface ChemSensorService {
     public void takeOwnership();
     public void releaseOnwnership();
         
-    public FreeMemory getFreeMemory();
-    public void startSampling();
-    public void stopSampling();
+    public HostStatus getHostStatus();
+    public List<BoardInfo> getSensorBoardsInfo();
+    public SensorConfig getSensorConfig(int sensorId);    
+    public boolean startSampling();
+    public boolean stopSampling();
     public SampleData getLastSample(int sensorId);
     
     public List<RawCommand> sendRawData(List<RawCommand> rawData);

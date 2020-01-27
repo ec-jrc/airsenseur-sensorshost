@@ -51,17 +51,34 @@ public class CodecHelper {
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
     
     public static char[] encodeValue(char value) {
-        char[] result = { hexArray[value >>> 4], hexArray[value & 0x0F] };
-        return result;
+        
+        try {
+            char[] result = { hexArray[value >>> 4], hexArray[value & 0x0F] };
+            return result;
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.err.println("Out of bound on received char " + value);
+            char[] result = { 0, 0 };
+            return result;
+        }
     }
     
     public static char[] encodeValue(short value) {
-        char[] result = { hexArray[(value >>> 12) & 0x0F], hexArray[(value >>> 8) & 0x0F], 
-                            hexArray[(value >>> 4) & 0x0F], hexArray[value & 0x0F] }; 
-        return result;
+        
+        try {
+            char[] result = { hexArray[(value >>> 12) & 0x0F], hexArray[(value >>> 8) & 0x0F], 
+                                hexArray[(value >>> 4) & 0x0F], hexArray[value & 0x0F] }; 
+            return result;
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.err.println("Out of bound on received char " + value);
+            char[] result = { 0, 0 };
+            return result;
+        }
     }
     
     public static String encodeString(String value) {
+        
+        // Strip out unprintable chars
+        value = value.replaceAll("[^\\x00-\\x7F]", "");
         
         StringBuilder sb = new StringBuilder((value.length()+1)*2);
         

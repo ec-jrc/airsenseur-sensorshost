@@ -60,7 +60,7 @@ public class AboutDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
 
-        jLabel1.setText("AirSensEURPanel R0.7");
+        jLabel1.setText("AirSensEURPanel R0.8");
 
         jLabel2.setText("www.airsenseur.org");
 
@@ -99,8 +99,11 @@ public class AboutDialog extends javax.swing.JDialog {
                             .addComponent(jLabel9)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(124, 124, 124)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                            .addComponent(jLabel2)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jLabel2)
+                                .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(99, 99, 99)))
                 .addGap(15, 15, 15))

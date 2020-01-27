@@ -32,6 +32,7 @@ import airsenseur.dev.chemsensorpanel.setupdialogs.ChemSensorSetupDialog;
 import airsenseur.dev.chemsensorpanel.setupdialogs.GenericBoardInfoDialog;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -48,21 +49,26 @@ public class ChemShieldPanel extends GenericTabPanel {
     public final static int CHEM_SENSOR_CHANNEL_ID_3  = CHEM_SENSOR_CHANNEL_ID_2 + 1;
     public final static int CHEM_SENSOR_CHANNEL_ID_4  = CHEM_SENSOR_CHANNEL_ID_3 + 1;
     public final static int PRESS_SENSOR_CHANNEL_ID = CHEM_SENSOR_CHANNEL_ID_4  +1;
-    public final static int TEMP_SENSOR_CHANNEL_ID = PRESS_SENSOR_CHANNEL_ID + 1;
-    public final static int HUM_SENSOR_CHANNEL_ID = TEMP_SENSOR_CHANNEL_ID + 1;    
-    public final static int GENERIC_INFO_CHANNEL_ID = HUM_SENSOR_CHANNEL_ID + 1;
+    public final static int TEMP_EXT_SENSOR_CHANNEL_ID = PRESS_SENSOR_CHANNEL_ID + 1;
+    public final static int HUM_EXT_SENSOR_CHANNEL_ID = TEMP_EXT_SENSOR_CHANNEL_ID + 1;    
+    public final static int TEMP_INT_SENSOR_CHANNEL_ID = HUM_EXT_SENSOR_CHANNEL_ID + 1;
+    public final static int HUM_INT_SENSOR_CHANNEL_ID = TEMP_INT_SENSOR_CHANNEL_ID + 1;    
+    public final static int GENERIC_INFO_CHANNEL_ID = HUM_INT_SENSOR_CHANNEL_ID + 1;
     
     private final static String CHEM_SENSOR_CHANNEL_MATH_EXPRESSION = "if(x>32767,x-32768,x+32768)";
-    private final static String UR100CD_TEMP_CHANNEL_MATH_EXPRESSION = "((x/16384)*165)-40.0";
-    private final static String UR100CD_HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/16384 * 100.0)";
     private final static String SHT31_TEMP_CHANNEL_MATH_EXPRESSION = "((x/65535*175) - 45.0)";
     private final static String SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/65535)*100.0";
     private final static String PRESSURE_CHANNEL_MATH_EXPRESSION = "x/48.0";
+
+    // For reference only. No more used on Chemical Shield R2.x and following
+    // private final static String UR100CD_TEMP_CHANNEL_MATH_EXPRESSION = "((x/16384)*165)-40.0";
+    // private final static String UR100CD_HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/16384 * 100.0)";
     
-    
-    private final static String TEMP_SENSOR_NAME = "Temp";
     private final static String PRESS_SENSOR_NAME = "Press";
-    private final static String HUM_SENSOR_NAME = "Humid";
+    private final static String HUM_EXT_SENSOR_NAME = "Ext. Humid";
+    private final static String TEMP_EXT_SENSOR_NAME = "Ext. Temp";
+    private final static String HUM_INT_SENSOR_NAME = "Int. Humid";
+    private final static String TEMP_INT_SENSOR_NAME = "Int. Temp";
     
     
     private int selectedBoardId = 0;
@@ -93,9 +99,11 @@ public class ChemShieldPanel extends GenericTabPanel {
         sensorSetupDialogs.add(new ChemSensorSetupDialog(parent, false, CHEM_SENSOR_CHANNEL_ID_2));
         sensorSetupDialogs.add(new ChemSensorSetupDialog(parent, false, CHEM_SENSOR_CHANNEL_ID_3));
         sensorSetupDialogs.add(new ChemSensorSetupDialog(parent, false, CHEM_SENSOR_CHANNEL_ID_4));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(PRESS_SENSOR_NAME, PRESS_SENSOR_CHANNEL_ID, false, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_SENSOR_NAME, TEMP_SENSOR_CHANNEL_ID, false, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(HUM_SENSOR_NAME, HUM_SENSOR_CHANNEL_ID, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(PRESS_SENSOR_NAME, PRESS_SENSOR_CHANNEL_ID, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_EXT_SENSOR_NAME, TEMP_EXT_SENSOR_CHANNEL_ID, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(HUM_EXT_SENSOR_NAME, HUM_EXT_SENSOR_CHANNEL_ID, true, true, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_INT_SENSOR_NAME, TEMP_INT_SENSOR_CHANNEL_ID, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(HUM_INT_SENSOR_NAME, HUM_INT_SENSOR_CHANNEL_ID, true, true, false, parent, false));
         sensorSetupDialogs.add(new GenericBoardInfoDialog(parent, false, "Chemical Shield Generic Info"));
         
         initComponents();
@@ -108,6 +116,8 @@ public class ChemShieldPanel extends GenericTabPanel {
         sampleLoggerPanels.add(sampleLogger4);
         sampleLoggerPanels.add(sampleLogger5);
         sampleLoggerPanels.add(sampleLogger6);
+        sampleLoggerPanels.add(sampleLogger7);
+        sampleLoggerPanels.add(sampleLogger8);
         
         // Initialize all loggers with common properties
         for (int n = 0; n < sampleLoggerPanels.size(); n++) {
@@ -118,6 +128,12 @@ public class ChemShieldPanel extends GenericTabPanel {
             sampleLoggerPanels.get(n).setBoardId(selectedBoardId);
             sampleLoggerPanels.get(n).setShieldProtocolLayer(shieldProtocolLayer);            
         }
+        
+        // Initialize specific logger properties
+        sampleLogger0.disableUnits();
+        sampleLogger1.disableUnits();
+        sampleLogger2.disableUnits();
+        sampleLogger3.disableUnits();
 
         // Initialize al sensorSetupDialogs
         int sensorId = CHEM_SENSOR_CHANNEL_ID_1;
@@ -138,16 +154,22 @@ public class ChemShieldPanel extends GenericTabPanel {
             }
         });
         
-        sampleLogger5.setLoggerProperties(TEMP_SENSOR_NAME, 0, 65535, 10);
-        sampleLogger5.setSensorId(TEMP_SENSOR_CHANNEL_ID);
+        sampleLogger5.setLoggerProperties(TEMP_EXT_SENSOR_NAME, 0, 65535, 10);
+        sampleLogger5.setSensorId(TEMP_EXT_SENSOR_CHANNEL_ID);
+        sampleLogger5.setDataProcessing(SampleLogger.sht31TemperatureDataProcessing);
         
-        sampleLogger6.setLoggerProperties(HUM_SENSOR_NAME, 0, 65535, 10);
-        sampleLogger6.setSensorId(HUM_SENSOR_CHANNEL_ID);       
+        sampleLogger6.setLoggerProperties(HUM_EXT_SENSOR_NAME, 0, 65535, 10);
+        sampleLogger6.setSensorId(HUM_EXT_SENSOR_CHANNEL_ID);  
+        sampleLogger6.setDataProcessing(SampleLogger.sht31HumidityDataProcessing);
         
-        // Define the default data sampling for humidity and pressure
-        jCBpthRevision.setSelectedIndex(1);
-        selectPTHRevision();
+        sampleLogger7.setLoggerProperties(TEMP_INT_SENSOR_NAME, 0, 65535, 10);
+        sampleLogger7.setSensorId(TEMP_INT_SENSOR_CHANNEL_ID);
+        sampleLogger7.setDataProcessing(SampleLogger.sht31TemperatureDataProcessing);
         
+        sampleLogger8.setLoggerProperties(HUM_INT_SENSOR_NAME, 0, 65535, 10);
+        sampleLogger8.setSensorId(HUM_INT_SENSOR_CHANNEL_ID);       
+        sampleLogger8.setDataProcessing(SampleLogger.sht31HumidityDataProcessing);
+
         // Board ID handling
         onBoardIDChanged();
     }
@@ -158,7 +180,7 @@ public class ChemShieldPanel extends GenericTabPanel {
     }
     
     @Override
-    public void onRefreshTimer() {
+    public void onRefreshTimer() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -199,27 +221,11 @@ public class ChemShieldPanel extends GenericTabPanel {
         if (!boardEnabled) {
             return;
         }        
-        
-        // Evaluate my needs
-        Integer freeMem = shieldProtocolLayer.evalFreeMemory(rxMessage, selectedBoardId);
-        if (freeMem != null) {
-            jLabelFreeMem.setText(freeMem.toString() + " bytes");
-        }
-        
+                
         String serialBoard = shieldProtocolLayer.evalReadBoardSerialNumber(rxMessage, selectedBoardId);
         if (serialBoard != null) {
             boardSerialNumber = serialBoard;
             jLabelBoardSerialNumber.setText(serialBoard);
-        }
-
-        // Check for PTH version (Rev < 1.4 have BMP180, Rev >= 1.4 have BMP280 pressure sensors)
-        String setupName = shieldProtocolLayer.evalSensorInquiry(rxMessage, selectedBoardId, PRESS_SENSOR_CHANNEL_ID);
-        if ((setupName != null) && !setupName.isEmpty()) {
-            if (setupName.contains("180")) {
-                jCBpthRevision.setSelectedIndex(0);
-            } else if (setupName.contains("280")) {
-                jCBpthRevision.setSelectedIndex(1);
-            }
         }
 
         // Loop on each panel and propagate this message
@@ -234,7 +240,7 @@ public class ChemShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -255,7 +261,7 @@ public class ChemShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -276,7 +282,7 @@ public class ChemShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void startSample() {
+    public void startSample() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }
@@ -286,7 +292,7 @@ public class ChemShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void stopSample() {
+    public void stopSample() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }
@@ -308,7 +314,7 @@ public class ChemShieldPanel extends GenericTabPanel {
     }
 
     @Override
-    public void onGetCurrentConfiguation(boolean forceRestartSampling) {
+    public void onGetCurrentConfiguation(boolean forceRestartSampling) throws SensorBusException {
         
         // Add the stop sample command to the buffer, if required
         if (forceRestartSampling) {
@@ -350,7 +356,6 @@ public class ChemShieldPanel extends GenericTabPanel {
             
             sensorProperties.setSensorBoardId(selectedBoardId);
             sensorProperties.setSensorChannel(n);
-            sensorProperties.setSensorHiRes(false);
             sensorProperties.setSensorExpression(CHEM_SENSOR_CHANNEL_MATH_EXPRESSION);
         }
         
@@ -359,27 +364,37 @@ public class ChemShieldPanel extends GenericTabPanel {
         sensorProperties.setSensorName(PRESS_SENSOR_NAME);
         sensorProperties.setSensorBoardId(selectedBoardId);
         sensorProperties.setSensorChannel(PRESS_SENSOR_CHANNEL_ID);
-        sensorProperties.setSensorHiRes(false);
         sensorProperties.setSensorExpression(PRESSURE_CHANNEL_MATH_EXPRESSION);
         
         
-        // Temperature 
-        int selected = jCBpthRevision.getSelectedIndex();        
+        // External Temperature 
         sensorProperties = hostConfigWriter.addNewSensor();
-        sensorProperties.setSensorName(TEMP_SENSOR_NAME);
+        sensorProperties.setSensorName(TEMP_EXT_SENSOR_NAME);
         sensorProperties.setSensorBoardId(selectedBoardId);
-        sensorProperties.setSensorChannel(TEMP_SENSOR_CHANNEL_ID);
-        sensorProperties.setSensorHiRes(false);
-        sensorProperties.setSensorExpression((selected==0)? UR100CD_TEMP_CHANNEL_MATH_EXPRESSION : SHT31_TEMP_CHANNEL_MATH_EXPRESSION);
+        sensorProperties.setSensorChannel(TEMP_EXT_SENSOR_CHANNEL_ID);
+        sensorProperties.setSensorExpression(SHT31_TEMP_CHANNEL_MATH_EXPRESSION);
         
 
-        // Humidity
+        // External Humidity
         sensorProperties = hostConfigWriter.addNewSensor();
-        sensorProperties.setSensorName(HUM_SENSOR_NAME);
+        sensorProperties.setSensorName(HUM_EXT_SENSOR_NAME);
         sensorProperties.setSensorBoardId(selectedBoardId);
-        sensorProperties.setSensorChannel(HUM_SENSOR_CHANNEL_ID);
-        sensorProperties.setSensorHiRes(false);
-        sensorProperties.setSensorExpression((selected==0)? UR100CD_TEMP_CHANNEL_MATH_EXPRESSION : SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION);
+        sensorProperties.setSensorChannel(HUM_EXT_SENSOR_CHANNEL_ID);
+        sensorProperties.setSensorExpression(SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION);
+        
+        // Internal Temperature
+        sensorProperties = hostConfigWriter.addNewSensor();
+        sensorProperties.setSensorName(TEMP_INT_SENSOR_NAME);
+        sensorProperties.setSensorBoardId(selectedBoardId);
+        sensorProperties.setSensorChannel(TEMP_INT_SENSOR_CHANNEL_ID);
+        sensorProperties.setSensorExpression(SHT31_TEMP_CHANNEL_MATH_EXPRESSION);
+
+        // Internal Humidity
+        sensorProperties = hostConfigWriter.addNewSensor();
+        sensorProperties.setSensorName(HUM_INT_SENSOR_NAME);
+        sensorProperties.setSensorBoardId(selectedBoardId);
+        sensorProperties.setSensorChannel(HUM_INT_SENSOR_CHANNEL_ID);
+        sensorProperties.setSensorExpression(SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION);
     }
     
 
@@ -399,25 +414,15 @@ public class ChemShieldPanel extends GenericTabPanel {
         sampleLogger3 = new airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel();
         sampleLogger4 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
         sampleLogger5 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
-        sampleLogger6 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
-        jCBpthRevision = new javax.swing.JComboBox();
-        jLabel1 = new javax.swing.JLabel();
-        jLabelFreeMem = new javax.swing.JLabel();
+        sampleLogger7 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
         jCBBoardId = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabelBoardSerialNumber = new javax.swing.JLabel();
-
-        jCBpthRevision.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "PTH Revision < 1.4", "PTH Revision >= 1.4" }));
-        jCBpthRevision.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCBpthRevisionActionPerformed(evt);
-            }
-        });
-
-        jLabel1.setText("Available board RAM:");
-
-        jLabelFreeMem.setText("--");
+        sampleLogger6 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLogger8 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        jSeparator1 = new javax.swing.JSeparator();
+        jSeparator2 = new javax.swing.JSeparator();
 
         jCBBoardId.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Not Connected", "ID 0", "ID 1", "ID 2", "ID 3", "ID 4", "ID 5", "ID 6", "ID 7", "ID 8", "ID 9", "ID 10", "ID 11", "ID 12", "ID 13", "ID 14" }));
         jCBBoardId.addActionListener(new java.awt.event.ActionListener() {
@@ -439,41 +444,40 @@ public class ChemShieldPanel extends GenericTabPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sampleLogger0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sampleLogger1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(sampleLogger4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sampleLogger5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sampleLogger6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jCBpthRevision, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelFreeMem, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelBoardSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(143, 143, 143))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(sampleLogger0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(sampleLogger1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSeparator1)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(sampleLogger5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(sampleLogger7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(sampleLogger6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sampleLogger8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelBoardSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabelFreeMem)
                     .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
                     .addComponent(jLabel3)
@@ -481,42 +485,30 @@ public class ChemShieldPanel extends GenericTabPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(sampleLogger5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(sampleLogger6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jCBpthRevision, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(sampleLogger1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(sampleLogger0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLogger5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLogger6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(3, 3, 3)
+                        .addComponent(sampleLogger7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLogger8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jCBpthRevisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCBpthRevisionActionPerformed
-        selectPTHRevision();
-    }
-
-    private void selectPTHRevision() {
-
-        int selected = jCBpthRevision.getSelectedIndex();
-        SampleLogger.DataProcessing temperature = SampleLogger.sht31TemperatureDataProcessing;
-        SampleLogger.DataProcessing humidity = SampleLogger.sht31HumidityDataProcessing;
-        if (selected == 0) {
-            temperature = SampleLogger.ur100CDTemperatureDataProcessing;
-            humidity = SampleLogger.ur100CDHumidityDataProcessing;
-        }
-
-        sampleLogger5.setDataProcessing(temperature);
-        sampleLogger6.setDataProcessing(humidity);
-    }//GEN-LAST:event_jCBpthRevisionActionPerformed
 
     private void jCBBoardIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCBBoardIdActionPerformed
         onBoardIDChanged();
@@ -546,19 +538,20 @@ public class ChemShieldPanel extends GenericTabPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox jCBBoardId;
-    private javax.swing.JComboBox jCBpthRevision;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabelBoardSerialNumber;
-    private javax.swing.JLabel jLabelFreeMem;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLogger0;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLogger1;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLogger2;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLogger3;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLogger4;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLogger5;
-    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLogger6;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLogger6;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLogger7;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLogger8;
     // End of variables declaration//GEN-END:variables
 
 }

@@ -57,5 +57,16 @@ public abstract class Serie {
         return points;
     }
     
+    protected String safeEscape(String value) {
+        value = value.replace(" ", "\\ ");
+        value = value.replace(",", "\\,");
+        
+        return value;
+    }
+    
+    protected String encloseInQuotation(String value) {
+        return '"' + value + '"';
+    }
+    
     public abstract String toLineProtocol() throws PersisterException;
 }

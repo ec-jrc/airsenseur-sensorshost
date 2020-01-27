@@ -28,6 +28,7 @@ import airsenseur.dev.chemsensorpanel.MainApplicationFrame;
 import airsenseur.dev.chemsensorpanel.SensorSetupDialog;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  *
@@ -122,12 +123,12 @@ public class MOXSensorSetupDialog extends SensorSetupDialog {
     }
     
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         mOXPreAndPostPanel.storeToBoard();
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         mOXPreAndPostPanel.readFromBoard();
     }
 

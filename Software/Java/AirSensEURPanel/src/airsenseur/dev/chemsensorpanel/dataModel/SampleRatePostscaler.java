@@ -32,14 +32,16 @@ import java.util.ArrayList;
  */
 public class SampleRatePostscaler extends RegisterDataModel {
     
+    private final static int POSTSCALER_DISABLED = 0;
     private final static int MIN_POSTSCALER_VALUE = 0;
-    private final static int MAX_POSTSCALER_VALUE = 60;
+    private final static int MAX_POSTSCALER_VALUE = 253;
 
     public SampleRatePostscaler() {
         
         super((new ArrayList<DataItem>() {{
-            for (int n = MIN_POSTSCALER_VALUE; n <= MAX_POSTSCALER_VALUE; n++) {
-                add(new DataItem(n + " samples", n));
+            add(new DataItem("Disabled", POSTSCALER_DISABLED));
+            for (int n = MIN_POSTSCALER_VALUE+1; n <= MAX_POSTSCALER_VALUE; n++) {
+                add(new DataItem((n+1) + " samples", n));
             }
         }}).toArray());
         

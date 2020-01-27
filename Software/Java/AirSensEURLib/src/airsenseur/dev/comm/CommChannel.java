@@ -38,8 +38,8 @@ public interface CommChannel {
     
     // When connecting to networked hosts is usefull to 
     // take ownership of the bus 
-    public void takeOwnership();
-    public void releaseOwnership();
+    public void takeOwnership() throws IOException;
+    public void releaseOwnership() throws IOException;
     
     public void writeMessage(CommChannelDataMessage message) throws IOException;
 }

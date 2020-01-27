@@ -50,7 +50,7 @@ public class SampleDataContainer {
         this.channel = 0;
         this.collectedTimestamp = 0;
     }
-
+    
     public SampleDataContainer(int channel) {
         this.channel = channel;
     }
@@ -72,7 +72,7 @@ public class SampleDataContainer {
         other.sampleEvaluatedVal = sampleEvaluatedVal;
         other.sensorTimeStamp = sensorTimeStamp;
         other.calibratedVal = calibratedVal;
-        other.setCollectedTimestamp(getCollectedTimestamp());
+        other.collectedTimestamp = collectedTimestamp;
         other.updateGPSValues(gpsTimestamp, latitude, longitude, altitude);
         return other;
     }
@@ -82,7 +82,7 @@ public class SampleDataContainer {
      * to what's already present in the object
      * @param sampleRawVal
      * @param timeStamp
-     * @return: true if the timestamp differs from the original value
+     * @return true if the timestamp differs from the original value
      */
     public boolean updateSample(int sampleRawVal, int timeStamp) {
         return updateSample(sampleRawVal, 0.0, timeStamp);
@@ -94,7 +94,7 @@ public class SampleDataContainer {
      * @param sampleRawVal
      * @param sampleEvaluatedVal
      * @param timeStamp
-     * @return: true if the timestamp differs from the original value
+     * @return true if the timestamp differs from the original value
      */
     public boolean updateSample(int sampleRawVal, double sampleEvaluatedVal, int timeStamp) {
         

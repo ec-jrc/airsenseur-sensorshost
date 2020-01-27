@@ -26,6 +26,7 @@ package airsenseur.dev.chemsensorpanel;
 
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  *
@@ -55,8 +56,8 @@ public abstract class SensorSetupDialog extends javax.swing.JDialog {
         this.sensorId = sensorId;
     }
     
-    public abstract void storeToBoard();
-    public abstract void readFromBoard();
+    public abstract void storeToBoard() throws SensorBusException;
+    public abstract void readFromBoard() throws SensorBusException;
     
     public abstract void evaluateRxMessage(AppDataMessage rxMessage);
     public abstract void onDataMessageFromConfiguration(AppDataMessage rxMessage);

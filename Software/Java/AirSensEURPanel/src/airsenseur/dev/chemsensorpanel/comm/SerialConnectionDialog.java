@@ -39,20 +39,39 @@ public class SerialConnectionDialog extends javax.swing.JDialog {
     private final CommChannelSerialPort serialPortHelper = new CommChannelSerialPort();
     private SensorBusCommunicationHandler sensorBoard = null;
     private boolean connected = false;
+    private int numOfBoardsEnabled = 0;
 
     /**
      * Creates new form ConnectionDialog
      * @param parent
+     * @param numOfBoardsEnabled
      * @param modal
      */
-    public SerialConnectionDialog(java.awt.Frame parent, boolean modal) {
+    public SerialConnectionDialog(java.awt.Frame parent, int numOfBoardsEnabled, boolean modal) {
         super(parent, modal);
+        
+        this.numOfBoardsEnabled = numOfBoardsEnabled;
         
         serialPortHelper.refreshSerialPortList();
         
         initComponents();
         
-        jStatusLabel.setText("Select a port then press Connect");
+        initComponentsBasedOnNumOfEnabledBoards();
+    }
+    
+    private void initComponentsBasedOnNumOfEnabledBoards() {
+        
+        boolean pointToMultiPoint = jCBPointToMultipoint.isSelected();
+        if (numOfBoardsEnabled == 0) {
+            jStatusLabel.setText("No boards were enabled in the main panel");
+            jButtonConnect.setEnabled(false);
+        } else if ((!pointToMultiPoint) && (numOfBoardsEnabled != 1)) {
+            jStatusLabel.setText("Only one board needs to be selected in point to point mode");
+            jButtonConnect.setEnabled(false);
+        } else {
+            jStatusLabel.setText("Select a port then press Connect");
+            jButtonConnect.setEnabled(true);
+        }
     }
     
     public void init(SensorBusCommunicationHandler sensorBoard) {
@@ -116,27 +135,43 @@ public class SerialConnectionDialog extends javax.swing.JDialog {
 
         jStatusLabel.setText("?");
 
-        jCBPointToMultipoint.setText("Use Point to Multipoint protocol");
+        jCBPointToMultipoint.setText("Use Point to Multipoint protocol (only for debug)");
+        jCBPointToMultipoint.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBPointToMultipointItemStateChanged(evt);
+            }
+        });
+        jCBPointToMultipoint.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jCBPointToMultipointStateChanged(evt);
+            }
+        });
+        jCBPointToMultipoint.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                jCBPointToMultipointPropertyChange(evt);
+            }
+        });
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
+                .addContainerGap(335, Short.MAX_VALUE)
+                .add(jButtonConnect)
+                .addContainerGap())
+            .add(layout.createSequentialGroup()
                 .add(23, 23, 23)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(layout.createSequentialGroup()
-                        .add(6, 6, 6)
-                        .add(jCBPointToMultipoint))
-                    .add(layout.createSequentialGroup()
-                        .add(jStatusLabel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 241, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(18, 18, 18)
-                        .add(jButtonConnect))
+                    .add(jCBPointToMultipoint)
                     .add(layout.createSequentialGroup()
                         .add(jButtonRefresh, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 96, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(13, 13, 13)
-                        .add(jcbInterfaces, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 246, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                .add(22, 22, 22))
+                        .add(jcbInterfaces, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 246, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(layout.createSequentialGroup()
+                        .add(6, 6, 6)
+                        .add(jStatusLabel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 372, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -145,13 +180,13 @@ public class SerialConnectionDialog extends javax.swing.JDialog {
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jButtonRefresh)
                     .add(jcbInterfaces, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 9, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jCBPointToMultipoint)
-                .add(18, 18, 18)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(jStatusLabel)
-                    .add(jButtonConnect))
-                .add(22, 22, 22))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(jStatusLabel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 16, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(12, 12, 12)
+                .add(jButtonConnect)
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -187,6 +222,18 @@ public class SerialConnectionDialog extends javax.swing.JDialog {
             jCBPointToMultipoint.setEnabled(false);
         }
     }//GEN-LAST:event_jButtonConnectActionPerformed
+
+    private void jCBPointToMultipointStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jCBPointToMultipointStateChanged
+
+    }//GEN-LAST:event_jCBPointToMultipointStateChanged
+
+    private void jCBPointToMultipointPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jCBPointToMultipointPropertyChange
+
+    }//GEN-LAST:event_jCBPointToMultipointPropertyChange
+
+    private void jCBPointToMultipointItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBPointToMultipointItemStateChanged
+        initComponentsBasedOnNumOfEnabledBoards();
+    }//GEN-LAST:event_jCBPointToMultipointItemStateChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonConnect;

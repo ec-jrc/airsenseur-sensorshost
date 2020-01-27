@@ -30,6 +30,7 @@ import airsenseur.dev.chemsensorpanel.exceptions.PresetException;
 import airsenseur.dev.chemsensorpanel.sensorsdb.PresetValue;
 import airsenseur.dev.chemsensorpanel.sensorsdb.PresetValues;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.List;
 
 /**
@@ -55,7 +56,7 @@ public class AD5694RPanel extends PresetDrivenPanel {
     
     private String getVoltageLabel(int value, boolean doubleGain) {
         
-        double dbValue = ((doubleGain == true)? 5.0f : 2.5f) * value / 4096;
+        double dbValue = ((doubleGain == true)? 5.0f : 2.5f) * value / 4095f;
         
         String voltageValue = String.format("%.3f V", dbValue);
         
@@ -63,13 +64,13 @@ public class AD5694RPanel extends PresetDrivenPanel {
     }
     
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         storeToBoard(dacModelA);
         storeToBoard(dacModelB);
         storeToBoard(dacModelC);
     }
     
-    private void storeToBoard(DACChannelDataModel dataModel) {
+    private void storeToBoard(DACChannelDataModel dataModel) throws SensorBusException {
         
         int subChannel = dataModel.getSubChannel();
         int value = dataModel.getValue();
@@ -79,7 +80,7 @@ public class AD5694RPanel extends PresetDrivenPanel {
     }
     
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         shieldProtocolLayer.renderDAC5694ReadSetup(boardId, channelId, IDDAC_A);
         shieldProtocolLayer.renderDAC5694ReadSetup(boardId, channelId, IDDAC_B);
         shieldProtocolLayer.renderDAC5694ReadSetup(boardId, channelId, IDDAC_C);
@@ -267,7 +268,7 @@ public class AD5694RPanel extends PresetDrivenPanel {
         int value = jSliderC.getValue();
         jlblVOutC.setText(getVoltageLabel(value, doubleGain));
         
-        double dbValue = ((doubleGain == true)? 5.0f : 2.5f) * value / 4096;
+        double dbValue = ((doubleGain == true)? 5.0f : 2.5f) * value / 4095f;
         if (lmp9100Panel != null) {
             lmp9100Panel.externalVoltageUpdated(dbValue);
         }

@@ -105,7 +105,7 @@ public class SampleDataSerie extends Serie {
 
                 // - Generate the tags string -
                 // Tag: Name
-                sb.append(getColumns().get(NAME_TOKEN_OFFSET)).append("=").append(safeEscape((String)point.get(NAME_TOKEN_OFFSET))).append(",");
+                sb.append(getColumns().get(NAME_TOKEN_OFFSET)).append("=").append(name).append(",");
 
                 // Tag: channel
                 sb.append(getColumns().get(CHANNEL_TOKEN_OFFSET)).append("=").append(point.get(CHANNEL_TOKEN_OFFSET)).append(" ");
@@ -130,11 +130,5 @@ public class SampleDataSerie extends Serie {
         }
         
         return sb.toString();
-    }
-    
-    private String safeEscape(String value) {
-        value = value.replace(" ", "\\ ");
-        
-        return value;
-    }
+    }    
 }

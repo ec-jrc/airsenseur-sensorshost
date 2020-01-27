@@ -28,6 +28,7 @@ import airsenseur.dev.chemsensorpanel.exceptions.PresetException;
 import airsenseur.dev.chemsensorpanel.sensorsdb.PresetValue;
 import airsenseur.dev.chemsensorpanel.sensorsdb.PresetValues;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.List;
 
 /**
@@ -45,6 +46,12 @@ public class LMP91000Panel extends PresetDrivenPanel {
         initComponents();
         updateInternalZero();
         updateBiasVoltage();
+        
+        // Start with channel enabled
+        jCheckBoxChannelEnabled.setSelected(true);
+        
+        // Channel is enabled by default
+        jCheckBoxChannelEnabled.setSelected(true);
     }
     
     public void externalVoltageUpdated(double extVoltage) {
@@ -63,7 +70,7 @@ public class LMP91000Panel extends PresetDrivenPanel {
         if (zeroPerc.compareToIgnoreCase("bypass") == 0) {
             zeroVal = 0;
         } else {
-            zeroVal = Integer.valueOf(zeroPerc).intValue();
+            zeroVal = Integer.valueOf(zeroPerc);
         }
         
         double dbZeroVal = (internal)? 5.0:extVoltage;
@@ -79,7 +86,7 @@ public class LMP91000Panel extends PresetDrivenPanel {
         boolean negative = jCBBiasPol.getSelectedItem().toString().compareToIgnoreCase("Negative") == 0;
         double dbRefVal = ((internal)? 5.0:extVoltage) * ((negative)? -1.0:1.0);
         
-        int biasPerc = Integer.valueOf(jCBBiasPerc.getSelectedItem().toString().replaceAll("%", "")).intValue();
+        int biasPerc = Integer.valueOf(jCBBiasPerc.getSelectedItem().toString().replaceAll("%", ""));
         
         dbRefVal = (dbRefVal * biasPerc) / 100;
         
@@ -88,20 +95,21 @@ public class LMP91000Panel extends PresetDrivenPanel {
     }
     
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         
         int tiaRegVal = getTiaRegVal();
         int refRegVal  = getRefRegVal();
         int modeRegVal = getModeRegVal();
         
         shieldProtocolLayer.renderLMP9100RegSetup(boardId, channelId, tiaRegVal, refRegVal, modeRegVal);
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, channelId, jCheckBoxChannelEnabled.isSelected());        
         shieldProtocolLayer.renderSavePresetWithName(boardId, channelId, jTxtName.getText());
         shieldProtocolLayer.renderSaveSensorSerialNumber(boardId, channelId, jTxtSensorSerialNumber.getText());
     }
 
     
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         
         shieldProtocolLayer.renderLMP9100ReadSetup(boardId, channelId);
         shieldProtocolLayer.renderSensorInquiry(boardId, channelId);
@@ -123,6 +131,12 @@ public class LMP91000Panel extends PresetDrivenPanel {
             jTxtSensorSerialNumber.setText(serialNumber);
         }
         
+        // Channel enabled
+        Boolean chEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, channelId);
+        if (chEnabled != null) {
+            jCheckBoxChannelEnabled.setSelected(chEnabled);
+        }
+        
         evaluateOherFields(rxMessage);
     }
 
@@ -139,6 +153,12 @@ public class LMP91000Panel extends PresetDrivenPanel {
         String serialNumber = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, boardId, channelId);
         if ((serialNumber != null) && !serialNumber.isEmpty()) {
             ((JOverridableTextField)jTxtSensorSerialNumber).setTextOverride(serialNumber);
+        }
+        
+        // Channel enabled
+        Boolean chEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, channelId);
+        if (chEnabled != null) {
+            jCheckBoxChannelEnabled.setSelected(chEnabled);
         }
         
         evaluateOherFields(rxMessage);
@@ -299,6 +319,7 @@ public class LMP91000Panel extends PresetDrivenPanel {
         jCBMode = new javax.swing.JComboBox();
         jTxtSensorSerialNumber = new JOverridableTextField();
         jLabel12 = new javax.swing.JLabel();
+        jCheckBoxChannelEnabled = new javax.swing.JCheckBox();
 
         jCBGain.setModel(lMP9100TIAGain);
 
@@ -376,6 +397,8 @@ public class LMP91000Panel extends PresetDrivenPanel {
 
         jLabel12.setText("Serial Number:");
 
+        jCheckBoxChannelEnabled.setText("Channel Enabled");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -383,14 +406,6 @@ public class LMP91000Panel extends PresetDrivenPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addComponent(jLabel9))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTxtBiasVoltage)
-                            .addComponent(jTxtZeroVoltage, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel10)
@@ -418,7 +433,19 @@ public class LMP91000Panel extends PresetDrivenPanel {
                             .addComponent(jCBMode, 0, 1, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jTxtSensorSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel8)
+                                    .addComponent(jLabel9))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTxtBiasVoltage)
+                                    .addComponent(jTxtZeroVoltage, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)))
+                            .addComponent(jCheckBoxChannelEnabled))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -427,7 +454,9 @@ public class LMP91000Panel extends PresetDrivenPanel {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(8, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(jCheckBoxChannelEnabled)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
                     .addComponent(jTxtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -500,6 +529,7 @@ public class LMP91000Panel extends PresetDrivenPanel {
     private javax.swing.JComboBox jCBLoad;
     private javax.swing.JComboBox jCBMode;
     private javax.swing.JComboBox jCBVSrc;
+    private javax.swing.JCheckBox jCheckBoxChannelEnabled;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

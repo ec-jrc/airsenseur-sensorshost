@@ -26,6 +26,7 @@ package airsenseur.dev.comm;
 
 import airsenseur.dev.exceptions.SensorBusException;
 import airsenseur.dev.helpers.TaskScheduler;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +70,9 @@ public abstract class SensorBusBase extends TaskScheduler implements SensorBus {
 
         // Connect to the specified channel
         try {
-            commChannel.openPort(busIdentifier, transportLogic.getBaudrate(), transportLogic);
+            if (!commChannel.openPort(busIdentifier, transportLogic.getBaudrate(), transportLogic)) {
+                throw new SensorBusException("Impossible to open the specified communication channel");
+            }
         } catch (Exception e) {
             throw new SensorBusException(e.getMessage());
         }
@@ -118,17 +121,26 @@ public abstract class SensorBusBase extends TaskScheduler implements SensorBus {
     }
 
     @Override
-    public void takeBusOwnership() {
-        commChannel.takeOwnership();
+    public void takeBusOwnership() throws SensorBusException {
+        
+        try {
+            commChannel.takeOwnership();
+        } catch (IOException ex) {
+            throw new SensorBusException("Error taking remote unit ownership");
+        }
     }
 
     @Override
-    public void releaseBusOwnership() {
-        commChannel.releaseOwnership();
+    public void releaseBusOwnership()  throws SensorBusException {
+        try {
+            commChannel.releaseOwnership();
+        } catch (IOException ex) {
+            throw new SensorBusException(("Error releasing remote unit ownership"));
+        }
     }
 
     @Override
-    public void writeMessageToBus(AppDataMessage message) {
+    public void writeMessageToBus(AppDataMessage message) throws SensorBusException {
         
         // If not connected, try to reconnect
         if (!isConnected()) {

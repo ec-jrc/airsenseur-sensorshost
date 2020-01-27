@@ -26,6 +26,7 @@ package airsenseur.dev.chemsensorhost;
 
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 import airsenseur.dev.json.RawCommand;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public class RawCommandQueue {
         this.protocolHelper = protocolHelper;
     }
     
-    public List<RawCommand> sendCommandList(List<RawCommand> list) throws InterruptedException {
+    public List<RawCommand> sendCommandList(List<RawCommand> list) throws InterruptedException, SensorBusException {
         
         List<RawCommand> result = new ArrayList<>();
         
@@ -88,7 +89,12 @@ public class RawCommandQueue {
             synchronized(messageContainer) {
                 messageContainer.setDataMessage(dataMessage);
                 protocolHelper.renderRawData(dataMessage);
-                messageContainer.wait(200);
+                
+                // Wait for acknowledge
+                long curTime = System.currentTimeMillis();
+                while (!messageContainer.isAcknowledged() && (System.currentTimeMillis() - curTime) < 1000) {
+                    messageContainer.wait(100);
+                }
                 
                 // If message has been acknowledged, generate a result
                 if (messageContainer.isAcknowledged()) {
@@ -114,7 +120,7 @@ public class RawCommandQueue {
         synchronized(messageContainer) {
             
             pivot = messageContainer.getDataMessage();
-            if (dataMessage.compareDataMessages(pivot)) {
+            if ((pivot != null) && pivot.compareDataMessages(dataMessage)) {
                 
                 pivot.setCommandString(dataMessage.getCommandString());
                 messageContainer.setAcknowledged();

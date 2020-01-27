@@ -22,20 +22,22 @@
  * ===========================================================================
  */
 
-package airsenseur.dev.json;
+package airsenseur.dev.datapush.datacontainers;
+
+import airsenseur.dev.json.BoardInfo;
+import java.util.List;
 
 /**
- * FreeMemory result to be sent via JSON
+ *
  * @author marco
  */
-public class FreeMemory {
-    
-    public int freeMemory;
+public class DataPushBoardInfoDataContainer extends DataPushDataContainer<BoardInfo> {
 
-    public FreeMemory() {
+    public DataPushBoardInfoDataContainer() {
+        super();
     }
-
-    public FreeMemory(int freeMemory) {
-        this.freeMemory = freeMemory;
+    
+    public DataPushBoardInfoDataContainer(List<BoardInfo> dataSet) {
+        super(dataSet);
     }
 }

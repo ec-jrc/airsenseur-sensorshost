@@ -43,9 +43,9 @@ public interface SensorBus {
     public void connectToBus(String busIdentifier) throws SensorBusException;
     public void disConnectFromBus();
     public boolean reConnectToBus();
-    public void takeBusOwnership();
-    public void releaseBusOwnership();
+    public void takeBusOwnership() throws SensorBusException;
+    public void releaseBusOwnership() throws SensorBusException;
     
-    public void writeMessageToBus(AppDataMessage message);
+    public void writeMessageToBus(AppDataMessage message) throws SensorBusException;
 }
 

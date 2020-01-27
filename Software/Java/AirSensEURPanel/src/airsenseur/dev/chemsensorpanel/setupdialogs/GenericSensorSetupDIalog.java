@@ -26,8 +26,10 @@ package airsenseur.dev.chemsensorpanel.setupdialogs;
 
 import airsenseur.dev.chemsensorpanel.MainApplicationFrame;
 import airsenseur.dev.chemsensorpanel.SensorSetupDialog;
+import airsenseur.dev.chemsensorpanel.widgets.JOverridableTextField;
 import airsenseur.dev.comm.ShieldProtocolLayer;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  *
@@ -36,26 +38,40 @@ import airsenseur.dev.comm.AppDataMessage;
 public class GenericSensorSetupDIalog extends SensorSetupDialog {
     
     private String sensorName = "Generic Sensor";
+    private final boolean serialDisabled;
 
     /**
      * Creates new form GenericSensorSetupDIalog
      * @param sensorName
      * @param sensorId
+     * @param sensorSerialDisabled
+     * @param prescalerDisabled
      * @param IIRDisabled
      * @param parent
      * @param modal
      */
-    public GenericSensorSetupDIalog(String sensorName, int sensorId, boolean IIRDisabled, MainApplicationFrame parent, boolean modal) {
+    public GenericSensorSetupDIalog(String sensorName, int sensorId, boolean sensorSerialDisabled, boolean prescalerDisabled, boolean IIRDisabled, MainApplicationFrame parent, boolean modal) {
         super(parent, modal, sensorId);
         
         this.sensorName = sensorName;
+        this.serialDisabled = sensorSerialDisabled;
         
         initComponents();
         
         iIRAndAvgPanel.setBoardId(boardId);
         iIRAndAvgPanel.setChannelId(sensorId);
-        if (IIRDisabled) 
+        if (prescalerDisabled) {
+            iIRAndAvgPanel.disablePrescaler();
+        }
+        if (IIRDisabled) {
             iIRAndAvgPanel.disableIIRSection();
+        }
+        if (serialDisabled) {
+            jTxtSensorSerialNumber.setEnabled(false);
+        }
+        
+        // Channel is enabled by default
+        jCheckBoxChannelEnabled.setSelected(true);
     }
 
     @Override
@@ -74,31 +90,65 @@ public class GenericSensorSetupDIalog extends SensorSetupDialog {
     
     /**
      * Update the board with the information set on this setup panel
+     * @throws airsenseur.dev.exceptions.SensorBusException
      */
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         iIRAndAvgPanel.storeToBoard();
+        
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorId, jCheckBoxChannelEnabled.isSelected());
         
         if (shieldProtocolLayer != null) {
             shieldProtocolLayer.renderSavePresetWithName(boardId, sensorId, this.sensorName);
         }
+        
+        if (!serialDisabled) {
+            shieldProtocolLayer.renderSaveSensorSerialNumber(boardId, sensorId, jTxtSensorSerialNumber.getText());
+        }
     }    
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
 
         iIRAndAvgPanel.readFromBoard();
+        
+        shieldProtocolLayer.renderReadSensorSerialNumber(boardId, sensorId);
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorId);
     }
 
     @Override
     public void evaluateRxMessage(AppDataMessage rxMessage) {
         
         iIRAndAvgPanel.evaluateRxMessage(rxMessage);
+        
+        // Sensor Serial Number
+        String serialNumber = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, boardId, sensorId);
+        if ((serialNumber != null) && !serialNumber.isEmpty()) {
+            jTxtSensorSerialNumber.setText(serialNumber);
+        }
+        
+        // Channel enabled
+        Boolean chEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorId);
+        if (chEnabled != null) {
+            jCheckBoxChannelEnabled.setSelected(chEnabled);
+        }
     }
     
     @Override
     public void onDataMessageFromConfiguration(AppDataMessage rxMessage) {
         iIRAndAvgPanel.onDataMessageFromConfiguration(rxMessage);
+        
+        // Sensor Serial Number
+        String serialNumber = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, boardId, sensorId);
+        if ((serialNumber != null) && !serialNumber.isEmpty()) {
+            ((JOverridableTextField)jTxtSensorSerialNumber).setTextOverride(serialNumber);
+        }
+        
+        // Channel enabled
+        Boolean chEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorId);
+        if (chEnabled != null) {
+            jCheckBoxChannelEnabled.setSelected(chEnabled);
+        }
     }
     
     @Override
@@ -115,10 +165,29 @@ public class GenericSensorSetupDIalog extends SensorSetupDialog {
     private void initComponents() {
 
         iIRAndAvgPanel = new airsenseur.dev.chemsensorpanel.widgets.IIRAndAvgPanel();
+        jLabel12 = new javax.swing.JLabel();
+        jTxtSensorSerialNumber = new JOverridableTextField();
+        jCheckBoxChannelEnabled = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle(sensorName);
         setResizable(false);
+
+        jLabel12.setText("Serial Number:");
+
+        jTxtSensorSerialNumber.setText("no serial");
+        jTxtSensorSerialNumber.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTxtSensorSerialNumberActionPerformed(evt);
+            }
+        });
+
+        jCheckBoxChannelEnabled.setText("Channel Enabled");
+        jCheckBoxChannelEnabled.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxChannelEnabledActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -126,22 +195,51 @@ public class GenericSensorSetupDIalog extends SensorSetupDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(8, 8, 8)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jCheckBoxChannelEnabled)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jTxtSensorSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(65, 65, 65))))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(13, Short.MAX_VALUE)
+                .addComponent(jCheckBoxChannelEnabled)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTxtSensorSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel12))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jTxtSensorSerialNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTxtSensorSerialNumberActionPerformed
+
+    }//GEN-LAST:event_jTxtSensorSerialNumberActionPerformed
+
+    private void jCheckBoxChannelEnabledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxChannelEnabledActionPerformed
+
+    }//GEN-LAST:event_jCheckBoxChannelEnabledActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private airsenseur.dev.chemsensorpanel.widgets.IIRAndAvgPanel iIRAndAvgPanel;
+    private javax.swing.JCheckBox jCheckBoxChannelEnabled;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JTextField jTxtSensorSerialNumber;
     // End of variables declaration//GEN-END:variables
 
 }

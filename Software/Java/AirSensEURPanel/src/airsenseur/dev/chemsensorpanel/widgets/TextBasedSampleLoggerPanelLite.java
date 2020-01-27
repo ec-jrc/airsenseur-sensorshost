@@ -26,12 +26,15 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.chemsensorpanel.SampleLogger;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  *
  * @author marco
  */
 public class TextBasedSampleLoggerPanelLite extends SampleLogger {
+    
+    private String units = "";
 
     /**
      * Creates new form TextBasedSampleLoggerPanel
@@ -47,11 +50,14 @@ public class TextBasedSampleLoggerPanelLite extends SampleLogger {
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         super.readFromBoard(); 
        
         // Ask for name
         shieldProtocolLayer.renderSensorInquiry(boardId, sensorId);
+        
+        // Ask for the sensor units
+        shieldProtocolLayer.renderReadUnits(boardId, sensorId);
     }
 
     @Override
@@ -63,13 +69,19 @@ public class TextBasedSampleLoggerPanelLite extends SampleLogger {
         if ((setupName != null) && !setupName.isEmpty()) {
             jLblTitle.setText(setupName);
         }
+        
+        // Units
+        String _units = shieldProtocolLayer.evalReadUnits(rxMessage, boardId, sensorId);
+        if ((_units != null) && !_units.isEmpty()) {
+            units = _units;
+        }        
     }
 
     @Override
     protected double onNewSample(double sample, int timestamp) {
         sample = super.onNewSample(sample, timestamp);
         
-        String newSample = String.format("%.2f", sample);
+        String newSample = String.format("%.2f %s", sample, units);
         jLblValue.setText(newSample);
         
         return sample;

@@ -26,6 +26,7 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  * Base class for all panels interacting with the sensor bus
@@ -49,8 +50,8 @@ public abstract class SensorBusInteractingPanel extends javax.swing.JPanel {
         this.channelId = channelId;
     }
     
-    public abstract void storeToBoard();
-    public abstract void readFromBoard();
+    public abstract void storeToBoard() throws SensorBusException;
+    public abstract void readFromBoard() throws SensorBusException;
     public abstract void evaluateRxMessage(AppDataMessage rxMessage);
     public abstract void onDataMessageFromConfiguration(AppDataMessage rxMessage);
 }

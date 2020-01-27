@@ -29,8 +29,11 @@ import airsenseur.dev.chemsensorpanel.helpers.HostConfigSensorProperties;
 import airsenseur.dev.chemsensorpanel.helpers.HostConfigWriter;
 import airsenseur.dev.chemsensorpanel.setupdialogs.GenericBoardInfoDialog;
 import airsenseur.dev.chemsensorpanel.setupdialogs.GenericSensorSetupDIalog;
+import airsenseur.dev.chemsensorpanel.setupdialogs.OPCN3SensorSetupDIalog;
+import airsenseur.dev.chemsensorpanel.setupdialogs.PMS5003SensorSetupDIalog;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -56,6 +59,7 @@ public class ExpShield1Panel extends GenericTabPanel {
     
     public final static int PMS5003_HISTOGRAM_BINS_NUM = 6;
     public final static int PMS5003_HISTOGRAM_PMAT_NUM = 3;
+    public final static int PMS5003_TOTAL_PMAT_NUM = 6;
     public final static int PMS5003_HISTOGRAM_BIN0_CHANNEL = PMS5003_CHANNEL + 6;
     public final static int PMS5003_HISTOGRAM_PMAT_CHANNEL = PMS5003_CHANNEL + 3;
     
@@ -68,6 +72,8 @@ public class ExpShield1Panel extends GenericTabPanel {
     public final static int OPCN3_HISTOGRAM_VOLUME_CHANNEL = OPCN3_HISTOGRAM_HUM_CHANNEL + 1;
     public final static int OPCN3_HISTOGRAM_SAMPLINGTIME_CHANNEL = OPCN3_HISTOGRAM_VOLUME_CHANNEL + 1;
     public final static int OPCN3_HISTOGRAM_SAMPLINGFLOWRATE_CHANNEL = OPCN3_HISTOGRAM_SAMPLINGTIME_CHANNEL + 1;
+    public final static int OPCN3_HISTOGRAM_LASERPOT = OPCN3_HISTOGRAM_SAMPLINGFLOWRATE_CHANNEL + 1;
+    public final static int OPCN3_DEBUG_CHANNELNUM = OPCN3_HISTOGRAM_LASERPOT - OPCN3_HISTOGRAM_VOLUME_CHANNEL + 1;
     
     public final static int EXPSHIELD1_NUM_OF_CHANNELS = OPCN3_CHANNEL + OPCN3_NUM_OF_CHANNELS;
 
@@ -87,8 +93,6 @@ public class ExpShield1Panel extends GenericTabPanel {
     private final static String OPCN3_TEMP_MATH_EXPRESSION = "x/1000";    
     private final static String OPCN3_HUM_MATH_EXPRESSION = "x/1000";    
     private final static String OPCN3_VOL_MATH_EXPRESSION = "x/64";
-    private final static String OPCN3_TSAMP_MATH_EXPRESSION = "x/100";
-    private final static String OPCN3_FLOWRATE_MATH_EXPRESSION = "x/100";
 
     // The chemical sensors setup panels
     private final List<SensorSetupDialog> sensorSetupDialogs = new ArrayList<>();
@@ -112,10 +116,10 @@ public class ExpShield1Panel extends GenericTabPanel {
         super(shieldProtocolLayer, logger);
         
         // Generate the sensor setup dialogs
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog("RD200M", RD200M_CHANNEL, true, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog("D300", D300_CHANNEL, true, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog("PMS5003", PMS5003_CHANNEL, true, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog("OPCN3", OPCN3_CHANNEL, true, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog("RD200M", RD200M_CHANNEL, false, true, true, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog("D300", D300_CHANNEL, false, false, true, parent, false));
+        sensorSetupDialogs.add(new PMS5003SensorSetupDIalog(PMS5003_CHANNEL, PMS5003_TOTAL_PMAT_NUM, PMS5003_HISTOGRAM_BIN0_CHANNEL, PMS5003_HISTOGRAM_BINS_NUM, parent, false));
+        sensorSetupDialogs.add(new OPCN3SensorSetupDIalog(OPCN3_HISTOGRAM_PM_CHANNEL, OPCN3_HISTOGRAM_PM_NUM, OPCN3_HISTOGRAM_BIN0_CHANNEL, OPCN3_HISTOGRAM_BINS_NUM, OPCN3_HISTOGRAM_TEMP_CHANNEL, OPCN3_HISTOGRAM_VOLUME_CHANNEL, OPCN3_DEBUG_CHANNELNUM, parent, false));
         sensorSetupDialogs.add(new GenericBoardInfoDialog(parent, false, "ExpShield1 Generic Info"));
         
         initComponents();
@@ -166,7 +170,7 @@ public class ExpShield1Panel extends GenericTabPanel {
             }
         });
         
-        sampleLoggerOPCTemp.setLoggerProperties("Temp [C]", 0, 5, 0);
+        sampleLoggerOPCTemp.setLoggerProperties("Temp", 0, 5, 0);
         sampleLoggerOPCTemp.setSensorId(OPCN3_HISTOGRAM_TEMP_CHANNEL);
         sampleLoggerOPCTemp.setDataProcessing(new SampleLogger.DataProcessing() {
 
@@ -176,7 +180,7 @@ public class ExpShield1Panel extends GenericTabPanel {
             }
         });
         
-        sampleLoggerOPCHum.setLoggerProperties("Hum [%Rel]", 0, 5, 0);
+        sampleLoggerOPCHum.setLoggerProperties("Hum", 0, 5, 0);
         sampleLoggerOPCHum.setSensorId(OPCN3_HISTOGRAM_HUM_CHANNEL);
         sampleLoggerOPCHum.setDataProcessing(new SampleLogger.DataProcessing() {
 
@@ -186,7 +190,7 @@ public class ExpShield1Panel extends GenericTabPanel {
             }
         });
         
-        sampleLoggerOPCVol.setLoggerProperties("Vol [ml]", 0, 5, 0);
+        sampleLoggerOPCVol.setLoggerProperties("Vol", 0, 5, 0);
         sampleLoggerOPCVol.setSensorId(OPCN3_HISTOGRAM_VOLUME_CHANNEL);
         sampleLoggerOPCVol.setDataProcessing(new SampleLogger.DataProcessing() {
 
@@ -196,25 +200,11 @@ public class ExpShield1Panel extends GenericTabPanel {
             }
         });
         
-        sampleLoggerOPCTSample.setLoggerProperties("TSampling [s]", 0, 5, 0);
+        sampleLoggerOPCTSample.setLoggerProperties("TSampling", 0, 5, 0);
         sampleLoggerOPCTSample.setSensorId(OPCN3_HISTOGRAM_SAMPLINGTIME_CHANNEL);
-        sampleLoggerOPCTSample.setDataProcessing(new SampleLogger.DataProcessing() {
-
-            @Override
-            public double processSample(double sample) {
-                return (sample / 100.0f);
-            }
-        });
         
-        sampleLoggerOPCFlowRate.setLoggerProperties("FlowRate [ml/s]", 0, 5, 0);
+        sampleLoggerOPCFlowRate.setLoggerProperties("FlowRate", 0, 5, 0);
         sampleLoggerOPCFlowRate.setSensorId(OPCN3_HISTOGRAM_SAMPLINGFLOWRATE_CHANNEL);
-        sampleLoggerOPCFlowRate.setDataProcessing(new SampleLogger.DataProcessing() {
-
-            @Override
-            public double processSample(double sample) {
-                return (sample / 100.0f);
-            }
-        });
         
         for (int n = 0; n < sampleLoggerPanels.size(); n++) {
             sampleLoggerPanels.get(n).setLogger(logger);
@@ -238,7 +228,7 @@ public class ExpShield1Panel extends GenericTabPanel {
     }
     
     @Override
-    public void onRefreshTimer() {
+    public void onRefreshTimer() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -250,6 +240,10 @@ public class ExpShield1Panel extends GenericTabPanel {
         
         // Get the board sensor name
         shieldProtocolLayer.renderReadBoardSerialNumber(selectedBoardId);
+        
+        // Get the PMS5003 and OPC-N3 serials
+        shieldProtocolLayer.renderReadSensorSerialNumber(selectedBoardId, PMS5003_HISTOGRAM_BIN0_CHANNEL);
+        shieldProtocolLayer.renderReadSensorSerialNumber(selectedBoardId, OPCN3_HISTOGRAM_BIN0_CHANNEL);
     }
 
     @Override
@@ -289,10 +283,20 @@ public class ExpShield1Panel extends GenericTabPanel {
             boardSerialNumber = serialBoard;
             jLabelBoardSerialNumber.setText(serialBoard);
         }
+        
+        String pms5003Serial = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, selectedBoardId, PMS5003_HISTOGRAM_BIN0_CHANNEL);
+        if (pms5003Serial != null) {
+            jLabelPMS5003SerialNumber.setText(pms5003Serial);
+        }
+        
+        String opcN3Serial = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, selectedBoardId, OPCN3_HISTOGRAM_BIN0_CHANNEL);
+        if (opcN3Serial != null) {
+            jLabelOPCN3SerialNumber.setText(opcN3Serial);
+        }
     }
 
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -313,7 +317,7 @@ public class ExpShield1Panel extends GenericTabPanel {
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }        
@@ -334,7 +338,7 @@ public class ExpShield1Panel extends GenericTabPanel {
     }
 
     @Override
-    public void startSample() {
+    public void startSample() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }
@@ -344,7 +348,7 @@ public class ExpShield1Panel extends GenericTabPanel {
     }
 
     @Override
-    public void stopSample() {
+    public void stopSample() throws SensorBusException {
         if (!boardEnabled) {
             return;
         }
@@ -366,7 +370,7 @@ public class ExpShield1Panel extends GenericTabPanel {
     }
 
     @Override
-    public void onGetCurrentConfiguation(boolean forceRestartSampling) {
+    public void onGetCurrentConfiguation(boolean forceRestartSampling) throws SensorBusException {
         
         // Add the stop sample command to the buffer, if required
         if (forceRestartSampling) {
@@ -404,7 +408,6 @@ public class ExpShield1Panel extends GenericTabPanel {
             HostConfigSensorProperties sensorProperties = hostConfigWriter.addNewSensor();
             sensorProperties.setSensorBoardId(selectedBoardId);
             sensorProperties.setSensorChannel(n);
-            sensorProperties.setSensorHiRes(false);
             
             if (n == RD200M_CHANNEL) {
                 sensorProperties.setSensorExpression(RD200_CHANNEL_MATH_EXPRESSION);
@@ -442,6 +445,8 @@ public class ExpShield1Panel extends GenericTabPanel {
         jPanel1 = new javax.swing.JPanel();
         sampleLoggerPMSBins = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
         sampleLoggerPMSPM = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabelPMS5003SerialNumber = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         sampleLoggerOPCBins = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
         sampleLoggerOPCPM = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
@@ -450,6 +455,8 @@ public class ExpShield1Panel extends GenericTabPanel {
         sampleLoggerOPCHum = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerOPCTSample = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerOPCFlowRate = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        jLabel5 = new javax.swing.JLabel();
+        jLabelOPCN3SerialNumber = new javax.swing.JLabel();
         jLabelBoardSerialNumber = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
 
@@ -464,6 +471,10 @@ public class ExpShield1Panel extends GenericTabPanel {
 
         jLabel2.setText("Board ID:");
 
+        jLabel1.setText("Serial:");
+
+        jLabelPMS5003SerialNumber.setText("--");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -473,7 +484,11 @@ public class ExpShield1Panel extends GenericTabPanel {
                 .addComponent(sampleLoggerPMSBins, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sampleLoggerPMSPM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(208, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabelPMS5003SerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(16, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -481,10 +496,20 @@ public class ExpShield1Panel extends GenericTabPanel {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(sampleLoggerPMSBins, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sampleLoggerPMSPM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 10, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabelPMS5003SerialNumber))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("PMS5003", jPanel1);
+
+        jLabel5.setText("Serial:");
+
+        jLabelOPCN3SerialNumber.setText("--");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -501,8 +526,12 @@ public class ExpShield1Panel extends GenericTabPanel {
                     .addComponent(sampleLoggerOPCTemp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sampleLoggerOPCHum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sampleLoggerOPCTSample, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLoggerOPCFlowRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(12, Short.MAX_VALUE))
+                    .addComponent(sampleLoggerOPCFlowRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabelOPCN3SerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -513,6 +542,10 @@ public class ExpShield1Panel extends GenericTabPanel {
                 .addGap(0, 10, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabelOPCN3SerialNumber))
+                .addGap(20, 20, 20)
                 .addComponent(sampleLoggerOPCVol, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sampleLoggerOPCTemp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -538,18 +571,17 @@ public class ExpShield1Panel extends GenericTabPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
                                 .addComponent(sampleLoggerRD200, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(sampleLoggerD300, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(16, 16, 16)
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(43, 43, 43)
+                                .addGap(18, 18, 18)
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabelBoardSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -561,13 +593,12 @@ public class ExpShield1Panel extends GenericTabPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel3)
-                        .addComponent(jLabelBoardSerialNumber))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel2)))
+                        .addComponent(jLabelBoardSerialNumber)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(sampleLoggerD300, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -606,9 +637,13 @@ public class ExpShield1Panel extends GenericTabPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox jCBBoardId;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabelBoardSerialNumber;
+    private javax.swing.JLabel jLabelOPCN3SerialNumber;
+    private javax.swing.JLabel jLabelPMS5003SerialNumber;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JTabbedPane jTabbedPane1;

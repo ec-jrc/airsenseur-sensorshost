@@ -24,11 +24,18 @@
 
 package airsenseur.dev.chemsensorhost.json;
 
-import airsenseur.dev.chemsensorhost.ChemSensorHost;
+import airsenseur.dev.chemsensorhost.sensors.SensorBoardInfo;
+import airsenseur.dev.chemsensorhost.sensors.SensorConfig;
+import airsenseur.dev.chemsensorhost.sensors.SensorInfo;
+import airsenseur.dev.chemsensorhost.sensors.SensorValue;
+import airsenseur.dev.chemsensorhost.engine.ChemSensorHostEngine;
+import airsenseur.dev.exceptions.SensorBusException;
+import airsenseur.dev.json.BoardInfo;
 import airsenseur.dev.json.ChemSensorService;
-import airsenseur.dev.json.FreeMemory;
+import airsenseur.dev.json.HostStatus;
 import airsenseur.dev.json.RawCommand;
 import airsenseur.dev.json.SampleData;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -38,37 +45,91 @@ import java.util.List;
  */
 public class ChemSensorServiceImpl implements ChemSensorService {
     
-    private ChemSensorHost sensorHost;
+    private ChemSensorHostEngine sensorHost;
 
-    public void setSensorHost(ChemSensorHost sensorHost) {
+    public void setSensorHost(ChemSensorHostEngine sensorHost) {
         this.sensorHost = sensorHost;
     }
 
-    @Override
-    public FreeMemory getFreeMemory() {
+    @Override    
+    public HostStatus getHostStatus() {
         
-        FreeMemory result = new FreeMemory(sensorHost.getCollectedData().getFreeMemory());
+        HostStatus result = new HostStatus(sensorHost.getIsReady()? HostStatus.STATUS_READY : HostStatus.STATUS_BUSY);
         
         return result;
     }
 
     @Override
-    public void startSampling() {
-        sensorHost.startSampling();
+    public List<BoardInfo> getSensorBoardsInfo() {
+        
+        List<BoardInfo> boardInfoList = new ArrayList<>();
+        for (SensorBoardInfo info:sensorHost.getBoards().values()) {
+            BoardInfo boardInfo = new BoardInfo();
+            boardInfo.boardId = info.getBoardId();
+            boardInfo.timestamp = sensorHost.getLastConfigurationTimestamp();
+            boardInfo.fwRevision = info.getFirmware().getValue();
+            boardInfo.serial = info.getSerial().getValue();
+            boardInfo.boardType = "" + info.getBoardType();
+            boardInfoList.add(boardInfo);
+        }
+        
+        return boardInfoList;
+    }
+    
+    @Override
+    public airsenseur.dev.json.SensorConfig getSensorConfig(int sensorId) {
+        
+        if (sensorId < sensorHost.getSensors().size()) {
+            SensorInfo sensorInfo = sensorHost.getSensors().get(sensorId);
+            SensorConfig sensorConfig = sensorInfo.getSensorConfig();
+            
+            String name = sensorConfig.getName().isSet()? sensorConfig.getName().getValue() : "";
+            String serial = sensorConfig.getSerial().isSet()? sensorConfig.getSerial().getValue() : "";
+            String measurementUnits = sensorConfig.getMeasurementUnits().isSet()? sensorConfig.getMeasurementUnits().getValue() : "";
+            Integer samplingPeriod = sensorConfig.getSamplingPeriod().isSet()? sensorConfig.getSamplingPeriod().getValue() : 0;
+            Boolean enabled = sensorConfig.getEnabled().isSet()? sensorConfig.getEnabled().getValue() : Boolean.TRUE;
+            
+            return new airsenseur.dev.json.SensorConfig(name, serial, measurementUnits, sensorId, samplingPeriod, sensorHost.getLastConfigurationTimestamp(), enabled);
+        }
+        
+        return null;
+    }
+    
+
+    @Override
+    public boolean startSampling() {
+        try {
+            sensorHost.startSampling();
+            return true;
+            
+        } catch (SensorBusException ex) {
+            return false;
+        }
     }
 
     @Override
-    public void stopSampling() {
-        sensorHost.stopSampling();
+    public boolean stopSampling() {
+        try {
+            sensorHost.stopSampling();
+            return true;
+            
+        } catch (SensorBusException ex) {
+            return false;
+        }
     }
 
     @Override
     public SampleData getLastSample(int sensorId) {
         
-        if (sensorId < sensorHost.getCollectedData().getSensors().size()) {
-            ChemSensorHost.SensorData data = sensorHost.getCollectedData().getSensors().get(sensorId);
+        if (sensorId < sensorHost.getSensors().size()) {
+            SensorInfo sensorInfo = sensorHost.getSensors().get(sensorId);
+            SensorConfig sensorConfig = sensorInfo.getSensorConfig();
+            SensorValue sensorValue = sensorInfo.getSensorValue();
+            
+            String name = sensorConfig.getName().isSet()? sensorConfig.getName().getValue() : "";
+            String serial = sensorConfig.getSerial().isSet()? sensorConfig.getSerial().getValue() : "";
                         
-            return new SampleData(data.getChannelName(), data.getChannelSerial(), data.getValue(), data.getTimeStamp(), data.getEvalSampleVal());
+            return new SampleData(name, serial, sensorValue.getValue(), sensorValue.getTimeStamp(), sensorValue.getEvalSampleVal());
         }
         
         return null;
@@ -82,7 +143,7 @@ public class ChemSensorServiceImpl implements ChemSensorService {
 
     @Override
     public int getNumSensors() {
-        return sensorHost.getCollectedData().getSensors().size();
+        return sensorHost.getSensors().size();
     }
 
     @Override

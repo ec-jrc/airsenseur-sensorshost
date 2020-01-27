@@ -36,11 +36,6 @@ public class RawCommand {
 
     public RawCommand() {
     }
-
-    public RawCommand(String commandString, String comandComment) {
-        this.commandString = commandString;
-        this.comandComment = comandComment;
-    }
     
     public RawCommand(int boardId, String commandString, String commandComment) {
         this.boardId = boardId;

@@ -51,7 +51,7 @@ public class TimeStampAggregator {
     }
     
     public void associateJavaTimeStamp(int boardTimeStamp, long javaTimeStamp) {
-        if (dictionary.size() > 100) {
+        if (dictionary.size() > 300) {
             dictionary.clear();
         }
         

@@ -85,12 +85,11 @@ public class SamplePersisterFile implements SamplesPersister {
         }
         
         try {
-            fileWriter.append(String.format("%012d", sample.getCollectedTimestamp())).append(COMMA_DELIMITER);            
+            fileWriter.append(String.format("%d", sample.getCollectedTimestamp())).append(COMMA_DELIMITER);            
             fileWriter.append(String.format("%02d", sample.getChannel())).append(COMMA_DELIMITER);            
             fileWriter.append(sample.getName()).append(COMMA_DELIMITER);
-            fileWriter.append(sample.getSerial()).append(COMMA_DELIMITER);
-            fileWriter.append(String.format("%012d", sample.getSampleVal())).append(COMMA_DELIMITER);
-            fileWriter.append(String.format("%012d", sample.getTimeStamp())).append(COMMA_DELIMITER);
+            fileWriter.append(String.format("%d", sample.getSampleVal())).append(COMMA_DELIMITER);
+            fileWriter.append(String.format("%d", sample.getTimeStamp())).append(COMMA_DELIMITER);
             fileWriter.append(String.format("%f", sample.getSampleEvaluatedVal())).append(COMMA_DELIMITER);
             fileWriter.append(String.format("%f", sample.getGpsTimestamp())).append(COMMA_DELIMITER);
             fileWriter.append(String.format("%f", sample.getLatitude())).append(COMMA_DELIMITER);

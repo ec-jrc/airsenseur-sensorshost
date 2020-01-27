@@ -28,6 +28,7 @@ import airsenseur.dev.chemsensorpanel.widgets.PresetDrivenPanel;
 import airsenseur.dev.chemsensorpanel.dataModel.SensorPresetsDataModel;
 import airsenseur.dev.chemsensorpanel.exceptions.PresetException;
 import airsenseur.dev.chemsensorpanel.sensorsdb.PresetDao;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -125,6 +126,8 @@ public class SensorPresetLoadPanel extends javax.swing.JPanel {
                     panel.loadPresetValues(preset.getValues());
                 } catch (PresetException ex) {
                     JOptionPane.showMessageDialog(this, ex.getErrorMessage(), "Load Preset", JOptionPane.ERROR_MESSAGE);
+                } catch (SensorBusException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getErrorMessage(), "Load Preset", JOptionPane.ERROR_MESSAGE);                    
                 }
             }
         }

@@ -25,6 +25,7 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.chemsensorpanel.exceptions.PresetException;
 import airsenseur.dev.chemsensorpanel.sensorsdb.PresetValues;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  * Abstract class for all panels supporting external presets
@@ -32,6 +33,6 @@ import airsenseur.dev.chemsensorpanel.sensorsdb.PresetValues;
  */
 public abstract class PresetDrivenPanel extends SensorBusInteractingPanel {
     
-    public abstract void loadPresetValues(PresetValues presetValues) throws PresetException;
-    public abstract void savePresetValues(PresetValues presetValues) throws PresetException;
+    public abstract void loadPresetValues(PresetValues presetValues) throws PresetException, SensorBusException;
+    public abstract void savePresetValues(PresetValues presetValues) throws PresetException, SensorBusException;
 }

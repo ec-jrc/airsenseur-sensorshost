@@ -26,6 +26,8 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.chemsensorpanel.SampleLogger;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
+import airsenseur.dev.helpers.Pair;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +64,7 @@ public class HistogramGraphSampleLoggerPanel extends SampleLogger {
 
     
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         if (shieldProtocolLayer != null) {
             
             // Ask for sample on all sensible channels
@@ -93,14 +95,15 @@ public class HistogramGraphSampleLoggerPanel extends SampleLogger {
         
         // Evaluate samples on all sensible channels
         for (int channel = 0; channel < numOfChannels; channel++) {
-            List<Integer> resultList = shieldProtocolLayer.evalLastSampleHResInquiry(rxMessage, boardId, sensorId+channel);
-            if (resultList == null) {
+            Pair<Integer, Float> resultPair = shieldProtocolLayer.evalLastSampleHResInquiry(rxMessage, boardId, sensorId+channel);
+            List<Integer> resultList = null;
+            if (resultPair == null) {
                 resultList = shieldProtocolLayer.evalLastSampleInquiry(rxMessage, boardId, sensorId+channel);
             }
-            if (resultList != null) {
+            if ((resultList != null) || (resultPair != null)) {
                 
-                int sample = resultList.get(0);
-                int timestamp = resultList.get(1);
+                float sample = (resultList != null)? resultList.get(0) : resultPair.second;
+                int timestamp = (resultList != null)? resultList.get(1) : resultPair.first;
                                 
                 if (timestamp != lastTimestamps.get(channel)) {
                     lastTimestamps.set(channel, timestamp);

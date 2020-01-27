@@ -36,7 +36,6 @@ public class HostConfigSensorProperties {
     protected String sensorExpression = "x";
     protected int sensorBoardId = AppDataMessage.BOARD_ID_UNDEFINED;
     protected int sensorChannel = 0;
-    protected boolean sensorHiRes = false;
 
     /**
      * @param sensorName the sensorName to set
@@ -65,12 +64,4 @@ public class HostConfigSensorProperties {
     public void setSensorChannel(int sensorChannel) {
         this.sensorChannel = sensorChannel;
     }
-
-    /**
-     * @param sensorHiRes the sensorHiRes to set
-     */
-    public void setSensorHiRes(boolean sensorHiRes) {
-        this.sensorHiRes = sensorHiRes;
-    }
-    
 }

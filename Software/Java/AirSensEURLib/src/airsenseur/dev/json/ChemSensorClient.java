@@ -76,19 +76,43 @@ public class ChemSensorClient {
         closeSocket();
     }
     
-    public FreeMemory getFreeMemory() {
+    public HostStatus getHostStatus() {
         
         if (service == null) {
             return null;
         }
         
         try {
-            return service.getFreeMemory();
+            return service.getHostStatus();
         } catch (UndeclaredThrowableException ex) {
             return null;
         }
     }
     
+    public List<BoardInfo> getSensorBoardsInfo() {
+        if (service == null) {
+            return null;
+        }
+        
+        try {
+            return service.getSensorBoardsInfo();
+        } catch (UndeclaredThrowableException ex) {
+            return null;
+        }
+    }
+    
+    public SensorConfig getSensorConfig(int sensorId) {
+        if (service == null) {
+            return null;
+        }
+        
+        try {
+            return service.getSensorConfig(sensorId);
+        } catch (UndeclaredThrowableException ex) {
+            return null;
+        }
+    }
+       
     public SampleData getLastSample(int channel) {
 
         if (service == null) {
@@ -102,27 +126,29 @@ public class ChemSensorClient {
         }
     }
     
-    public void startSampling() {
+    public boolean startSampling() {
         
         if (service == null) {
-            return;
+            return false;
         }
         
         try {
-            service.startSampling();
+            return service.startSampling();
         } catch (UndeclaredThrowableException ex) {
+            return false;
         }
     }
     
-    public void stopSampling() {
+    public boolean stopSampling() {
         
         if (service == null) {
-            return;
+            return false;
         }
         
         try {
-            service.stopSampling();
+            return service.stopSampling();
         } catch (UndeclaredThrowableException ex) {
+            return false;
         }
     }
     

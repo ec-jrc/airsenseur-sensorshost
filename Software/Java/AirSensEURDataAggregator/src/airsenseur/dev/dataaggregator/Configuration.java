@@ -67,7 +67,7 @@ public class Configuration extends Properties{
     }
     
     public int getPollTime() {
-        String pollTime = getProperty("sensorPollTime", "5000");
+        String pollTime = getProperty("sensorPollTime", "1000");
         return Integer.valueOf(pollTime);
     }
     
@@ -92,4 +92,23 @@ public class Configuration extends Properties{
     public String getPersisterPath() {
         return getProperty("datapath", "./");
     }
+    
+    public boolean applyTimestampCorrection() {
+        String valString = getProperty("applyTimestampCorrection", "true");
+        return getBooleanValue(valString);
+    }
+    
+    private boolean getBooleanValue(String valString) {
+        if ((valString.compareToIgnoreCase("true") == 0) || (valString.compareToIgnoreCase("yes") == 0)) {
+            return true;
+        } else if ((valString.compareToIgnoreCase("false") == 0) || (valString.compareToIgnoreCase("no") == 0)){
+            return false;
+        }
+        
+        try {
+            return Integer.parseInt(valString) > 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }     
 }

@@ -29,6 +29,7 @@ import airsenseur.dev.chemsensorpanel.helpers.FileLogger;
 import airsenseur.dev.chemsensorpanel.helpers.HostConfigWriter;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
+import airsenseur.dev.exceptions.SensorBusException;
 import java.util.List;
 
 /**
@@ -53,7 +54,7 @@ public abstract class GenericTabPanel extends javax.swing.JPanel {
     }
     
     // Mish gui actions
-    public abstract void onRefreshTimer();
+    public abstract void onRefreshTimer() throws SensorBusException;
     public abstract int getSelectedBoardId();
     public abstract boolean getIsEnabled();
     public abstract void setConnected(boolean connected);
@@ -61,18 +62,18 @@ public abstract class GenericTabPanel extends javax.swing.JPanel {
     // Actions with remote board
     public abstract void onDataReceived(AppDataMessage rxMessage);
     
-    public abstract void storeToBoard();
-    public abstract void readFromBoard();
+    public abstract void storeToBoard() throws SensorBusException;
+    public abstract void readFromBoard() throws SensorBusException;
     
-    public abstract void startSample();
-    public abstract void stopSample();
+    public abstract void startSample() throws SensorBusException;
+    public abstract void stopSample() throws SensorBusException;
     
     // External configuration management
     public abstract void onDataMessageFromConfiguration(AppDataMessage configurationMessage);
-    public abstract void onGetCurrentConfiguation(boolean forceRestartSampling);
+    public abstract void onGetCurrentConfiguation(boolean forceRestartSampling) throws SensorBusException;
     
     // Board device ID
-    public abstract String getBoardSerialNumber();
+    public abstract String getBoardSerialNumber() throws SensorBusException;
     
     // Preset management
     public abstract void onDatabaseChanged();

@@ -24,18 +24,24 @@
 
 package airsenseur.dev.datapush;
 
-import airsenseur.dev.exceptions.ConfigurationException;
+import airsenseur.dev.datapush.datacontainers.DataPushDataContainer;
+import airsenseur.dev.datapush.dataprocessors.DataPushBoardInfoProcessor;
+import airsenseur.dev.datapush.dataprocessors.DataPushProcessor;
+import airsenseur.dev.datapush.dataprocessors.DataPushSamplesProcessor;
+import airsenseur.dev.datapush.dataprocessors.DataPushSensorConfigProcessor;
 import airsenseur.dev.exceptions.PersisterException;
 import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.history.HistoryPersister;
 import airsenseur.dev.history.sql.HistoryPersisterSQL;
-import airsenseur.dev.persisters.SampleDataContainer;
+import airsenseur.dev.persisters.SampleAndConfigurationLoader;
 import airsenseur.dev.persisters.SampleLoader;
 import airsenseur.dev.persisters.SamplesPersister;
+import airsenseur.dev.persisters.influxdb.BoardPersisterInfluxDB;
 import airsenseur.dev.persisters.influxdb.SamplePersisterInfluxDB;
+import airsenseur.dev.persisters.influxdb.SensorConfigPersisterInfluxDB;
 import airsenseur.dev.persisters.sosdb.HistorySOSDB;
 import airsenseur.dev.persisters.sosdb.SamplePersisterSOSDB;
-import airsenseur.dev.persisters.sql.SampleLoaderSQL;
+import airsenseur.dev.persisters.sql.SensorConfigLoaderSQL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -44,38 +50,31 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author marcos
+ * @author marco
  */
 public class AirSensEURDataPush {
-
+    
+    private static final String BOARD_INFO_DATASETNAME_POSTFIX = "_Boards";
+    private static final String SENSOR_CONFIG_DATASETNAME_POSTFIX = "_Sensors";
+    
     private static final Logger log = LoggerFactory.getLogger(AirSensEURDataPush.class);
     
-    private static SampleLoader sampleLoader;
-    private static HistoryPersister history;
-    private static SamplesPersister samplePersister;
-    private static Configuration config;
-    private static Configuration.workingMode workingMode;
+    private HistoryPersister history;
+    private Configuration config;
+    private Configuration.workingMode workingMode;
     
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
+    private DataPushProcessor dataPushBoardInfoProcessor;
+    private DataPushProcessor dataPushSensorsConfigProcessor;
+    private DataPushProcessor dataPushSampleProcessor;
+    
+    public void start(Configuration config) {
         
-        log.info("AirSensEURDataPush started");
-        
-        // Load the configuration file
-        config = Configuration.getConfig();
-        try {
-            config.init(args[0]);
-        } catch (ConfigurationException ex) {
-            log.error("Please specify a valid configuration file.");
-            return;
-        }
-        
+        this.config = config;
+                
         // The sample loader from the database
-        sampleLoader = new SampleLoaderSQL(config.getPersisterPath());
+        SampleAndConfigurationLoader sampleAndConfigurationLoader = new SensorConfigLoaderSQL(config.getPersisterPath());
         try {
-            if (!sampleLoader.openLog()) {
+            if (!sampleAndConfigurationLoader.openLog()) {
                 throw new PersisterException("Impossible to open the database");
             }
         } catch (PersisterException ex) {
@@ -88,8 +87,30 @@ public class AirSensEURDataPush {
         
         // Generate the main business objects
         List<Integer> channels = new ArrayList<>();
+        SamplesPersister samplePersister;
         if (workingMode == workingMode.INFLUX) {
             log.info("WorkingMode: INFLUX DB");
+            
+            // Initialize persisters
+            BoardPersisterInfluxDB boardPersister = new BoardPersisterInfluxDB(config.getInfluxDbDataSetName() + BOARD_INFO_DATASETNAME_POSTFIX, 
+                                                                                config.getInfluxDbHost(), 
+                                                                                config.getInfluxDbPort(), 
+                                                                                config.getInfluxDbName(), 
+                                                                                config.getInfluxDbUsername(), 
+                                                                                config.getInfluxDbPassword(), 
+                                                                                config.getInfluxDbUseLineProtocol(), 
+                                                                                config.getUseHTTPSProtocol(), 
+                                                                                config.getConnectionTimeout());
+            
+            SensorConfigPersisterInfluxDB sensorConfigPersister = new SensorConfigPersisterInfluxDB(config.getInfluxDbDataSetName() + SENSOR_CONFIG_DATASETNAME_POSTFIX, 
+                                                                                                    config.getInfluxDbHost(), 
+                                                                                                    config.getInfluxDbPort(), 
+                                                                                                    config.getInfluxDbName(), 
+                                                                                                    config.getInfluxDbUsername(), 
+                                                                                                    config.getInfluxDbPassword(), 
+                                                                                                    config.getInfluxDbUseLineProtocol(), 
+                                                                                                    config.getUseHTTPSProtocol(), 
+                                                                                                    config.getConnectionTimeout());
             
             history = new HistoryPersisterSQL(config.getHistoryPath());
             samplePersister = new SamplePersisterInfluxDB(config.getInfluxDbDataSetName(), 
@@ -102,12 +123,25 @@ public class AirSensEURDataPush {
                                                            config.getUseHTTPSProtocol(),
                                                            config.getConnectionTimeout());
             channels.add(SampleLoader.CHANNEL_INVALID);
+            
+
+            // Initialize processors
+            dataPushBoardInfoProcessor = new DataPushBoardInfoProcessor(sampleAndConfigurationLoader, boardPersister);
+            dataPushSensorsConfigProcessor = new DataPushSensorConfigProcessor(sampleAndConfigurationLoader, sensorConfigPersister);
+            dataPushSampleProcessor = new DataPushSamplesProcessor(workingMode, sampleAndConfigurationLoader, samplePersister);
+            
         } else {
             log.info("WorkingMode: 52°North SOS");
             
+            
+            // Initialize persisters
             try {
                 history = new HistorySOSDB(config);                
                 samplePersister = new SamplePersisterSOSDB(config);
+                
+                // Initialize processors
+                dataPushSampleProcessor = new DataPushSamplesProcessor(workingMode, sampleAndConfigurationLoader, samplePersister);
+                
             } catch (PersisterException ex) {
                 log.error(ex.getErrorMessage() + " Terminating.");
                 return;
@@ -127,9 +161,14 @@ public class AirSensEURDataPush {
         }
         
         try {
+            
+            processBoardConfig();
+            processSensorsConfig();
             for (int channel:channels) {
                 processChannelSamples(channel);
             }
+            
+            
         } catch (PersisterException ex) {
             log.error(ex.getErrorMessage() + " Terminating.");
         } finally {
@@ -137,22 +176,46 @@ public class AirSensEURDataPush {
             // Close logger
             history.closeLog();
             samplePersister.stop();
-            sampleLoader.stop();
-
-            log.info("AirSensEURDataPush terminated");
+            sampleAndConfigurationLoader.stop();
         }
+    }
+        
+    private boolean processBoardConfig() throws PersisterException {
+        if (dataPushBoardInfoProcessor == null) {
+            return false;
+        }
+        
+        MinMax minMaxTS = getMinMaxTsFromHistory(0, dataPushBoardInfoProcessor);
+        processDataSetInTheRange(0, minMaxTS, dataPushBoardInfoProcessor);
+        
+        return true;
     }
     
-    private static String getPersisterMarker(int channel) {
-        if (workingMode == workingMode.INFLUX) {
-            return "latestInfluxDbTs";
-        } else {
-            return "" + channel;
+    private boolean processSensorsConfig() throws PersisterException {
+        if (dataPushSensorsConfigProcessor == null) {
+            return false;
         }
+        
+        MinMax minMaxTS = getMinMaxTsFromHistory(0, dataPushSensorsConfigProcessor);
+        processDataSetInTheRange(0, minMaxTS, dataPushSensorsConfigProcessor);
+        
+        return true;
     }
-
-    private static boolean processChannelSamples(int channel) throws NumberFormatException, PersisterException {
-
+    
+    private boolean processChannelSamples(int channel) throws NumberFormatException, PersisterException {
+        
+        if (dataPushSampleProcessor == null) {
+            return false;
+        }
+        
+        MinMax minMaxTs = getMinMaxTsFromHistory(channel, dataPushSampleProcessor);
+        processDataSetInTheRange(channel, minMaxTs, dataPushSampleProcessor);
+        
+        return true;
+    }
+    
+    private MinMax getMinMaxTsFromHistory(int channel, DataPushProcessor dataPushProcessor) throws NumberFormatException, PersisterException {
+        
         // Retrieve the minimum and maximum timestamp present in the database for that channel
         // Retry several times before aborting. This way we will be able to 
         // handle table locks in a safer way
@@ -162,8 +225,9 @@ public class AirSensEURDataPush {
         boolean bValid = false;
         while (retry < config.getMaxDatabaseRetry()) {
             try {
-                minTs = sampleLoader.getMinimumTimestamp(channel);
-                maxTs = sampleLoader.getMaximumTimestamp(channel);
+                MinMax minMax = dataPushProcessor.getMinMaxTxForChannel(channel);
+                minTs = minMax.getMin();
+                maxTs = minMax.getMax();
                 retry = config.getMaxDatabaseRetry();
                 bValid = true;
                 
@@ -184,7 +248,7 @@ public class AirSensEURDataPush {
         }
         
         long latestAddedTs = 0;
-        HistoryEventContainer event = history.loadEvent(getPersisterMarker(channel));
+        HistoryEventContainer event = history.loadEvent(dataPushProcessor.getPersisterMarker(channel));
         if (event != null) {
             latestAddedTs = Long.valueOf(event.getEventValue());
         }
@@ -195,30 +259,28 @@ public class AirSensEURDataPush {
         log.info("Skipping data older than " + minTs + " for channel " + channel);
         log.info("Running until " + maxTs + " is reached " + " for channel " + channel);
         
-        // Process all samples in the specific range
-        processAllSamplesInTheRange(minTs, maxTs, channel);
-        
-        return false;
+        return new MinMax(minTs, maxTs);
     }
 
-    private static void processAllSamplesInTheRange(long minTs, long maxTs, int channel) throws PersisterException {
+    private void processDataSetInTheRange(int channel, MinMax minMaxTs, DataPushProcessor dataPushProcessor) throws PersisterException {
         
         // Loop on all available samples and store them to the remote server
+        long minTs = minMaxTs.getMin();
+        long maxTs = minMaxTs.getMax();
         int timeSpan = config.loadDataTimeSpan();
         long lastTsUpdated = -1;
-        List<SampleDataContainer> samplesList = new ArrayList<>();
+        DataPushDataContainer dataContainer = dataPushProcessor.clearDataContainer();
         do {
-            
             // Retry several times before aborting. This way we will be able to 
             // handle table locks in a safer way
             int retry = 0;
             while (retry < config.getMaxDatabaseRetry()) {
                 try {
-                    samplesList = sampleLoader.loadSamples(channel, minTs, minTs+timeSpan);
+                    dataContainer = dataPushProcessor.loadDataSetFromLocalPersistence(channel, new MinMax(minTs, minTs+timeSpan));
                     retry = config.getMaxDatabaseRetry();
                     
                 } catch (PersisterException ex) {
-                    log.info("Error retrieving samples from database. Database locked? Retrying.");
+                    log.info("Error retrieving dataset from database. Database locked? Retrying.");
                     retry++;
                     
                     try {
@@ -229,7 +291,7 @@ public class AirSensEURDataPush {
                 }
                 
             }
-            if (samplesList.isEmpty()) {
+            if (dataContainer.isEmpty()) {
                 if (config.debugEnabled()) {
                     log.info("Nothing found from " + minTs + " period till " + (minTs+timeSpan));
                 }
@@ -238,16 +300,22 @@ public class AirSensEURDataPush {
                 
             } else {
                 
-                minTs = (long)samplesList.get(samplesList.size()-1).getCollectedTimestamp() + 1;
+                minTs = dataPushProcessor.getLatestTimestampInDataContainer(dataContainer);
+                
+                // Prevent stacking from malformed minTs
+                if (minTs < 0) {
+                    minTs = maxTs;
+                } 
+                
                 if (lastTsUpdated != minTs) {
 
                     if (config.debugEnabled()) {
-                        log.info("Adding " + samplesList.size() + " samples for period till " + minTs);
+                        log.info("Adding " + dataContainer.size() + " samples for period till " + minTs);
                     }
 
                     // Send collected samples to the remote server
-                    if (samplePersister.addSamples(samplesList)) {
-                        history.saveEvent(new HistoryEventContainer(getPersisterMarker(channel), "" + minTs));
+                    if (dataPushProcessor.sendDataToRemotePersistence(dataContainer)) {
+                        history.saveEvent(new HistoryEventContainer(dataPushProcessor.getPersisterMarker(channel), "" + minTs));
                     } else {
                         throw new PersisterException("");
                     }
@@ -262,6 +330,7 @@ public class AirSensEURDataPush {
                     minTs++;
                 }
             }
-        } while (minTs < maxTs);
+        } while (minTs < maxTs);        
     }
+    
 }

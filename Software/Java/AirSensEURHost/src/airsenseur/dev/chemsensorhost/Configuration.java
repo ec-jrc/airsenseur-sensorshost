@@ -81,9 +81,9 @@ public class Configuration extends Properties{
         return getProperty("port", "ttyS0");
     }
     
-    public int getPollTime() {
-        String pollTime = getProperty("pollTime", "1000");
-        return Integer.valueOf(pollTime);
+    public int getPollPeriod() {
+        String pollPeriod = getProperty("pollPeriod", "6000");
+        return Integer.valueOf(pollPeriod);
     }
     
     public boolean getUseBusProtocol() {
@@ -108,7 +108,7 @@ public class Configuration extends Properties{
     
     public String getMathExpressionForSensor(int sensor) {
         String key = String.format("sensorexpression_%02d", sensor);
-        return getProperty(key, "x");
+        return getProperty(key, "");
     }
     
 /**
@@ -119,7 +119,9 @@ public class Configuration extends Properties{
     private String checkMathExpression(String expression) throws ConfigurationException {
        
         try { 
-            Parser.parse(expression);
+            if (!expression.isEmpty()) {
+                Parser.parse(expression);
+            }
         } catch (SyntaxException ex) {
             throw new ConfigurationException("Invalid expression found: " + expression);
         }
@@ -148,14 +150,36 @@ public class Configuration extends Properties{
         try {
             return Integer.parseInt(valString);
         } catch (NumberFormatException e) {
-            return sensor;
+            return -1;
         }
+    }
+    
+    public boolean enableAutoDiscovery() {
+        String valString = getProperty("enableAutoDiscovery", "false");
+        
+        return getBooleanValue(valString);
+    }
+    
+    public boolean getIsSensorDisabled(int sensor) {
+        String key = String.format("sensordisabled_%02d", sensor);
+        String valString = getProperty(key, "false");
+        
+        return getBooleanValue(valString);
+    }
+    
+    public boolean skipHostSensors() {
+        String valString = getProperty("skipHostSensors", "false");
+        return getBooleanValue(valString);
     }
     
     public boolean getHiResSample(int sensor) {
         String key = String.format("sensorhires_%02d", sensor);
         String valString = getProperty(key, "false");
         
+        return getBooleanValue(valString);
+    }
+    
+    private boolean getBooleanValue(String valString) {
         if ((valString.compareToIgnoreCase("true") == 0) || (valString.compareToIgnoreCase("yes") == 0)) {
             return true;
         } else if ((valString.compareToIgnoreCase("false") == 0) || (valString.compareToIgnoreCase("no") == 0)){
@@ -163,9 +187,9 @@ public class Configuration extends Properties{
         }
         
         try {
-            return Integer.parseInt(key) > 0;
+            return Integer.parseInt(valString) > 0;
         } catch (NumberFormatException e) {
             return false;
         }
-    }
+    }    
 }

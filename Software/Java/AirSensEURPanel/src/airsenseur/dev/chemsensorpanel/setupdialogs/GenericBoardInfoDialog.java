@@ -28,6 +28,7 @@ import airsenseur.dev.chemsensorpanel.MainApplicationFrame;
 import airsenseur.dev.chemsensorpanel.SensorSetupDialog;
 import airsenseur.dev.chemsensorpanel.widgets.JOverridableTextField;
 import airsenseur.dev.comm.AppDataMessage;
+import airsenseur.dev.exceptions.SensorBusException;
 
 /**
  *
@@ -137,7 +138,7 @@ public class GenericBoardInfoDialog extends SensorSetupDialog {
 
     
     @Override
-    public void storeToBoard() {
+    public void storeToBoard() throws SensorBusException {
         
         if (!jTextBoardSN.getText().isEmpty()) {
             shieldProtocolLayer.renderSaveBoardSerialNumber(boardId, jTextBoardSN.getText());
@@ -145,7 +146,7 @@ public class GenericBoardInfoDialog extends SensorSetupDialog {
     }
 
     @Override
-    public void readFromBoard() {
+    public void readFromBoard() throws SensorBusException {
         shieldProtocolLayer.renderReadBoardSerialNumber(boardId);
         shieldProtocolLayer.renderReadFirmwareVersion(boardId);
     }

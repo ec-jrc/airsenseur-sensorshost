@@ -68,23 +68,25 @@ public class FileConfiguration {
      * Create or read a configuration file
      * @param fileName: the required file name
      * @param read: open in read mode if true
+     * @return true if success
      */
-    public void openFile(String fileName, boolean read) {
+    public boolean openFile(String fileName, boolean read) {
         
         File configFile = new File(fileName);
-        openFile(configFile, read);
+        return openFile(configFile, read);
     }
     
     /**
      * Create or read a configuration file
      * @param configFile
      * @param read 
+     * @return  true if success
      */
-    public void openFile(File configFile, boolean read) {
+    public boolean openFile(File configFile, boolean read) {
         
         sessionContents.clear();        
         if (configFile == null) {
-            return;
+            return false;
         }
 
         try {
@@ -99,7 +101,10 @@ public class FileConfiguration {
                 reader = null;
             }
         } catch (IOException ex) {
+            return false;
         }
+        
+        return true;
     }
     
     /**

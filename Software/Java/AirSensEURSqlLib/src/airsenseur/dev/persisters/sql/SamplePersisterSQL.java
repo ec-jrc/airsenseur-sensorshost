@@ -27,10 +27,8 @@ package airsenseur.dev.persisters.sql;
 import airsenseur.dev.exceptions.PersisterException;
 import airsenseur.dev.persisters.SampleDataContainer;
 import airsenseur.dev.persisters.SamplesPersister;
-import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -40,30 +38,23 @@ import org.slf4j.LoggerFactory;
  * Implements an SQLite based persisted sample dataset entry point
  * @author marco
  */
-public class SamplePersisterSQL implements SamplesPersister {
+public class SamplePersisterSQL extends PersisterSQL implements SamplesPersister {
     
-    private final static String DATABASE_NAME = "airsenseur.db";
-    private final static int MAX_RETRY_BEFORE_ERROR = 10;
+    private final static int MAX_RETRY_BEFORE_ERROR = 100;
     private final static int MAX_QUEUED_DATA_BEFORE_CLEARING = (MAX_RETRY_BEFORE_ERROR * 10);
     
-    private final String folderPath;
+    private final static String SAMPLES_TABLE_NAME = "measures";
     
     private final List<SampleDataContainer> sampleQueue = new ArrayList<>();
-    private SQLiteConnection db = null;
     
     private static final Logger log = LoggerFactory.getLogger(SamplePersisterSQL.class);
 
     public SamplePersisterSQL() {
-        this.folderPath = "";
+        super();
     }
 
     public SamplePersisterSQL(String folderPath) {
-        
-        if (!folderPath.endsWith("/")) {
-            folderPath = folderPath + "/";
-        }
-        
-        this.folderPath = folderPath;
+        super(folderPath);
     }
 
     @Override
@@ -81,54 +72,39 @@ public class SamplePersisterSQL implements SamplesPersister {
 
     @Override
     public boolean addSample(SampleDataContainer sample) throws PersisterException {
-        
+
         queueSample(sample);
-        commitPendingData();
+        if (!checkConnection()) {
+            return false;
+        }
         
-        return sampleQueue.size() < MAX_RETRY_BEFORE_ERROR;
+        flushCachedData();
+                    
+        return (sampleQueue.size() < MAX_RETRY_BEFORE_ERROR);
     }
 
     @Override
     public boolean addSamples(List<SampleDataContainer> samples) throws PersisterException {
+        
+        // DB Never connected
+        if (!checkConnection()) {
+            return false;
+        }
+        
         for (SampleDataContainer sample:samples) {
             queueSample(sample);
         }
         
-        commitPendingData();
+        flushCachedData();
+        
         return sampleQueue.size() < MAX_RETRY_BEFORE_ERROR;
     }
     
  
-    private void connectToDb() throws PersisterException {
-        
-        releaseDb();
-        
-        String fullFileName = folderPath + DATABASE_NAME;
-        db = new SQLiteConnection(new File(fullFileName));
-        try {
-            db.open(true);
-        } catch (SQLiteException ex) {
-            log.error(ex.getMessage());            
-            throw new PersisterException("Impossible to open the database at " + fullFileName);
-        }
-        
-        // I know: this could loose queued data if we're trying to reconnect
-        // to a database because it was locked by an external process. But could prevent problems
-        // if queued data are partially broken and we're no more able to commit them due
-        // to a sql exception
-        if(sampleQueue.size() >= MAX_QUEUED_DATA_BEFORE_CLEARING) {
-            sampleQueue.clear();
-        }
-        
-        // Create the table if not exists
-        createTable();
-        createIndex("clttst_index", "(collectedts)");
-        createIndex("clttst_chn_index", "(collectedts,channel)");
-    }
-    
-    private void createTable() throws PersisterException {
+    @Override
+    protected void createTable() throws PersisterException {
 
-        String sqlTable = "CREATE TABLE IF NOT EXISTS `measures` (" +
+        String sqlTable = "CREATE TABLE IF NOT EXISTS `" + SAMPLES_TABLE_NAME + "` (" +
                             "`value` INT NOT NULL, " +
                             "`evvalue` REAL NOT NULL, " +
                             "`timestamp` INT NOT NULL, " +
@@ -154,45 +130,40 @@ public class SamplePersisterSQL implements SamplesPersister {
                 st0.dispose();
             }
         }
-    }
-    private void createIndex(String indexName, String indexComposition) throws PersisterException {
-
-        String sqlTable = "CREATE INDEX IF NOT EXISTS " + indexName + 
-                            " ON `measures` " + indexComposition + "; ";
         
-        SQLiteStatement st0 = null;
+        createIndex(SAMPLES_TABLE_NAME, "clttst_index", "(collectedts)");
+        createIndex(SAMPLES_TABLE_NAME, "clttst_chn_index", "(collectedts,channel)");
+    }
+    
+    protected void purgeCachedData() {
+        
+        if(sampleQueue.size() >= MAX_QUEUED_DATA_BEFORE_CLEARING) {
+            sampleQueue.clear();
+        }
+    }
+    
+    private void queueSample(SampleDataContainer sample) throws PersisterException {
+        
         try {
-            st0 = db.prepare(sqlTable);
-            st0.step();
-        } catch (SQLiteException ex) {
-            log.error(ex.getMessage());
-            throw new PersisterException("Error creating SQL index for samples");
-        } finally {
-            if (st0 != null) {
-                st0.dispose();
-            }
+            sampleQueue.add(sample.clone());
+        } catch (CloneNotSupportedException e) {
+            throw new PersisterException("Sample.clone not supported: " + e.getMessage());
         }
     }
-    
-    private void releaseDb() {
         
-        if (db != null) {
-            db.dispose();
+    @Override
+    protected void flushCachedData() {
+                
+        // Nothing to flush
+        if (sampleQueue.isEmpty()) {
+            return;
         }
-    }
-    
-    private void queueSample(SampleDataContainer sample) {
-        
-        sampleQueue.add(sample.clone());
-    }
-    
-    private void commitPendingData() {
         
         SQLiteStatement st1 = null;
         try {
             db.exec("BEGIN TRANSACTION;");
 
-            st1 = db.prepare("INSERT INTO measures"
+            st1 = db.prepare("INSERT INTO " + SAMPLES_TABLE_NAME 
                     + "       (`value`, `evvalue`, `timestamp`, `channel`, `channelName`, `gpstimestamp`, `gpslatitude`, `gpslongitude`, `gpsaltitude`, `collectedts`, `calibrated`) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", true);
 
@@ -223,6 +194,11 @@ public class SamplePersisterSQL implements SamplesPersister {
             try {
                 db.exec("ROLLBACK TRANSACTION");
                 log.error("SQL Task commit error." + ex.getMessage());
+                
+                // Let's try to remove the cached data to see if the problem
+                // we arise is related to the dataset
+                purgeCachedData();
+                
             } catch (SQLiteException ex1) {
             }
         } finally {

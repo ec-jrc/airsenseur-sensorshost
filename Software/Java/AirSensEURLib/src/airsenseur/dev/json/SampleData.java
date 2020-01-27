@@ -39,11 +39,11 @@ public class SampleData {
     public SampleData() {
     }
 
-    public SampleData(String name, String serial, int value, int timeStamp, double evalTimeStamp) {
+    public SampleData(String name, String serial, int value, int timeStamp, double evalSampleVal) {
         this.name = name;
         this.serial = serial;
         this.value = value;
         this.timeStamp = timeStamp;
-        this.evalSampleVal = evalTimeStamp;
+        this.evalSampleVal = evalSampleVal;
     }
 }
