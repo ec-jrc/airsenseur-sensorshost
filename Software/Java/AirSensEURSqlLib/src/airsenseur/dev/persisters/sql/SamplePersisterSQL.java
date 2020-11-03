@@ -207,4 +207,10 @@ public class SamplePersisterSQL extends PersisterSQL implements SamplesPersister
             }
         }
     }
+
+    @Override
+    public String getPersisterMarker(int channel) {
+        // This is supposed to be used when persisting data through data-push processes
+        throw new UnsupportedOperationException("No implementation is supposed here");
+    }
 }

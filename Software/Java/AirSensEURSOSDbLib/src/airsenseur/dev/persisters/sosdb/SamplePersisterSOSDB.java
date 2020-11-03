@@ -110,6 +110,11 @@ public class SamplePersisterSOSDB extends SOSDBBaseService implements SamplesPer
     public Logger getLogger() {
         return log;
     }
+
+    @Override
+    public String getPersisterMarker(int channel) {
+        return "" + channel;
+    }
     
     /**
      * Generate the insertObservation SOS command

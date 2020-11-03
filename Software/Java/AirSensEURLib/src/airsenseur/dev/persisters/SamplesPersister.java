@@ -38,4 +38,5 @@ public interface SamplesPersister {
     void stop();
     boolean addSample(SampleDataContainer sample) throws PersisterException;
     boolean addSamples(List<SampleDataContainer> samples) throws PersisterException;
+    String getPersisterMarker(int channel);
 }

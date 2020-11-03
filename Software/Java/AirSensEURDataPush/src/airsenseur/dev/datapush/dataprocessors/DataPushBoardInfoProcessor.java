@@ -40,6 +40,8 @@ import java.util.List;
  */
 public class DataPushBoardInfoProcessor implements DataPushProcessor {
     
+    private final static long TIMESPAN_MULTIPLIER = 100;
+    
     private final SampleAndConfigurationLoader dataLoader;
     private final BoardPersisterInfluxDB dataPersister;
 
@@ -50,7 +52,7 @@ public class DataPushBoardInfoProcessor implements DataPushProcessor {
 
     @Override
     public String getPersisterMarker(int channel) {
-        return HistoryEventContainer.EVENT_LATEST_BOARDINFOPUSH_TS;
+        return HistoryEventContainer.EVENT_LATEST_INFLUXDB_BOARDINFOPUSH_TS;
     }
 
     @Override
@@ -83,5 +85,10 @@ public class DataPushBoardInfoProcessor implements DataPushProcessor {
         List<BoardInfo> dataSet = dataContainer.getDataSet();
         
         return (long)dataSet.get(dataSet.size()-1).timestamp + 1;
+    }
+
+    @Override
+    public long getTimeSpanMultiplier() {
+        return TIMESPAN_MULTIPLIER;
     }
 }

@@ -146,4 +146,11 @@ public class SamplePersisterFile implements SamplesPersister {
         
         return folderPath + "/" + DATANAME_PREFIX + String.format("%06d", maxNum+1) + DATANAME_EXTENSION;
     }
+
+    @Override
+    public String getPersisterMarker(int channel) {
+        
+        // This is supposed to be used when persisting data through data-push processes
+        throw new UnsupportedOperationException("No implementation is supposed here");
+    }
 }

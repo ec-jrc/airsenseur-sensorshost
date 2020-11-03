@@ -42,4 +42,5 @@ public interface DataPushProcessor {
 
     public DataPushDataContainer clearDataContainer();
     public long getLatestTimestampInDataContainer(DataPushDataContainer dataContainer);
+    public long getTimeSpanMultiplier();
 }

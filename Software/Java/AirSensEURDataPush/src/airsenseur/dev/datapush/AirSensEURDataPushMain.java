@@ -24,6 +24,7 @@
 
 package airsenseur.dev.datapush;
 
+import airsenseur.dev.datapush.config.Configuration;
 import airsenseur.dev.exceptions.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AirSensEURDataPushMain {
     
-    static final String VERSION = "AirSensEURDataPush V2.0.0";
+    static final String VERSION = "AirSensEURDataPush V2.1.3D";
        
     private static final Logger log = LoggerFactory.getLogger(AirSensEURDataPushMain.class);
     

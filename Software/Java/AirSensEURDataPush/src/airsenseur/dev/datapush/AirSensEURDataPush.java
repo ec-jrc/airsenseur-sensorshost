@@ -24,11 +24,13 @@
 
 package airsenseur.dev.datapush;
 
+import airsenseur.dev.datapush.config.Configuration;
 import airsenseur.dev.datapush.datacontainers.DataPushDataContainer;
 import airsenseur.dev.datapush.dataprocessors.DataPushBoardInfoProcessor;
 import airsenseur.dev.datapush.dataprocessors.DataPushProcessor;
 import airsenseur.dev.datapush.dataprocessors.DataPushSamplesProcessor;
 import airsenseur.dev.datapush.dataprocessors.DataPushSensorConfigProcessor;
+import airsenseur.dev.exceptions.ConfigurationException;
 import airsenseur.dev.exceptions.PersisterException;
 import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.history.HistoryPersister;
@@ -36,9 +38,13 @@ import airsenseur.dev.history.sql.HistoryPersisterSQL;
 import airsenseur.dev.persisters.SampleAndConfigurationLoader;
 import airsenseur.dev.persisters.SampleLoader;
 import airsenseur.dev.persisters.SamplesPersister;
+import airsenseur.dev.persisters.awsmqtt.SamplePersisterAWSMQTT;
+import airsenseur.dev.persisters.iflink.SamplePersisterIFLINKCurl;
+import airsenseur.dev.persisters.iflink.SamplePersisterIFLINKEmbedded;
 import airsenseur.dev.persisters.influxdb.BoardPersisterInfluxDB;
 import airsenseur.dev.persisters.influxdb.SamplePersisterInfluxDB;
 import airsenseur.dev.persisters.influxdb.SensorConfigPersisterInfluxDB;
+import airsenseur.dev.persisters.mqtt.SamplePersisterMQTT;
 import airsenseur.dev.persisters.sosdb.HistorySOSDB;
 import airsenseur.dev.persisters.sosdb.SamplePersisterSOSDB;
 import airsenseur.dev.persisters.sql.SensorConfigLoaderSQL;
@@ -83,74 +89,40 @@ public class AirSensEURDataPush {
         }
         
         // Retrieve the main working mode (SOS or InfluxDB)
-        workingMode = config.getWorkingMode();
+        try {
+            workingMode = config.getWorkingMode();
+        } catch (ConfigurationException ex) {
+            log.error(ex.getErrorMessage() + " Terminating.");
+            return;
+        }
         
         // Generate the main business objects
         List<Integer> channels = new ArrayList<>();
         SamplesPersister samplePersister;
-        if (workingMode == workingMode.INFLUX) {
-            log.info("WorkingMode: INFLUX DB");
-            
-            // Initialize persisters
-            BoardPersisterInfluxDB boardPersister = new BoardPersisterInfluxDB(config.getInfluxDbDataSetName() + BOARD_INFO_DATASETNAME_POSTFIX, 
-                                                                                config.getInfluxDbHost(), 
-                                                                                config.getInfluxDbPort(), 
-                                                                                config.getInfluxDbName(), 
-                                                                                config.getInfluxDbUsername(), 
-                                                                                config.getInfluxDbPassword(), 
-                                                                                config.getInfluxDbUseLineProtocol(), 
-                                                                                config.getUseHTTPSProtocol(), 
-                                                                                config.getConnectionTimeout());
-            
-            SensorConfigPersisterInfluxDB sensorConfigPersister = new SensorConfigPersisterInfluxDB(config.getInfluxDbDataSetName() + SENSOR_CONFIG_DATASETNAME_POSTFIX, 
-                                                                                                    config.getInfluxDbHost(), 
-                                                                                                    config.getInfluxDbPort(), 
-                                                                                                    config.getInfluxDbName(), 
-                                                                                                    config.getInfluxDbUsername(), 
-                                                                                                    config.getInfluxDbPassword(), 
-                                                                                                    config.getInfluxDbUseLineProtocol(), 
-                                                                                                    config.getUseHTTPSProtocol(), 
-                                                                                                    config.getConnectionTimeout());
-            
-            history = new HistoryPersisterSQL(config.getHistoryPath());
-            samplePersister = new SamplePersisterInfluxDB(config.getInfluxDbDataSetName(), 
-                                                           config.getInfluxDbHost(), 
-                                                           config.getInfluxDbPort(), 
-                                                           config.getInfluxDbName(), 
-                                                           config.getInfluxDbUsername(), 
-                                                           config.getInfluxDbPassword(),
-                                                           config.getInfluxDbUseLineProtocol(),
-                                                           config.getUseHTTPSProtocol(),
-                                                           config.getConnectionTimeout());
-            channels.add(SampleLoader.CHANNEL_INVALID);
-            
+        try {
+            if (workingMode == workingMode.INFLUX) {
+                samplePersister = initWM_InfluxDB(config, channels, sampleAndConfigurationLoader);
 
-            // Initialize processors
-            dataPushBoardInfoProcessor = new DataPushBoardInfoProcessor(sampleAndConfigurationLoader, boardPersister);
-            dataPushSensorsConfigProcessor = new DataPushSensorConfigProcessor(sampleAndConfigurationLoader, sensorConfigPersister);
-            dataPushSampleProcessor = new DataPushSamplesProcessor(workingMode, sampleAndConfigurationLoader, samplePersister);
-            
-        } else {
-            log.info("WorkingMode: 52°North SOS");
-            
-            
-            // Initialize persisters
-            try {
-                history = new HistorySOSDB(config);                
-                samplePersister = new SamplePersisterSOSDB(config);
+            } else if (workingMode == workingMode.MQTT) {
+                samplePersister = initWM_MQTT(config, channels);
+
+            } else if (workingMode == workingMode.AWS_MQTT) {
+                samplePersister = initWM_AWSMQTT(config, channels);
+
+            } else if (workingMode == workingMode.SOSDB) {
+                samplePersister = initWM_SOSDB(config, channels);
                 
-                // Initialize processors
-                dataPushSampleProcessor = new DataPushSamplesProcessor(workingMode, sampleAndConfigurationLoader, samplePersister);
+            } else {
+                samplePersister = initWM_iFLINK(config, channels);
                 
-            } catch (PersisterException ex) {
-                log.error(ex.getErrorMessage() + " Terminating.");
-                return;
-            }
-            
-            for (int channel = 0; channel < config.getSensorsObservedProp().size(); channel++) {
-                channels.add(channel);
-            }
-        }        
+            }   
+        } catch (PersisterException ex) {
+            log.error(ex.getErrorMessage() + " Terminating.");
+            return;
+        }
+        
+        // The Data Push Sample Processor is common to all working modes
+        dataPushSampleProcessor = new DataPushSamplesProcessor(sampleAndConfigurationLoader, samplePersister);        
         
         // Start the history persister
         try {
@@ -160,6 +132,15 @@ public class AirSensEURDataPush {
             return;
         }
         
+        // Start the sample persister
+        try {
+            samplePersister.startNewLog();
+        } catch (PersisterException ex) {
+            log.error(ex.getErrorMessage() + " Terminating.");
+            return;
+        }
+        
+        // Run the datapush process
         try {
             
             processBoardConfig();
@@ -178,6 +159,157 @@ public class AirSensEURDataPush {
             samplePersister.stop();
             sampleAndConfigurationLoader.stop();
         }
+    }
+
+
+    private SamplesPersister initWM_InfluxDB(Configuration configuration, 
+                                            List<Integer> channels, 
+                                            SampleAndConfigurationLoader sampleAndConfigurationLoader) {
+        
+        SamplesPersister samplePersister;
+        log.info("WorkingMode: INFLUX DB");
+        
+        // Initialize persisters
+        BoardPersisterInfluxDB boardPersister = new BoardPersisterInfluxDB(configuration.getInfluxDbDataSetName() + BOARD_INFO_DATASETNAME_POSTFIX, 
+                                                                            configuration.getInfluxDbHost(), 
+                                                                            configuration.getInfluxDbPort(), 
+                                                                            configuration.getInfluxDbName(), 
+                                                                            configuration.getInfluxDbUsername(), 
+                                                                            configuration.getInfluxDbPassword(), 
+                                                                            configuration.getInfluxDbUseLineProtocol(), 
+                                                                            configuration.getUseHTTPSProtocol(), 
+                                                                            configuration.getConnectionTimeout());
+        
+        SensorConfigPersisterInfluxDB sensorConfigPersister = new SensorConfigPersisterInfluxDB(configuration.getInfluxDbDataSetName() + SENSOR_CONFIG_DATASETNAME_POSTFIX, 
+                                                                                                configuration.getInfluxDbHost(), 
+                                                                                                configuration.getInfluxDbPort(), 
+                                                                                                configuration.getInfluxDbName(), 
+                                                                                                configuration.getInfluxDbUsername(), 
+                                                                                                configuration.getInfluxDbPassword(), 
+                                                                                                configuration.getInfluxDbUseLineProtocol(), 
+                                                                                                configuration.getUseHTTPSProtocol(), 
+                                                                                                configuration.getConnectionTimeout());
+        history = new HistoryPersisterSQL(configuration.getHistoryPath());
+        samplePersister = new SamplePersisterInfluxDB(configuration.getInfluxDbDataSetName(), 
+                                                        configuration.getInfluxDbHost(), 
+                                                        configuration.getInfluxDbPort(), 
+                                                        configuration.getInfluxDbName(), 
+                                                        configuration.getInfluxDbUsername(), 
+                                                        configuration.getInfluxDbPassword(), 
+                                                        configuration.getInfluxDbUseLineProtocol(), 
+                                                        configuration.getUseHTTPSProtocol(), 
+                                                        configuration.getConnectionTimeout());
+        channels.add(SampleLoader.CHANNEL_INVALID);
+        
+        
+        // Initialize processors. If the user don't need to send registry information, avoid to create the related processors
+        if (!configuration.getSkipRegistry()) {
+            
+            dataPushBoardInfoProcessor = new DataPushBoardInfoProcessor(sampleAndConfigurationLoader, boardPersister);
+            dataPushSensorsConfigProcessor = new DataPushSensorConfigProcessor(sampleAndConfigurationLoader, sensorConfigPersister);
+        }
+        
+        return samplePersister;
+    }
+    
+    private SamplesPersister initWM_SOSDB(Configuration configuration, List<Integer> channels) throws PersisterException {
+        
+        SamplesPersister samplePersister;
+        log.info("WorkingMode: 52°North SOS");
+            
+        // Initialize persisters
+        history = new HistorySOSDB(configuration);
+        samplePersister = new SamplePersisterSOSDB(configuration);
+        for (int channel = 0; channel < config.getSensorsObservedProp().size(); channel++) {
+            channels.add(channel);
+        }
+        
+        return samplePersister;
+    }   
+    
+    private SamplesPersister initWM_MQTT(Configuration configuration, List<Integer> channels) {
+        
+        SamplesPersister samplePersister;
+        log.info("WorkingMode: MQTT");
+        
+        // Initialize persisters
+        history = new HistoryPersisterSQL(configuration.getHistoryPath());
+        samplePersister = new SamplePersisterMQTT(configuration.getMQTTHost(), 
+                                                    configuration.getMQTTUsername(), 
+                                                    configuration.getMQTTPassword(), 
+                                                    configuration.getMQTTBaseTopic(), 
+                                                    configuration.getMQTTUseSSL(), 
+                                                    configuration.getConnectionTimeout(), 
+                                                    configuration.getMQTTPort(), 
+                                                    configuration.getMQTTQoS());
+        
+        channels.add(SampleLoader.CHANNEL_INVALID);
+        
+        return samplePersister;
+    }
+    
+    private SamplesPersister initWM_AWSMQTT(Configuration configuration, List<Integer> channels) throws PersisterException {
+        
+        SamplesPersister samplePersister;
+        log.info("WordingMode: AWS-MQTT-IOT");
+        
+        // Initialize persisters
+        history = new HistoryPersisterSQL(config.getHistoryPath());
+        samplePersister = new SamplePersisterAWSMQTT(configuration.getMQTTHost(), 
+                                                        configuration.getMQTTBaseTopic(), 
+                                                        configuration.getAWSIOClientID(), 
+                                                        configuration.getAWSIOTKeyPath(), 
+                                                        configuration.getAWSIOTCertPath(), 
+                                                        configuration.getAWSIOTHostPath(),  
+                                                        configuration.getAWSIOKeyAlgorithm());
+        
+        channels.add(SampleLoader.CHANNEL_INVALID);
+        
+        return samplePersister;
+    }    
+    
+    
+    private SamplesPersister initWM_iFLINK(Configuration configuration, List<Integer> channels)  throws PersisterException {
+
+        SamplesPersister samplePersister;
+        log.info("WorkingMode: iFLINK");
+        
+        history = new HistoryPersisterSQL(config.getHistoryPath());
+        if (configuration.getIFLINKUseCurl()) {
+            samplePersister = new SamplePersisterIFLINKCurl(configuration.getIFLINKHost(), 
+                                                        configuration.getIFLINKEndpoint(),
+                                                        configuration.getIFLINKSensorID(),
+                                                        configuration.getIFLINKBearerToken(),
+                                                        configuration.getIFLINKSensorsList(), 
+                                                        configuration.getIFLINKDatePath(),
+                                                        configuration.getIFLINKInboundSensorID(),
+                                                        configuration.getUseHTTPSProtocol(),
+                                                        configuration.getIFLINKUpdatePosition(),
+                                                        configuration.getNumThreads(),
+                                                        configuration.getAggregationFactor(),
+                                                        configuration.getConnectionTimeout(),
+                                                        configuration.debugVerbose());
+        } else {
+            samplePersister = new SamplePersisterIFLINKEmbedded(configuration.getIFLINKHost(), 
+                                                            configuration.getIFLINKEndpoint(),
+                                                            configuration.getIFLINKSensorID(),
+                                                            configuration.getIFLINKBearerToken(),
+                                                            configuration.getIFLINKSensorsList(), 
+                                                            configuration.getIFLINKDatePath(),
+                                                            configuration.getIFLINKInboundSensorID(),
+                                                            configuration.getUseHTTPSProtocol(),
+                                                            configuration.getIFLINKUpdatePosition(),
+                                                            configuration.getNumThreads(),
+                                                            configuration.getAggregationFactor(),
+                                                            configuration.getConnectionTimeout(),
+                                                            configuration.debugVerbose());
+            
+        }
+        
+        // Add all channels. Data will be filtered by means of the configured paths in the iFLINKSensorsList
+        channels.add(SampleLoader.CHANNEL_INVALID);
+        
+        return samplePersister;        
     }
         
     private boolean processBoardConfig() throws PersisterException {
@@ -267,7 +399,7 @@ public class AirSensEURDataPush {
         // Loop on all available samples and store them to the remote server
         long minTs = minMaxTs.getMin();
         long maxTs = minMaxTs.getMax();
-        int timeSpan = config.loadDataTimeSpan();
+        long timeSpan = config.loadDataTimeSpan() * dataPushProcessor.getTimeSpanMultiplier();
         long lastTsUpdated = -1;
         DataPushDataContainer dataContainer = dataPushProcessor.clearDataContainer();
         do {

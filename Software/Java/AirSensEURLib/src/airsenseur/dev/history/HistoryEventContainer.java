@@ -30,9 +30,14 @@ package airsenseur.dev.history;
  */
 public class HistoryEventContainer {
     
-    public final static String EVENT_LATEST_SAMPLEPUSH_TS = "latestInfluxDbTs";
-    public final static String EVENT_LATEST_BOARDINFOPUSH_TS = "latestBoardInfoDbTs";
-    public final static String EVENT_LATEST_SENSORCONFIGPUSH_TS = "latestSensorConfigDbTs";
+    public final static String EVENT_LATEST_INFLUXDB_SAMPLEPUSH_TS = "latestInfluxDbTs";
+    public final static String EVENT_LATEST_INFLUXDB_BOARDINFOPUSH_TS = "latestBoardInfoDbTs";
+    public final static String EVENT_LATEST_INFLUXDB_SENSORCONFIGPUSH_TS = "latestSensorConfigDbTs";
+    
+    public final static String EVENT_LATEST_MQTT_SAMPLEPUSH_TS = "latestMQTTTs";
+    public final static String EVENT_LATEST_AWSMQTT_SAMPLEPUSH_TS = "latestAWSMQTTTs";
+    
+    public final static String EVENT_LATEST_IFLINK_SAMPLEPUSH_TS = "latestIFLINKTs";
     
     private final String eventName;
     private final String eventValue;

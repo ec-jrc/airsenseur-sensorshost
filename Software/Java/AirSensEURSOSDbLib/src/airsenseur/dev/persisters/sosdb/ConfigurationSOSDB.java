@@ -68,7 +68,7 @@ public class ConfigurationSOSDB extends Properties {
     }
 
     public String getSOSDBHost() {
-        return getProperty("sos.hostname");
+        return getProperty("sos.hostname", "");
     }
     
     public int getSOSDBPort() {

@@ -24,12 +24,10 @@
 
 package airsenseur.dev.datapush.dataprocessors;
 
-import airsenseur.dev.datapush.Configuration;
 import airsenseur.dev.datapush.MinMax;
 import airsenseur.dev.datapush.datacontainers.DataPushDataContainer;
 import airsenseur.dev.datapush.datacontainers.DataPushSamplesDataContainer;
 import airsenseur.dev.exceptions.PersisterException;
-import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.persisters.SampleDataContainer;
 import airsenseur.dev.persisters.SampleLoader;
 import airsenseur.dev.persisters.SamplesPersister;
@@ -41,23 +39,17 @@ import java.util.List;
  */
 public class DataPushSamplesProcessor implements DataPushProcessor {
     
-    private final Configuration.workingMode workingMode;
     private final SampleLoader sampleLoader;
     private final SamplesPersister samplePersister;
 
-    public DataPushSamplesProcessor(Configuration.workingMode workingMode, SampleLoader sampleLoader, SamplesPersister samplePersister) {
-        this.workingMode = workingMode;
+    public DataPushSamplesProcessor(SampleLoader sampleLoader, SamplesPersister samplePersister) {
         this.sampleLoader = sampleLoader;
         this.samplePersister = samplePersister;
     }
 
     @Override
     public String getPersisterMarker(int channel) {
-        if (workingMode == workingMode.INFLUX) {
-            return HistoryEventContainer.EVENT_LATEST_SAMPLEPUSH_TS;
-        } else {
-            return "" + channel;
-        }
+        return samplePersister.getPersisterMarker(channel);
     }
 
     @Override
@@ -90,5 +82,10 @@ public class DataPushSamplesProcessor implements DataPushProcessor {
         List<SampleDataContainer> sampleDataList = dataContainer.getDataSet();
         
         return (long)sampleDataList.get(sampleDataList.size()-1).getCollectedTimestamp() + 1;
+    }
+
+    @Override
+    public long getTimeSpanMultiplier() {
+        return 1;
     }
 }

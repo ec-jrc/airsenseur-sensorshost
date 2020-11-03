@@ -22,7 +22,7 @@
  * ===========================================================================
  */
 
-package airsenseur.dev.datapush;
+package airsenseur.dev.datapush.config;
 
 import airsenseur.dev.persisters.sosdb.ConfigurationSOSDB;
 
@@ -30,48 +30,7 @@ import airsenseur.dev.persisters.sosdb.ConfigurationSOSDB;
  *
  * @author marco
  */
-public class Configuration extends ConfigurationSOSDB {
-    
-    public enum workingMode {
-        INFLUX,
-        SOSDB,
-    };
-        
-    private static final Configuration singleton = new Configuration();
-    
-    public static Configuration getConfig() {
-        return singleton;
-    }
-    
-    public int getPollTime() {
-        String pollTime = getProperty("sensorPollTime", "1000");
-        return Integer.valueOf(pollTime);
-    }
-    
-    public String getPersisterPath() {
-        return getProperty("datapath", "./");
-    }
-    
-    public String getHistoryPath() {
-        return getProperty("historypath", "./");
-    }
-    
-    public int getMaxDatabaseRetry() {
-        String maxDatabaseRetry = getProperty("maxdbretry", "10");
-        return Integer.valueOf(maxDatabaseRetry);
-    }
-    
-    public int loadDataTimeSpan() {
-        String dataTimeSpan = getProperty("datatimespan", "900000");
-        return Integer.valueOf(dataTimeSpan);
-    }
-    
-    public workingMode getWorkingMode() {
-        if (getInfluxDbHost().isEmpty()) {
-            return workingMode.SOSDB;
-        }
-        return workingMode.INFLUX;
-    }
+public class ConfigurationInfluxDB extends ConfigurationSOSDB {
     
 
     /* Influx DB related configuration */
@@ -104,20 +63,11 @@ public class Configuration extends ConfigurationSOSDB {
         String value = getProperty("uselineprotocol", "false");
         return getBooleanValue(value);
     }
-    
-    public boolean getUseHTTPSProtocol() {
-        String value = getProperty("useHTTPS", "false");
-        return getBooleanValue(value);
-    }
-    
-    public int getConnectionTimeout() {
-        String value = getProperty("connectionTimeout", "60");
-        return Integer.valueOf(value);
-    }
-    
-    private boolean getBooleanValue(String value) {
+
+    public boolean getBooleanValue(String value) {
         return ((value.compareToIgnoreCase("true") == 0) ||
                 (value.compareToIgnoreCase("yes") == 0) || 
                 (value.compareToIgnoreCase("on") == 0));
     }
+    
 }

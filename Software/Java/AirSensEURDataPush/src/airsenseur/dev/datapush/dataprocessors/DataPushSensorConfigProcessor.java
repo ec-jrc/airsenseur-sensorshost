@@ -40,6 +40,8 @@ import java.util.List;
  */
 public class DataPushSensorConfigProcessor implements DataPushProcessor {
     
+    private final static long TIMESPAN_MULTIPLIER = 100;    
+    
     private final SampleAndConfigurationLoader dataLoader;
     private final SensorConfigPersisterInfluxDB dataPersister;
 
@@ -50,7 +52,7 @@ public class DataPushSensorConfigProcessor implements DataPushProcessor {
     
     @Override
     public String getPersisterMarker(int channel) {
-        return HistoryEventContainer.EVENT_LATEST_SENSORCONFIGPUSH_TS;
+        return HistoryEventContainer.EVENT_LATEST_INFLUXDB_SENSORCONFIGPUSH_TS;
     }
 
     @Override
@@ -81,5 +83,10 @@ public class DataPushSensorConfigProcessor implements DataPushProcessor {
     public long getLatestTimestampInDataContainer(DataPushDataContainer dataContainer) {
         List<SensorConfig> dataSet = dataContainer.getDataSet();
         return (long)dataSet.get(dataSet.size()-1).startSamplingTimestamp + 1;
+    }
+
+    @Override
+    public long getTimeSpanMultiplier() {
+        return TIMESPAN_MULTIPLIER;
     }
 }

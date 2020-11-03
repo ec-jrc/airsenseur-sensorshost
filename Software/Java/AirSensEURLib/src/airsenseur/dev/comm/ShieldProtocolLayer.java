@@ -39,11 +39,16 @@ import java.util.Map;
  */
 public class ShieldProtocolLayer {
     
+    public static final Integer CHEM_SHIELD_R3X_TYPE_ID = 1;
+    public static final Integer EXP1_SHIELD_R1X_TYPE_ID = 2;
+    public static final Integer HOST_SHIELD_R2X_TYPE_ID = 3;
+    public static final Integer ENV1_SHIELD_R1X_TYPE_ID = 4;    
+    
     public static final int COMMPROTOCOL_COMMANDID_LENGTH = 1;
     public static final int COMMPROTOCOL_CHANNEL_LENGTH = 2;
     public static final int COMMPROTOCOL_COMMAND_CHANNEL_PATTERNLENGTH = COMMPROTOCOL_COMMANDID_LENGTH + COMMPROTOCOL_CHANNEL_LENGTH;
     
-    
+
     private static final char COMMPROTOCOL_SENSOR_INQUIRY = 'I';
     private static final char COMMPROTOCOL_ECHO = 'E';
     private static final char COMMPROTOCOL_SAMPLE_ENABLE = 'S';
@@ -94,6 +99,7 @@ public class ShieldProtocolLayer {
         add("Chemical Shield R3.x"); 
         add("Exp1Shield R1.x");
         add("HostBoard R2.x");
+        add("Env1Shield R1.x");
     }};
     
     private final SensorBus sensorBus;

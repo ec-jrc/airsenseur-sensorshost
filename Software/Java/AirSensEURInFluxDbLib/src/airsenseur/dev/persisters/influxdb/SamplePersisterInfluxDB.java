@@ -25,6 +25,7 @@
 package airsenseur.dev.persisters.influxdb;
 
 import airsenseur.dev.exceptions.PersisterException;
+import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.persisters.SampleDataContainer;
 import airsenseur.dev.persisters.SamplesPersister;
 import java.util.List;
@@ -102,5 +103,10 @@ public class SamplePersisterInfluxDB extends PersiterInfluxDB implements Samples
         boolean bResult = sendDataToInfluxDB(series);
         
         return bResult;
+    }
+
+    @Override
+    public String getPersisterMarker(int channel) {
+        return HistoryEventContainer.EVENT_LATEST_INFLUXDB_SAMPLEPUSH_TS;
     }
 }

@@ -59,8 +59,8 @@ public class FileConfiguration {
         }
     };
     
-    private BufferedWriter writer = null;
-    private BufferedReader reader = null;
+    protected BufferedWriter writer = null;
+    protected BufferedReader reader = null;
     
     private final List<SessionContent> sessionContents = new ArrayList<>();
     
@@ -178,14 +178,18 @@ public class FileConfiguration {
         } 
     }
     
-    
     public AppDataMessage getNextCommand(int session) {
-        
+
         if (session >= sessionContents.size()) {
             return null;
         }
         
-        String line = sessionContents.get(session).getNextLine();
+        return getNextCommand(sessionContents.get(session));
+    }
+    
+    protected AppDataMessage getNextCommand(SessionContent session) {
+        
+        String line = session.getNextLine();
         if (line == null) {
             return null;
         }
@@ -211,7 +215,7 @@ public class FileConfiguration {
     // Each session is statically associated to a tab (i.e. board) in the java panel
     //
     // Returns: the number of sessions found or -1 if no reader is available
-    private int populateSessionsContents() {
+    protected int populateSessionsContents() {
         
         if (reader == null) {
             return -1;
@@ -242,5 +246,9 @@ public class FileConfiguration {
         }
         
         return sessionContents.size();
+    }
+    
+    protected SessionContent getSessionContent(int sessionNumber) {
+        return sessionContents.get(sessionNumber);
     }
 }
