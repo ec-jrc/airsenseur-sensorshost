@@ -56,7 +56,7 @@ public class AD5694RPanel extends PresetDrivenPanel {
     
     private String getVoltageLabel(int value, boolean doubleGain) {
         
-        double dbValue = ((doubleGain == true)? 5.0f : 2.5f) * value / 4095f;
+        double dbValue = ((doubleGain == true)? 5.0f : 2.5f) * value / 4096f;
         
         String voltageValue = String.format("%.3f V", dbValue);
         

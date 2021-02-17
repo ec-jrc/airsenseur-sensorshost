@@ -38,9 +38,11 @@ public interface DataPushProcessor {
 
     public MinMax getMinMaxTxForChannel(int channel) throws PersisterException;
     public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs) throws PersisterException;
+    public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs, long averageTime) throws PersisterException;
     public boolean sendDataToRemotePersistence(DataPushDataContainer dataContainer) throws PersisterException;
 
     public DataPushDataContainer clearDataContainer();
     public long getLatestTimestampInDataContainer(DataPushDataContainer dataContainer);
     public long getTimeSpanMultiplier();
+    public long getTimeAveragerMultiplier();
 }

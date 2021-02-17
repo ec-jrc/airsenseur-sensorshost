@@ -26,7 +26,6 @@ package airsenseur.dev.chemsensorpanel;
 
 import airsenseur.dev.chemsensorpanel.helpers.FileLogger;
 import airsenseur.dev.chemsensorpanel.comm.RemoteConnectionDialog;
-import airsenseur.dev.helpers.FileConfiguration;
 import airsenseur.dev.chemsensorpanel.comm.SensorBusCommunicationHandler;
 import airsenseur.dev.comm.ShieldProtocolLayer;
 import airsenseur.dev.chemsensorpanel.comm.SerialConnectionDialog;
@@ -34,6 +33,7 @@ import airsenseur.dev.chemsensorpanel.exceptions.ChemSensorPanelException;
 import airsenseur.dev.chemsensorpanel.helpers.HostConfigWriter;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.exceptions.SensorBusException;
+import airsenseur.dev.helpers.FileConfigurationTypedSessions;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -73,6 +73,9 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     // Main tab panel list
     private final List<GenericTabPanel> tabPanelsList = new ArrayList<>();
     
+    // TypedSessionsID in the configuration file, expected for each tab
+    private final Integer tabSessions[] = { ShieldProtocolLayer.CHEM_SHIELD_R3X_TYPE_ID, ShieldProtocolLayer.EXP1_SHIELD_R1X_TYPE_ID, ShieldProtocolLayer.ENV1_SHIELD_R1X_TYPE_ID };
+    
     // We need to understand if the board has been connected or not
     private boolean connected = false;
         
@@ -104,7 +107,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private final FileLogger logger = new FileLogger();
     
     // Configuration file and file chooser
-    private final FileConfiguration configFile = new FileConfiguration();
+    private final FileConfigurationTypedSessions configFile = new FileConfigurationTypedSessions();
     private final JFileChooser fChooser = new JFileChooser();
     
     // HashMap to retrieve menu items from window handlers
@@ -122,7 +125,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         
         // Add genericTabPanels in a list for an easy access
         tabPanelsList.add(chemSensorPanel);
-        tabPanelsList.add(oPCN2SensorPanel);
+        tabPanelsList.add(envShield1Panel1);
         tabPanelsList.add(expShield1Panel);
         
         // Populate links between menu items and windows
@@ -137,13 +140,17 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_INT_SENSOR_CHANNEL_ID), jMenuItemIntHumSetup);
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.GENERIC_INFO_CHANNEL_ID), jMenuChemShieldInfo);
 
-        menuFromWindow.put(oPCN2SensorPanel.getSensorSetupDialogs().get(OPCN2ShieldPanel.OPCN2_SETUP_DIALOG_OPC), jMenuItemOPCN2Setup);
-        menuFromWindow.put(oPCN2SensorPanel.getSensorSetupDialogs().get(OPCN2ShieldPanel.OPCN2_SETUP_DIALOG_MOX), jMenuItemMOXSetup);
+        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOFAST), jMenuItemAudioFast);
+        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOSLOW), jMenuItemAudioSlow);
+        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_TEMPERATURE_HUMIDITY), jMenuItemTemperatureHum);
+        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_OPT3001), jMenuItemOPT3001);
+        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.GENERIC_INFO_CHANNEL_ID), jMenuEnvShieldInfo);
 
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_RD200M), jMenuItemRD200MSetup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_D300), jMenuItemD300Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_PMS5003), jMenuItemPMS5003Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_OPCN3), jMenuItemOPCN3Setup);
+        menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(expShield1Panel.EXPSHIELD1_SETUP_DIALOG_SPS30), jMenuItemSPS30Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_GENERIC_INFO), jMenuItemExpShieldInfo);
         
         menuFromWindow.put(sensorPresetManagerDialog, jMenuItemSensorDBEdit);
@@ -153,7 +160,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         for (SensorSetupDialog dialog:chemSensorPanel.getSensorSetupDialogs()) {
             dialog.addWindowListener(this);
         }
-        for (SensorSetupDialog dialog:oPCN2SensorPanel.getSensorSetupDialogs()) {
+        for (SensorSetupDialog dialog:envShield1Panel1.getSensorSetupDialogs()) {
             dialog.addWindowListener(this);
         }
         for (SensorSetupDialog dialog:expShield1Panel.getSensorSetupDialogs()) {
@@ -258,8 +265,8 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jTabbedPane1 = new javax.swing.JTabbedPane();
         chemSensorPanel = new airsenseur.dev.chemsensorpanel.ChemShieldPanel(this, shieldProtocolLayer, logger)
         ;
-        oPCN2SensorPanel = new airsenseur.dev.chemsensorpanel.OPCN2ShieldPanel(this, shieldProtocolLayer, logger);
         expShield1Panel = new airsenseur.dev.chemsensorpanel.ExpShield1Panel(this, shieldProtocolLayer, logger);
+        envShield1Panel1 = new airsenseur.dev.chemsensorpanel.EnvShield1Panel(this, shieldProtocolLayer, logger);
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemSaveConfig = new javax.swing.JMenuItem();
@@ -291,16 +298,21 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuItemIntHumSetup = new javax.swing.JMenuItem();
         jSeparator6 = new javax.swing.JPopupMenu.Separator();
         jMenuChemShieldInfo = new javax.swing.JMenuItem();
-        jMenuOPCN2 = new javax.swing.JMenu();
-        jMenuItemOPCN2Setup = new javax.swing.JMenuItem();
-        jMenuItemMOXSetup = new javax.swing.JMenuItem();
         jMenuExpShield1 = new javax.swing.JMenu();
         jMenuItemRD200MSetup = new javax.swing.JMenuItem();
         jMenuItemD300Setup = new javax.swing.JMenuItem();
         jMenuItemPMS5003Setup = new javax.swing.JMenuItem();
         jMenuItemOPCN3Setup = new javax.swing.JMenuItem();
+        jMenuItemSPS30Setup = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         jMenuItemExpShieldInfo = new javax.swing.JMenuItem();
+        jMenuEnvShield1 = new javax.swing.JMenu();
+        jMenuItemAudioFast = new javax.swing.JMenuItem();
+        jMenuItemAudioSlow = new javax.swing.JMenuItem();
+        jMenuItemTemperatureHum = new javax.swing.JMenuItem();
+        jMenuItemOPT3001 = new javax.swing.JMenuItem();
+        jSeparator7 = new javax.swing.JPopupMenu.Separator();
+        jMenuEnvShieldInfo = new javax.swing.JMenuItem();
         jMenuSensorsDB = new javax.swing.JMenu();
         jMenuItemSensorDBEdit = new javax.swing.JMenuItem();
 
@@ -323,8 +335,8 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         setLocationByPlatform(true);
 
         jTabbedPane1.addTab("Chemical Sensor Shield", chemSensorPanel);
-        jTabbedPane1.addTab("OPC-N2 Sensor Shield", oPCN2SensorPanel);
         jTabbedPane1.addTab("ExpShield1", expShield1Panel);
+        jTabbedPane1.addTab("EnvShield1", envShield1Panel1);
 
         jMenuFile.setText("File");
 
@@ -533,26 +545,6 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
 
         jMenuBar.add(jMenuChemSensors);
 
-        jMenuOPCN2.setText("OPC-N2 Shield");
-
-        jMenuItemOPCN2Setup.setText("OPC-N2 Setup");
-        jMenuItemOPCN2Setup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemOPCN2SetupActionPerformed(evt);
-            }
-        });
-        jMenuOPCN2.add(jMenuItemOPCN2Setup);
-
-        jMenuItemMOXSetup.setText("MOX Setup");
-        jMenuItemMOXSetup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemMOXSetupActionPerformed(evt);
-            }
-        });
-        jMenuOPCN2.add(jMenuItemMOXSetup);
-
-        jMenuBar.add(jMenuOPCN2);
-
         jMenuExpShield1.setText("ExpShield1");
 
         jMenuItemRD200MSetup.setText("RD200M");
@@ -586,6 +578,14 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
             }
         });
         jMenuExpShield1.add(jMenuItemOPCN3Setup);
+
+        jMenuItemSPS30Setup.setText("SPS30");
+        jMenuItemSPS30Setup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSPS30SetupActionPerformed(evt);
+            }
+        });
+        jMenuExpShield1.add(jMenuItemSPS30Setup);
         jMenuExpShield1.add(jSeparator4);
 
         jMenuItemExpShieldInfo.setText("Generic Information");
@@ -597,6 +597,51 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuExpShield1.add(jMenuItemExpShieldInfo);
 
         jMenuBar.add(jMenuExpShield1);
+
+        jMenuEnvShield1.setText("EnvShield1");
+
+        jMenuItemAudioFast.setText("Audio Fast");
+        jMenuItemAudioFast.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemAudioFastActionPerformed(evt);
+            }
+        });
+        jMenuEnvShield1.add(jMenuItemAudioFast);
+
+        jMenuItemAudioSlow.setText("Audio Slow");
+        jMenuItemAudioSlow.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemAudioSlowActionPerformed(evt);
+            }
+        });
+        jMenuEnvShield1.add(jMenuItemAudioSlow);
+
+        jMenuItemTemperatureHum.setText("Temp/Humid");
+        jMenuItemTemperatureHum.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemTemperatureHumActionPerformed(evt);
+            }
+        });
+        jMenuEnvShield1.add(jMenuItemTemperatureHum);
+
+        jMenuItemOPT3001.setText("Light (OPT3001)");
+        jMenuItemOPT3001.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemOPT3001ActionPerformed(evt);
+            }
+        });
+        jMenuEnvShield1.add(jMenuItemOPT3001);
+        jMenuEnvShield1.add(jSeparator7);
+
+        jMenuEnvShieldInfo.setText("Generic Information");
+        jMenuEnvShieldInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuEnvShieldInfoActionPerformed(evt);
+            }
+        });
+        jMenuEnvShield1.add(jMenuEnvShieldInfo);
+
+        jMenuBar.add(jMenuEnvShield1);
 
         jMenuSensorsDB.setText("Database");
 
@@ -810,7 +855,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         configFile.openFile(selectedFile, false);
         for (int tabIndex = 0; tabIndex < tabPanelsList.size(); tabIndex++) {
             
-            configFile.generateBoardSession();
+            configFile.generateBoardSession(tabSessions[tabIndex]);
             configFile.appendCommands(getCurrentConfiguration(tabIndex, false));
         }
 
@@ -836,11 +881,12 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         boolean connectedStatus = connected;
         connected = false;
         
-        // Read the configuration file
-        configFile.openFile(selectedFile, true);
-        for (int tabSession = 0; tabSession < tabPanelsList.size(); tabSession++) {
+        // Read the typedSession format configuration file
+        configFile.openFile(selectedFile, true);        
+        for (int tab = 0; tab < tabPanelsList.size(); tab++) {
             
             AppDataMessage configurationMessage;
+            Integer tabSession = tabSessions[tab];
             while ((configurationMessage = configFile.getNextCommand(tabSession)) != null) {
 
                 // The configuration file is a container of commands set to the
@@ -852,7 +898,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
                 shieldProtocolLayer.toAnswerCommandString(configurationMessage);
                 
                 // Propagate to the proper tab
-                tabPanelsList.get(tabSession).onDataMessageFromConfiguration(configurationMessage);
+                tabPanelsList.get(tab).onDataMessageFromConfiguration(configurationMessage);
             }
         }
         
@@ -871,14 +917,6 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private void jMenuItemSensorDBEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSensorDBEditActionPerformed
         updateMenuItemVisibilityForDialog(sensorPresetManagerDialog);
     }//GEN-LAST:event_jMenuItemSensorDBEditActionPerformed
-
-    private void jMenuItemOPCN2SetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemOPCN2SetupActionPerformed
-        updateMenuItemVisibilityForDialog(oPCN2SensorPanel.getSensorSetupDialogs().get(OPCN2ShieldPanel.OPCN2_SETUP_DIALOG_OPC));
-    }//GEN-LAST:event_jMenuItemOPCN2SetupActionPerformed
-
-    private void jMenuItemMOXSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMOXSetupActionPerformed
-        updateMenuItemVisibilityForDialog(oPCN2SensorPanel.getSensorSetupDialogs().get(OPCN2ShieldPanel.OPCN2_SETUP_DIALOG_MOX));
-    }//GEN-LAST:event_jMenuItemMOXSetupActionPerformed
 
     private void jMenuItemConnectNetworkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemConnectNetworkActionPerformed
         RemoteConnectionDialog connectionDialog = new RemoteConnectionDialog(this, true);
@@ -965,6 +1003,30 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private void jMenuItemIntHumSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemIntHumSetupActionPerformed
         updateMenuItemVisibilityForDialog(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_INT_SENSOR_CHANNEL_ID));
     }//GEN-LAST:event_jMenuItemIntHumSetupActionPerformed
+
+    private void jMenuItemAudioFastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAudioFastActionPerformed
+        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOFAST));
+    }//GEN-LAST:event_jMenuItemAudioFastActionPerformed
+
+    private void jMenuItemAudioSlowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAudioSlowActionPerformed
+        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOSLOW));
+    }//GEN-LAST:event_jMenuItemAudioSlowActionPerformed
+
+    private void jMenuItemTemperatureHumActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemTemperatureHumActionPerformed
+        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_TEMPERATURE_HUMIDITY));
+    }//GEN-LAST:event_jMenuItemTemperatureHumActionPerformed
+
+    private void jMenuItemOPT3001ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemOPT3001ActionPerformed
+        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_OPT3001));
+    }//GEN-LAST:event_jMenuItemOPT3001ActionPerformed
+
+    private void jMenuEnvShieldInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuEnvShieldInfoActionPerformed
+        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.GENERIC_INFO_CHANNEL_ID));
+    }//GEN-LAST:event_jMenuEnvShieldInfoActionPerformed
+
+    private void jMenuItemSPS30SetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSPS30SetupActionPerformed
+        updateMenuItemVisibilityForDialog(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_SPS30));
+    }//GEN-LAST:event_jMenuItemSPS30SetupActionPerformed
 
     protected List<AppDataMessage> getCurrentConfiguration(int tabPanelIndex, boolean forceRestartSampling) {
         
@@ -1070,10 +1132,13 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private airsenseur.dev.chemsensorpanel.ChemShieldPanel chemSensorPanel;
+    private airsenseur.dev.chemsensorpanel.EnvShield1Panel envShield1Panel1;
     private airsenseur.dev.chemsensorpanel.ExpShield1Panel expShield1Panel;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuChemSensors;
     private javax.swing.JMenuItem jMenuChemShieldInfo;
+    private javax.swing.JMenu jMenuEnvShield1;
+    private javax.swing.JMenuItem jMenuEnvShieldInfo;
     private javax.swing.JMenu jMenuExpShield1;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItem1;
@@ -1084,6 +1149,8 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JMenuItem jMenuItemAudioFast;
+    private javax.swing.JMenuItem jMenuItemAudioSlow;
     private javax.swing.JMenuItem jMenuItemChemSetup1;
     private javax.swing.JMenuItem jMenuItemChemSetup2;
     private javax.swing.JMenuItem jMenuItemChemSetup3;
@@ -1098,21 +1165,21 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItemExtTempSetup;
     private javax.swing.JMenuItem jMenuItemIntHumSetup;
     private javax.swing.JMenuItem jMenuItemIntTempSetup;
-    private javax.swing.JMenuItem jMenuItemMOXSetup;
-    private javax.swing.JMenuItem jMenuItemOPCN2Setup;
     private javax.swing.JMenuItem jMenuItemOPCN3Setup;
+    private javax.swing.JMenuItem jMenuItemOPT3001;
     private javax.swing.JMenuItem jMenuItemPMS5003Setup;
     private javax.swing.JMenuItem jMenuItemPressSetup;
     private javax.swing.JMenuItem jMenuItemRD200MSetup;
     private javax.swing.JMenuItem jMenuItemReadConfig;
     private javax.swing.JMenuItem jMenuItemReadFromBoard;
+    private javax.swing.JMenuItem jMenuItemSPS30Setup;
     private javax.swing.JMenuItem jMenuItemSaveConfig;
     private javax.swing.JMenuItem jMenuItemSaveSensorProperties;
     private javax.swing.JMenuItem jMenuItemSensorDBEdit;
     private javax.swing.JMenuItem jMenuItemStartSampling;
     private javax.swing.JMenuItem jMenuItemStopSampling;
+    private javax.swing.JMenuItem jMenuItemTemperatureHum;
     private javax.swing.JMenuItem jMenuItemWriteToBoard;
-    private javax.swing.JMenu jMenuOPCN2;
     private javax.swing.JMenu jMenuSensorBus;
     private javax.swing.JMenu jMenuSensorsDB;
     private javax.swing.JPopupMenu.Separator jSeparator1;
@@ -1121,8 +1188,8 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JPopupMenu.Separator jSeparator4;
     private javax.swing.JPopupMenu.Separator jSeparator5;
     private javax.swing.JPopupMenu.Separator jSeparator6;
+    private javax.swing.JPopupMenu.Separator jSeparator7;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private airsenseur.dev.chemsensorpanel.OPCN2ShieldPanel oPCN2SensorPanel;
     // End of variables declaration//GEN-END:variables
 
     

@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AirSensEURClient {
     
-    private static final String VERSION = "AirSensEUR Client R1.0.0";
+    private static final String VERSION = "AirSensEUR Client R1.1.0";
     
     private static final int RETURN_OK = 0;
     private static final int RETURN_ERROR = 1;

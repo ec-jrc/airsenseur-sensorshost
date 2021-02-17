@@ -25,20 +25,23 @@
 package airsenseur.dev.persisters.influxdb;
 
 import airsenseur.dev.exceptions.PersisterException;
+import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.json.SensorConfig;
+import airsenseur.dev.persisters.SensorsConfigPersister;
 import java.util.List;
 
 /**
  * Implements a sensor configuration persister through influxDB
  * @author marco
  */
-public class SensorConfigPersisterInfluxDB extends PersiterInfluxDB {
+public class SensorConfigPersisterInfluxDB extends PersiterInfluxDB implements SensorsConfigPersister {
     
     public SensorConfigPersisterInfluxDB(String dataSetName, String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, boolean useLineProtocol, boolean useSSL, int timeout) {
         super(dataSetName, dbHost, dbPort, dbName, dbUser, dbPassword, useLineProtocol, useSSL, timeout);
     }
     
     
+    @Override
     public boolean addSensorsConfig(List<SensorConfig> sensorsConfig) throws PersisterException {
         
         if (sensorsConfig == null) {
@@ -56,5 +59,10 @@ public class SensorConfigPersisterInfluxDB extends PersiterInfluxDB {
         boolean bResult = sendDataToInfluxDB(series);
         
         return bResult;
+    }
+
+    @Override
+    public String getPersisterMarker(int channel) {
+        return HistoryEventContainer.EVENT_LATEST_INFLUXDB_SENSORCONFIGPUSH_TS;
     }
 }

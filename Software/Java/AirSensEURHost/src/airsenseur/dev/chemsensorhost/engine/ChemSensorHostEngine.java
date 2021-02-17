@@ -142,7 +142,11 @@ public class ChemSensorHostEngine extends TaskScheduler implements SensorBus.Sen
         try {            
             
             // Initialize the sensor bus transport logic (only point to multipoint allowed here)
-            sensorBusHandler.init(this, CommChannelFactory.commChannelType.SERIAL, TransportLogicFactory.transportLogicType.POINT_TO_MULTIPOINT);
+            if (Configuration.getConfig().useCRCInSensorBus()) {
+                log.info("Inizializing Sensor Bus with CRC enabled");
+            }
+            
+            sensorBusHandler.init(this, CommChannelFactory.commChannelType.SERIAL, TransportLogicFactory.transportLogicType.POINT_TO_MULTIPOINT, Configuration.getConfig().useCRCInSensorBus());
             sensorBusHandler.connectToBus(Configuration.getConfig().serialPort());
         
             stateAutodiscover.init(this);       

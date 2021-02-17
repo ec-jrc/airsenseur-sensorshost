@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AirSensEURDataPushMain {
     
-    static final String VERSION = "AirSensEURDataPush V2.1.3D";
+    static final String VERSION = "AirSensEURDataPush R2.2.2";
        
     private static final Logger log = LoggerFactory.getLogger(AirSensEURDataPushMain.class);
     
@@ -58,9 +58,19 @@ public class AirSensEURDataPushMain {
             return;
         }
         
-        // This is the main engine
-        dataPushEngine.start(config);
-
+        // Run if the engine is enabled by configuration
+        if (config.getEnabled()) {
+            
+            // This is the main engine
+            dataPushEngine.start(config);
+            
+        } else {
+            try {
+                log.info("AirSensEURDataPush running in " + config.getWorkingModeString() + " mode has been disabled by configuration");
+            } catch (ConfigurationException ex) {
+            }
+        }
+        
         log.info("AirSensEURDataPush terminated");
     }        
 }

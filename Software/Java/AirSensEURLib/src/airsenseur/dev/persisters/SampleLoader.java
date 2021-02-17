@@ -41,4 +41,5 @@ public interface SampleLoader {
     long getMinimumTimestamp(int channel) throws PersisterException;
     long getMaximumTimestamp(int channel) throws PersisterException;
     List<SampleDataContainer> loadSamples(int channel, long firstTimeStamp, long lastTimeStamp) throws PersisterException;
+    List<SampleDataContainer> loadSamples(int channel, long firstTimeStamp, long lastTimeStamp, long averageTime) throws PersisterException;
 }

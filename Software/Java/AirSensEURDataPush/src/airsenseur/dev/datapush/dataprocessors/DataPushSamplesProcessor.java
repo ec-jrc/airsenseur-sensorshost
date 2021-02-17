@@ -64,6 +64,11 @@ public class DataPushSamplesProcessor implements DataPushProcessor {
     public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs) throws PersisterException {
         return new DataPushSamplesDataContainer(sampleLoader.loadSamples(channel, minMaxTs.getMin(), minMaxTs.getMax()));
     }
+    
+    @Override
+    public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs, long averageTime) throws PersisterException {
+        return new DataPushSamplesDataContainer(sampleLoader.loadSamples(channel, minMaxTs.getMin(), minMaxTs.getMax(), averageTime));
+    }
 
     @Override
     public boolean sendDataToRemotePersistence(DataPushDataContainer dataContainer) throws PersisterException {
@@ -87,5 +92,10 @@ public class DataPushSamplesProcessor implements DataPushProcessor {
     @Override
     public long getTimeSpanMultiplier() {
         return 1;
+    }
+
+    @Override
+    public long getTimeAveragerMultiplier() {
+        return 1000;
     }
 }

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SampleLoaderSQL extends LoaderSQL implements SampleLoader {
     
-    private static final Logger log = LoggerFactory.getLogger(SampleLoaderSQL.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SampleLoaderSQL.class);
     
     private final static String SAMPLES_TABLE_NAME = "measures"; 
     private final static String TIMESTAMP_COLUMN_NAME = "collectedts";
@@ -126,7 +126,7 @@ public class SampleLoaderSQL extends LoaderSQL implements SampleLoader {
             }
             
         } catch (SQLiteException ex) {
-            log.error("Error loading samples from database");
+            LOG.error("Error loading samples from database");
             throw new PersisterException(ex.getMessage());
         } finally {
             if (st1 != null) {
@@ -135,5 +135,62 @@ public class SampleLoaderSQL extends LoaderSQL implements SampleLoader {
         }
         
         return result;
+    }
+
+    @Override
+    public List<SampleDataContainer> loadSamples(int channel, long firstTimeStamp, long lastTimeStamp, long averageTime) throws PersisterException {
+        
+        List<SampleDataContainer> result = new ArrayList<>();
+        SQLiteStatement st1 = null;
+        try {
+            String channelSql = "";
+            if (channel != SampleLoader.CHANNEL_INVALID) {
+                channelSql = " AND channel = ? ";
+            }
+            
+            st1 = getDb().prepare("SELECT AVG(`value`), AVG(`evvalue`), MAX(`timestamp`), `channel`, `channelName`, AVG(`gpstimestamp`), AVG(`gpslatitude`), AVG(`gpslongitude`), AVG(`gpsaltitude`), MAX(`collectedts`), AVG(`calibrated`) "
+                            + "FROM " + SAMPLES_TABLE_NAME + " " 
+                            + "WHERE collectedts >= ? AND collectedts < ? " + channelSql +  "GROUP BY channel ORDER BY collectedts ASC");
+            
+            st1.bind(1, firstTimeStamp);
+            st1.bind(2, lastTimeStamp);
+            
+            if (channel != SampleLoader.CHANNEL_INVALID) {
+                st1.bind(3, channel);
+            }
+            
+            while (st1.step()) {
+                int value = st1.columnInt(0);
+                double evvalue = st1.columnDouble(1);
+                int sensorTimeStamp = st1.columnInt(2);
+                int sensorChannel = st1.columnInt(3);
+                String name = st1.columnString(4);
+                double gpsTimeStamp = st1.columnDouble(5);
+                double gpsLatitude = st1.columnDouble(6);
+                double gpsLongitude = st1.columnDouble(7);
+                double gpsAltitude = st1.columnDouble(8);
+                long collectedTs = st1.columnLong(9);
+                double calibratedVal = st1.columnDouble(10);
+                
+                SampleDataContainer data = new SampleDataContainer(sensorChannel);
+                data.setName(name);
+                data.updateSample(value, evvalue, sensorTimeStamp);
+                data.updateGPSValues(gpsTimeStamp, gpsLatitude, gpsLongitude, gpsAltitude);
+                data.setCollectedTimestamp(collectedTs);
+                data.setCalibratedVal(calibratedVal);
+                
+                result.add(data);
+            }
+            
+        } catch (SQLiteException ex) {
+            LOG.error("Error loading samples from database");
+            throw new PersisterException(ex.getMessage());
+        } finally {
+            if (st1 != null) {
+                st1.dispose();
+            }
+        }
+        
+        return result;        
     }
 }

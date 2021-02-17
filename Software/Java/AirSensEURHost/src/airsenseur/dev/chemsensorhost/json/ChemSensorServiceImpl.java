@@ -33,6 +33,7 @@ import airsenseur.dev.exceptions.SensorBusException;
 import airsenseur.dev.json.BoardInfo;
 import airsenseur.dev.json.ChemSensorService;
 import airsenseur.dev.json.HostStatus;
+import airsenseur.dev.json.JsonFieldsUtils;
 import airsenseur.dev.json.RawCommand;
 import airsenseur.dev.json.SampleData;
 import java.util.ArrayList;
@@ -64,12 +65,9 @@ public class ChemSensorServiceImpl implements ChemSensorService {
         
         List<BoardInfo> boardInfoList = new ArrayList<>();
         for (SensorBoardInfo info:sensorHost.getBoards().values()) {
-            BoardInfo boardInfo = new BoardInfo();
-            boardInfo.boardId = info.getBoardId();
-            boardInfo.timestamp = sensorHost.getLastConfigurationTimestamp();
-            boardInfo.fwRevision = info.getFirmware().getValue();
-            boardInfo.serial = info.getSerial().getValue();
-            boardInfo.boardType = "" + info.getBoardType();
+            BoardInfo boardInfo = JsonFieldsUtils.safeCheck(new BoardInfo(info.getBoardId(), sensorHost.getLastConfigurationTimestamp(), 
+                                                "" + info.getBoardType(), info.getFirmware().getValue(), 
+                                                info.getSerial().getValue()));
             boardInfoList.add(boardInfo);
         }
         
@@ -83,13 +81,14 @@ public class ChemSensorServiceImpl implements ChemSensorService {
             SensorInfo sensorInfo = sensorHost.getSensors().get(sensorId);
             SensorConfig sensorConfig = sensorInfo.getSensorConfig();
             
+            int boardId = sensorConfig.getBoardId();
             String name = sensorConfig.getName().isSet()? sensorConfig.getName().getValue() : "";
             String serial = sensorConfig.getSerial().isSet()? sensorConfig.getSerial().getValue() : "";
             String measurementUnits = sensorConfig.getMeasurementUnits().isSet()? sensorConfig.getMeasurementUnits().getValue() : "";
             Integer samplingPeriod = sensorConfig.getSamplingPeriod().isSet()? sensorConfig.getSamplingPeriod().getValue() : 0;
             Boolean enabled = sensorConfig.getEnabled().isSet()? sensorConfig.getEnabled().getValue() : Boolean.TRUE;
             
-            return new airsenseur.dev.json.SensorConfig(name, serial, measurementUnits, sensorId, samplingPeriod, sensorHost.getLastConfigurationTimestamp(), enabled);
+            return airsenseur.dev.json.JsonFieldsUtils.safeCheck(new airsenseur.dev.json.SensorConfig(name, serial, measurementUnits, sensorId, boardId, samplingPeriod, sensorHost.getLastConfigurationTimestamp(), enabled));
         }
         
         return null;
@@ -129,7 +128,7 @@ public class ChemSensorServiceImpl implements ChemSensorService {
             String name = sensorConfig.getName().isSet()? sensorConfig.getName().getValue() : "";
             String serial = sensorConfig.getSerial().isSet()? sensorConfig.getSerial().getValue() : "";
                         
-            return new SampleData(name, serial, sensorValue.getValue(), sensorValue.getTimeStamp(), sensorValue.getEvalSampleVal());
+            return JsonFieldsUtils.safeCheck(new SampleData(name, serial, sensorValue.getValue(), sensorValue.getTimeStamp(), sensorValue.getEvalSampleVal()));
         }
         
         return null;

@@ -28,10 +28,9 @@ import airsenseur.dev.datapush.MinMax;
 import airsenseur.dev.datapush.datacontainers.DataPushDataContainer;
 import airsenseur.dev.datapush.datacontainers.DataPushSensorConfigDataContainer;
 import airsenseur.dev.exceptions.PersisterException;
-import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.json.SensorConfig;
 import airsenseur.dev.persisters.SampleAndConfigurationLoader;
-import airsenseur.dev.persisters.influxdb.SensorConfigPersisterInfluxDB;
+import airsenseur.dev.persisters.SensorsConfigPersister;
 import java.util.List;
 
 /**
@@ -40,19 +39,20 @@ import java.util.List;
  */
 public class DataPushSensorConfigProcessor implements DataPushProcessor {
     
-    private final static long TIMESPAN_MULTIPLIER = 100;    
+    private final static long TIMESPAN_MULTIPLIER = 10000;    
+    private final static long TIMEAVERAGER_MULTIPLIER = TIMESPAN_MULTIPLIER;
     
     private final SampleAndConfigurationLoader dataLoader;
-    private final SensorConfigPersisterInfluxDB dataPersister;
+    private final SensorsConfigPersister dataPersister;
 
-    public DataPushSensorConfigProcessor(SampleAndConfigurationLoader dataLoader, SensorConfigPersisterInfluxDB dataPersister) {
+    public DataPushSensorConfigProcessor(SampleAndConfigurationLoader dataLoader, SensorsConfigPersister dataPersister) {
         this.dataLoader = dataLoader;
         this.dataPersister = dataPersister;
     }
     
     @Override
     public String getPersisterMarker(int channel) {
-        return HistoryEventContainer.EVENT_LATEST_INFLUXDB_SENSORCONFIGPUSH_TS;
+        return dataPersister.getPersisterMarker(channel);
     }
 
     @Override
@@ -66,6 +66,11 @@ public class DataPushSensorConfigProcessor implements DataPushProcessor {
     @Override
     public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs) throws PersisterException {
         return new DataPushSensorConfigDataContainer(dataLoader.loadSensorInfo(minMaxTs.getMin(), minMaxTs.getMax()));
+    }
+    
+    @Override
+    public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs, long averageTime) throws PersisterException {
+        return loadDataSetFromLocalPersistence(channel, minMaxTs);
     }
 
     @Override
@@ -88,5 +93,10 @@ public class DataPushSensorConfigProcessor implements DataPushProcessor {
     @Override
     public long getTimeSpanMultiplier() {
         return TIMESPAN_MULTIPLIER;
+    }
+
+    @Override
+    public long getTimeAveragerMultiplier() {
+        return TIMEAVERAGER_MULTIPLIER;
     }
 }

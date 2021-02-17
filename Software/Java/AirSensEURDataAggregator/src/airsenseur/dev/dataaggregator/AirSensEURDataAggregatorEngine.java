@@ -61,10 +61,9 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
     private List<BoardInfo> boardInfo;
     private Integer numOfSensors;
     
-    static final Logger log = LoggerFactory.getLogger(AirSensEURDataAggregatorEngine.class);
+    static final Logger LOG = LoggerFactory.getLogger(AirSensEURDataAggregatorEngine.class);
     
     private int cumulatedPollsWithValidHostConnection = 0;  // Periodically reconnect to sensor server seems improve the sensor server stability
-    private int cumulatedPollsWithZeroTimestamp = 0;
     private boolean applyTimestampCorrection = true;
     
     /**
@@ -73,6 +72,8 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
      */
     public boolean init() {
         
+
+
         Configuration config = Configuration.getConfig();
         
         applyTimestampCorrection = config.applyTimestampCorrection();
@@ -85,7 +86,7 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
             
             try {
                 result &= dataPersister.startNewLog();
-                // result &= sqlDataPersister.startNewLog(); // NOTE: We can't start here a SQLite new log because this is not the correct thread
+                // result &= sqlDataPersister.startNewLog(); // NOTE: We can't start here a SQLite new LOG because this is not the correct thread
             } catch (PersisterException ex) {
                 return false;
             }
@@ -99,10 +100,10 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
                 
                 Date date = new Date();
                 if (retry != 0) {
-                    log.info(date.toString() + ": Retrying in 2 seconds");
+                    LOG.info(date.toString() + ": Retrying in 2 seconds");
                     
                 } else {
-                    log.info(date.toString() + ": Too much retries. Exiting");
+                    LOG.info(date.toString() + ": Too much retries. Exiting");
                 }
                 retry--;
                 
@@ -133,7 +134,6 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
             sensorDataCollector.startSampling();
         }
 
-        cumulatedPollsWithZeroTimestamp = 0;
         cumulatedPollsWithValidHostConnection = 0;
         
         return result;
@@ -154,21 +154,27 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
         checkAndConnectToGPSServer();
         
         // Retrieve samples from the remote sensorDataCollector process
-        boolean oneSampleWithZeroTimestampFound = false;
+        boolean restartSamplingNeeded = false;
         for (int channel = 0; channel < numOfSensors; channel++) {
             
-            // Skip disabled sensors - TBD            
+            // Thake the proper channelData 
+            ChannelDataContainer channelData = channels.get(channel);
+            
+            // Skip disabled sensors
+            if (!channelData.isEnabled()) {
+                continue;
+            }
             
             // Check if it's time to poll this sensor, based on the known sensor periodicity
             long now = System.currentTimeMillis();
             
             // It's not time to poll this sensor
-            if ((now - channels.get(channel).getLastPollTimestamp()) < channels.get(channel).getPollPeriod()) {
+            if ((now - channelData.getLastPollTimestamp()) < channelData.getPollPeriod()) {
                 continue;
             }
             
             // Ok. It's time to poll this sensor
-            channels.get(channel).setLastPollTimestamp(now);            
+            channelData.setLastPollTimestamp(now);            
             
             SampleData remoteSample = sensorDataCollector.getLastSample(channel);
             if (remoteSample == null) {
@@ -177,15 +183,20 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
                 // This is probaly due to a loss of host connection.
                 // We expect a host connection handling on next poll.
                 Date date = new Date();
-                log.info(date.toString() + ": Error retrieving data for sensor " + channel);
+                LOG.info(date.toString() + ": Error retrieving data for sensor " + channel);
                 break;
             }
             
             // Valid samples have timestamp different than zero.
-            // Mark this poll time with a warning flag
             if (remoteSample.timeStamp == 0) {
                 
-                oneSampleWithZeroTimestampFound = true;
+                // We don't expect to have zero timestamp for several minutes.
+                // If not, this means at least one sensor board is not in sampling
+                // status (due to an unexpected reset or malfunction, for example).
+                // After a grace period, we ask for a start sample command again
+                if (channelData.checkIfTooZeroTsFound()) {
+                    restartSamplingNeeded = true;
+                }
             } else {
             
                 // Process and store the sample
@@ -194,23 +205,12 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
         }
         
         // If at least one sample with zero timestamp has been found
-        if (oneSampleWithZeroTimestampFound) {
-            
-            // We don't expect to have zero timestamp for several minutes.
-            // If not, this means at least one sensor board is not in sampling
-            // status (due to a reset, for example).
-            // After a grace, configurable period we ask for a start sample command
-            cumulatedPollsWithZeroTimestamp++;
-            if (cumulatedPollsWithZeroTimestamp > 100) {
-                cumulatedPollsWithZeroTimestamp = 0;
-                sensorDataCollector.startSampling();
-                
-                Date date = new Date();
-                log.info(date.toString() + ": Asking sensor server for start sampling due to repeated samples with empty timestamp found");
-            }
-        } else {
-            cumulatedPollsWithZeroTimestamp = 0;
-        }
+        if (restartSamplingNeeded) {
+            sensorDataCollector.startSampling();
+                                            
+            Date date = new Date();
+            LOG.info(date.toString() + ": Asking sensor server for start sampling due to repeated samples with empty timestamp found");
+        } 
     }
 
     private void processAndStoreSample(SampleData readSample, int channel, long now) {
@@ -267,13 +267,13 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
                     // Something goes wrong with the SQL logger
                     // Try to reconnect
                     Date date = new Date();
-                    log.info(date.toString() + ": Trying to reconnect with the SQL database");
+                    LOG.info(date.toString() + ": Trying to reconnect with the SQL database");
                     sqlDataPersister.startNewLog();
                 }
                 
             } catch (PersisterException ex) {
                 Date date = new Date();
-                log.info(date.toString() + ": Error when persisting read sample for sensor " + channel + " (" + ex.getErrorMessage() + ")");
+                LOG.info(date.toString() + ": Error when persisting read sample for sensor " + channel + " (" + ex.getErrorMessage() + ")");
             }
         }
     }
@@ -285,13 +285,13 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
         if (hostStatus == null) {
             
             // Something goes wrong. Try to reconnect to sensor board
-            log.info((new Date()).toString() + ": Sensor server not available. Trying to reconnect.");            
+            LOG.info((new Date()).toString() + ": Sensor server not available. Trying to reconnect.");            
             if (!reconnectToHostServer()) { 
                 return false;
             }
         } else {
             if (hostStatus.status == HostStatus.STATUS_BUSY) {
-                log.info((new Date()).toString() + ": Sensor server busy. Waiting for idle.");
+                LOG.info((new Date()).toString() + ": Sensor server busy. Waiting for idle.");
                 return false;
             }
         }
@@ -300,7 +300,7 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
         // the host sensor stability
         cumulatedPollsWithValidHostConnection++;
         if (cumulatedPollsWithValidHostConnection > 3600) {
-            log.info((new Date()).toString() + ": Periodically reconnecting to sensor server");
+            LOG.info((new Date()).toString() + ": Periodically reconnecting to sensor server");
             reconnectToHostServer();
         }
         
@@ -312,7 +312,7 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
         sensorDataCollector.disconnect();
         Configuration config = Configuration.getConfig();
         if (!sensorDataCollector.connect(config.getSensorHostname(), config.getSensorPort())) {
-            log.info((new Date()).toString() + ": No re-connect success. Sensor server not available.");
+            LOG.info((new Date()).toString() + ": No re-connect success. Sensor server not available.");
             return false;
         }
         
@@ -330,14 +330,14 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
             // Something goes wrong. Try to reconnect to the GPS server
             if (!gpsDataCollector.connect(config.getGPSHostname(), config.getGPSPort())) {
                 Date date = new Date();
-                log.info(date.toString() + ": GPS server not available. Samples will not be gps-located");
+                LOG.info(date.toString() + ": GPS server not available. Samples will not be gps-located");
             }
         }
         // Check for fixes (only for info message; gps data
         // are empty if no fix is available)
         if (!gpsDataCollector.isFixed()) {
             Date date = new Date();
-            log.info(date.toString() + ": No GPS Fix. Samples will not be gps-located");
+            LOG.info(date.toString() + ": No GPS Fix. Samples will not be gps-located");
         }
         return config;
     }
@@ -368,7 +368,7 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
         numOfSensors = sensorDataCollector.getNumSensors();
         if ((numOfSensors == null) || (numOfSensors == 0)) {
             Date date = new Date();
-            log.info(date.toString() + ": Error retrieving the number of configured sensors ");
+            LOG.info(date.toString() + ": Error retrieving the number of configured sensors ");
             return false;
         }
         
@@ -381,7 +381,7 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
         boardInfo = sensorDataCollector.getSensorBoardsInfo();
         if ((boardInfo == null) || boardInfo.isEmpty()) {
             Date date = new Date();
-            log.info(date.toString() + ": Error retrieving board information from the host. Board info will not be persisted ");
+            LOG.info(date.toString() + ": Error retrieving board information from the host. Board info will not be persisted ");
         }
     }
 
@@ -392,7 +392,7 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
             SensorConfig sensorData = sensorDataCollector.getSensorConfig(sensorId);
             if (sensorData == null) {
                 Date date = new Date();
-                log.info(date.toString() + ": Error retrieving sensor information from the host. Sensor info for sensor Id " + sensorId + " will not be persisted ");
+                LOG.info(date.toString() + ": Error retrieving sensor information from the host. Sensor info for sensor Id " + sensorId + " will not be persisted ");
                 sensorData = new SensorConfig(sensorId);
             } 
             
@@ -410,10 +410,12 @@ public class AirSensEURDataAggregatorEngine extends TaskScheduler {
             channels.clear();
             for (int sensorId = 0; sensorId < numSensors; sensorId++) {
                 long samplingPeriod = 0;
+                boolean enabled = true;
                 if (sensorsConfig.size() == numSensors) {
                     samplingPeriod = sensorsConfig.get(sensorId).samplingPeriod;
+                    enabled = sensorsConfig.get(sensorId).enabled;
                 }
-                channels.add(new ChannelDataContainer(new SampleDataContainer(sensorId), samplingPeriod));
+                channels.add(new ChannelDataContainer(new SampleDataContainer(sensorId), samplingPeriod, enabled));
             }
         }
         

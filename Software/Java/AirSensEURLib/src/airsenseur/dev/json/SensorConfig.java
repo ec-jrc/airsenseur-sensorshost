@@ -34,10 +34,11 @@ public class SensorConfig {
     public String serial = "";
     public String measurementUnits = "";
     public int sensorId = 0;
+    public int boardId = 0;
     public long samplingPeriod = 0;
     public long startSamplingTimestamp = 0;
     public boolean enabled = true;
-        
+
     
     public SensorConfig() {
     }
@@ -46,14 +47,14 @@ public class SensorConfig {
         this.sensorId = sensorId;
     }
     
-    public SensorConfig(String name, String serial, String measurementUnits, int sensorId, long samplingPeriod, long startSamplingTimestamp, boolean enabled) {
+    public SensorConfig(String name, String serial, String measurementUnits, int sensorId, int boardId, long samplingPeriod, long startSamplingTimestamp, boolean enabled) {
         this.name = name;
         this.serial = serial;
         this.measurementUnits = measurementUnits;
         this.sensorId = sensorId;
+        this.boardId = boardId;
         this.samplingPeriod = samplingPeriod;
         this.startSamplingTimestamp = startSamplingTimestamp;
         this.enabled = enabled;
-    }
+    }    
 }
-

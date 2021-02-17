@@ -179,6 +179,11 @@ public class Configuration extends Properties{
         return getBooleanValue(valString);
     }
     
+    public boolean useCRCInSensorBus() {
+        String valString = getProperty("useCRCInSensorBus", "false");
+        return getBooleanValue(valString);
+    }
+    
     private boolean getBooleanValue(String valString) {
         if ((valString.compareToIgnoreCase("true") == 0) || (valString.compareToIgnoreCase("yes") == 0)) {
             return true;

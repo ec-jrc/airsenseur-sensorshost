@@ -38,12 +38,16 @@ public class ChannelDataContainer {
     
     private final long samplingPreriod;
     private final long pollPeriod;
+    private final boolean enabled;    
+    private long numOfZeroTsFound;
     private long lastPollTs;
 
-    public ChannelDataContainer(SampleDataContainer value, long samplingPreriod) {
+    public ChannelDataContainer(SampleDataContainer value, long samplingPreriod, boolean enabled) {
         this.value = value;
         this.samplingPreriod = samplingPreriod;
+        this.enabled = enabled;
         this.pollPeriod = samplingPreriod/POLL_PERIOD_OVERSAMPLING;
+        this.numOfZeroTsFound = 0;        
         this.lastPollTs = 0;
     }
 
@@ -81,6 +85,26 @@ public class ChannelDataContainer {
     public long getSamplingPreriod() {
         return samplingPreriod;
     }
+
+    /**
+     * 
+     * @return true if the polling resulted in a zero-timestamped samples for too long time
+     */
+    public boolean checkIfTooZeroTsFound() {
+        numOfZeroTsFound++;
+        
+        if (numOfZeroTsFound > 100) {
+            numOfZeroTsFound = 0;
+            return true;
+        }
+        
+        return false;
+    }
     
-    
+    /**
+     * @return if the channel is enabled or not
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

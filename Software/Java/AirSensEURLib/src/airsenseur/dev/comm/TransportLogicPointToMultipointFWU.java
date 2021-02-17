@@ -32,8 +32,8 @@ public class TransportLogicPointToMultipointFWU extends TransportLogicPointToMul
     
     private final static char COMMPROTOCOL_PTM_VERSION = 'P';
 
-    public TransportLogicPointToMultipointFWU(AppDataMessageQueue rxDataQueue, AppDataMessageQueue txDataQueue, SensorBus parent, CommChannel commChannel) {
-        super(rxDataQueue, txDataQueue, parent, commChannel);
+    public TransportLogicPointToMultipointFWU(AppDataMessageQueue rxDataQueue, AppDataMessageQueue txDataQueue, SensorBus parent, CommChannel commChannel, boolean useCRCWhenAvailable) {
+        super(rxDataQueue, txDataQueue, parent, commChannel, useCRCWhenAvailable);
     }
 
     @Override

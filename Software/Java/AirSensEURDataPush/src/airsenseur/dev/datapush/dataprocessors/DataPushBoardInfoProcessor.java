@@ -28,10 +28,9 @@ import airsenseur.dev.datapush.MinMax;
 import airsenseur.dev.datapush.datacontainers.DataPushBoardInfoDataContainer;
 import airsenseur.dev.datapush.datacontainers.DataPushDataContainer;
 import airsenseur.dev.exceptions.PersisterException;
-import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.json.BoardInfo;
+import airsenseur.dev.persisters.BoardsPersister;
 import airsenseur.dev.persisters.SampleAndConfigurationLoader;
-import airsenseur.dev.persisters.influxdb.BoardPersisterInfluxDB;
 import java.util.List;
 
 /**
@@ -40,19 +39,20 @@ import java.util.List;
  */
 public class DataPushBoardInfoProcessor implements DataPushProcessor {
     
-    private final static long TIMESPAN_MULTIPLIER = 100;
+    private final static long TIMESPAN_MULTIPLIER = 10000;
+    private final static long TIMEAVERAGER_MULTIPLIER = TIMESPAN_MULTIPLIER;
     
     private final SampleAndConfigurationLoader dataLoader;
-    private final BoardPersisterInfluxDB dataPersister;
+    private final BoardsPersister dataPersister;
 
-    public DataPushBoardInfoProcessor(SampleAndConfigurationLoader dataLoader, BoardPersisterInfluxDB dataPersister) {
+    public DataPushBoardInfoProcessor(SampleAndConfigurationLoader dataLoader, BoardsPersister dataPersister) {
         this.dataLoader = dataLoader;
         this.dataPersister = dataPersister;
     }
 
     @Override
     public String getPersisterMarker(int channel) {
-        return HistoryEventContainer.EVENT_LATEST_INFLUXDB_BOARDINFOPUSH_TS;
+        return dataPersister.getPersisterMarker(channel);
     }
 
     @Override
@@ -66,6 +66,11 @@ public class DataPushBoardInfoProcessor implements DataPushProcessor {
     @Override
     public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs) throws PersisterException {
         return new DataPushBoardInfoDataContainer(dataLoader.loadBoardInfo(minMaxTs.getMin(), minMaxTs.getMax()));
+    }
+    
+    @Override
+    public DataPushDataContainer loadDataSetFromLocalPersistence(int channel, MinMax minMaxTs, long averageTime) throws PersisterException {
+        return loadDataSetFromLocalPersistence(channel, minMaxTs);
     }
 
     @Override
@@ -90,5 +95,10 @@ public class DataPushBoardInfoProcessor implements DataPushProcessor {
     @Override
     public long getTimeSpanMultiplier() {
         return TIMESPAN_MULTIPLIER;
+    }
+
+    @Override
+    public long getTimeAveragerMultiplier() {
+        return TIMEAVERAGER_MULTIPLIER;
     }
 }

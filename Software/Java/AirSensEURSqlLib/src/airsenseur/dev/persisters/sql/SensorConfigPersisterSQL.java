@@ -68,6 +68,7 @@ public class SensorConfigPersisterSQL extends SamplePersisterSQL {
         String sqlTable = "CREATE TABLE IF NOT EXISTS `" + SENSORS_TABLE_NAME + "` (" +
                             "`timestamp` INT NOT NULL, " +
                             "`channel` INT NOT NULL, " +
+                            "`boardId` INT NOT NULL, " +                
                             "`channelName` VARCHAR(255) NOT NULL, " +
                             "`serialId` VARCHAR(255) NOT NULL, " +
                             "`unit` VARCHAR(255) NOT NULL, " +
@@ -149,18 +150,19 @@ public class SensorConfigPersisterSQL extends SamplePersisterSQL {
                         
 
             st1 = db.prepare("INSERT INTO " + SENSORS_TABLE_NAME 
-                    + "       (`timestamp`, `channel`, `channelName`, `serialId`, `unit`, `samplePeriod`, `enabled` ) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?);", true);
+                    + "       (`timestamp`, `channel`, `boardId`, `channelName`, `serialId`, `unit`, `samplePeriod`, `enabled` ) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?);", true);
 
             for (SensorConfig sensorConfig : sensorsConfig) {
 
                 st1.bind(1, sensorConfig.startSamplingTimestamp);
                 st1.bind(2, sensorConfig.sensorId);
-                st1.bind(3, sensorConfig.name);
-                st1.bind(4, sensorConfig.serial);
-                st1.bind(5, sensorConfig.measurementUnits);
-                st1.bind(6, sensorConfig.samplingPeriod);
-                st1.bind(7, (sensorConfig.enabled)? 1 : 0);
+                st1.bind(3, sensorConfig.boardId);
+                st1.bind(4, sensorConfig.name);
+                st1.bind(5, sensorConfig.serial);
+                st1.bind(6, sensorConfig.measurementUnits);
+                st1.bind(7, sensorConfig.samplingPeriod);
+                st1.bind(8, (sensorConfig.enabled)? 1 : 0);
 
                 st1.step();
 

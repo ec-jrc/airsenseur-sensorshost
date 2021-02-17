@@ -25,20 +25,23 @@
 package airsenseur.dev.persisters.influxdb;
 
 import airsenseur.dev.exceptions.PersisterException;
+import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.json.BoardInfo;
+import airsenseur.dev.persisters.BoardsPersister;
 import java.util.List;
 
 /**
  * Implements a board information persister through influxDB
  * @author marco
  */
-public class BoardPersisterInfluxDB extends PersiterInfluxDB {
+public class BoardPersisterInfluxDB extends PersiterInfluxDB implements BoardsPersister {
     
     public BoardPersisterInfluxDB(String dataSetName, String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, boolean useLineProtocol, boolean useSSL, int timeout) {
         super(dataSetName, dbHost, dbPort, dbName, dbUser, dbPassword, useLineProtocol, useSSL, timeout);
     }
     
     
+    @Override
     public boolean addBoardsInfo(List<BoardInfo> boards) throws PersisterException {
         
         if (boards == null) {
@@ -57,5 +60,10 @@ public class BoardPersisterInfluxDB extends PersiterInfluxDB {
         
         return bResult;
     }
+
     
+    @Override
+    public String getPersisterMarker(int channel) {
+        return HistoryEventContainer.EVENT_LATEST_INFLUXDB_BOARDINFOPUSH_TS;
+    }
 }

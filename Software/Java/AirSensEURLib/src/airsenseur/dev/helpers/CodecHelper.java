@@ -61,7 +61,7 @@ public class CodecHelper {
             return result;
         }
     }
-    
+        
     public static char[] encodeValue(short value) {
         
         try {
@@ -73,6 +73,51 @@ public class CodecHelper {
             char[] result = { 0, 0 };
             return result;
         }
+    }
+    
+    public static char[] encodeValue(int value) {
+        try {
+    
+            short MSB = (short)((value >>> 16) & 0xFFFF);
+            short LSB = (short)(value & 0xFFFF);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append(encodeValue(MSB)).append(encodeValue(LSB));
+            return sb.toString().toCharArray();
+            
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.err.println("Out of bound on received char " + value);
+            char[] result = { 0, 0 };
+            return result;
+        }        
+    }
+    
+    public static char[] encodeValue(long value) {
+        try {
+    
+            short MSBH = (short)((value >>> 48) & 0xFFFF);
+            short MSBL = (short)((value >>> 32) & 0xFFFF);
+            short LSBH = (short)((value >>> 16) & 0xFFFF);
+            short LSBL = (short)(value & 0xFFFF);
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append(encodeValue(MSBH)).append(encodeValue(MSBL)).append(encodeValue(LSBH)).append(encodeValue(LSBL));
+            return sb.toString().toCharArray();
+            
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.err.println("Out of bound on received char " + value);
+            char[] result = { 0, 0 };
+            return result;
+        }
+    }
+    
+    public static char[] encodeValue(float value) {
+        
+        return encodeValue(Float.floatToIntBits(value));
+    }
+    
+    public static char[] encodeValue(double value) {
+        return encodeValue(Double.doubleToLongBits(value));
     }
     
     public static String encodeString(String value) {
@@ -105,7 +150,9 @@ public class CodecHelper {
         char[] data = { 0, 0 };
         
         buffer.getChars(start, start+2, data, 0);
-        return decodeChars(data);
+        
+        Long result = decodeChars(data);
+        return (result == null)? null : result.intValue();
     }
     
     public static Integer decodeShortAt(String buffer, int start) {
@@ -113,6 +160,16 @@ public class CodecHelper {
         char[] data = { 0, 0, 0, 0 };
         
         buffer.getChars(start, start+4, data, 0);
+        
+        Long result = decodeChars(data);
+        return (result == null)? null : result.intValue();
+    }
+    
+    public static Long decodeLongAt(String buffer, int start) {
+        char[] data = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        
+        buffer.getChars(start, start+8, data, 0);
+        
         return decodeChars(data);
     }
     
@@ -144,12 +201,12 @@ public class CodecHelper {
         char[] inBuffer = new char[8];
 
         buffer.getChars(start, start+8, inBuffer, 0);
-        return decodeChars(inBuffer);
+        return decodeChars(inBuffer).intValue();
     }
     
     public static String decodeStringAt(String buffer, int start) {
         
-        Integer rxChar;
+        Long rxChar;
         char[] inBuffer = new char[buffer.length()];
         buffer.getChars(start, inBuffer.length, inBuffer, start);
         StringBuilder sb = new StringBuilder(buffer.length()/2);
@@ -164,8 +221,8 @@ public class CodecHelper {
         return sb.toString();
     }        
     
-    public static Integer decodeChars(char[] data) {
-        int result = 0;
+    public static Long decodeChars(char[] data) {
+        long result = 0;
         
         for (int i = 0; i < data.length; i++) {
             result <<= 4;
@@ -182,8 +239,8 @@ public class CodecHelper {
         return result;
     }    
 
-    public static Integer decodeChars(char[] data, int start, int length) {
-        int result = 0;
+    public static Long decodeChars(char[] data, int start, int length) {
+        long result = 0;
         
         for (int i = start; i < start+length; i++) {
             result <<= 4;

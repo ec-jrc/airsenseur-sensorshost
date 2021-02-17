@@ -30,7 +30,7 @@ import airsenseur.dev.exceptions.ConfigurationException;
  *
  * @author marco
  */
-public class Configuration extends ConfigurationIFLINK {
+public class Configuration extends ConfigurationLoRa {
     
     public enum workingMode {
         INFLUX,
@@ -38,8 +38,9 @@ public class Configuration extends ConfigurationIFLINK {
         MQTT,
         AWS_MQTT,
         IFLINK,
+        LORA,
     };
-        
+    
     private static final Configuration singleton = new Configuration();
     
     public static Configuration getConfig() {
@@ -74,6 +75,11 @@ public class Configuration extends ConfigurationIFLINK {
         return getBooleanValue(value);
     }
     
+    public boolean getEnabled() {
+        String value = getProperty("enabled", "true");
+        return getBooleanValue(value);
+    }
+    
     public int getConnectionTimeout() {
         String value = getProperty("connectionTimeout", "60");
         return Integer.valueOf(value);
@@ -81,6 +87,11 @@ public class Configuration extends ConfigurationIFLINK {
     
     public int getAggregationFactor() {
         String value = getProperty("aggregationFactor", "1");
+        return Integer.valueOf(value);
+    }
+    
+    public int getAveragingPeriod() {
+        String value = getProperty("averagingPeriod", "0");
         return Integer.valueOf(value);
     }
     
@@ -111,6 +122,37 @@ public class Configuration extends ConfigurationIFLINK {
             return workingMode.IFLINK;
         }
         
+        if (!getLoRaAppKey().isEmpty()) {
+            return workingMode.LORA;
+        }
+        
         throw new ConfigurationException("Invalid configuration found. It's not possible to determine the working mode.");
+    }
+    
+    public String getWorkingModeString() throws ConfigurationException {
+        
+        workingMode mode = getWorkingMode();
+        switch (mode) {
+            case INFLUX:
+                return "InfluxDB";
+                
+            case SOSDB:
+                return "52North SOS DB";
+            
+            case MQTT:
+                return "MQTT";
+            
+            case AWS_MQTT:
+                return "AWS MQTT";
+                
+            case IFLINK:
+                return "IFLINK";
+                
+            case LORA:
+                return "LoRa";
+                
+            default:
+                return "Unknown";
+        }
     }
 }

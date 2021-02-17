@@ -38,7 +38,7 @@ public interface SensorBus {
         public void onNewMessageReady(AppDataMessage message);
     }
     
-    public void init(SensorBusMessageConsumer messageConsumer, CommChannelFactory.commChannelType commChannelType, TransportLogicFactory.transportLogicType type) throws SensorBusException;
+    public void init(SensorBusMessageConsumer messageConsumer, CommChannelFactory.commChannelType commChannelType, TransportLogicFactory.transportLogicType type, boolean useCRCWhenAvailable) throws SensorBusException;
 
     public void connectToBus(String busIdentifier) throws SensorBusException;
     public void disConnectFromBus();

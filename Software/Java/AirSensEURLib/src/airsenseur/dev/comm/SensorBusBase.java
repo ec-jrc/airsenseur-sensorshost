@@ -53,11 +53,11 @@ public abstract class SensorBusBase extends TaskScheduler implements SensorBus {
     
     // From SensorBus
     @Override
-    public void init(SensorBusMessageConsumer messageConsumer, CommChannelFactory.commChannelType commChannelType, TransportLogicFactory.transportLogicType type) throws SensorBusException {
+    public void init(SensorBusMessageConsumer messageConsumer, CommChannelFactory.commChannelType commChannelType, TransportLogicFactory.transportLogicType type, boolean useCRCWhenAvailable) throws SensorBusException {
         
         this.messageConsumer = messageConsumer;
         commChannel = CommChannelFactory.getInstance(commChannelType);
-        transportLogic = TransportLogicFactory.getInstance(type, rxDataQueue, txDataQueue, this, commChannel);
+        transportLogic = TransportLogicFactory.getInstance(type, rxDataQueue, txDataQueue, this, commChannel, useCRCWhenAvailable);
     }
 
     // From SensorBus

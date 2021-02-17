@@ -35,15 +35,20 @@ import airsenseur.dev.exceptions.PersisterException;
 import airsenseur.dev.history.HistoryEventContainer;
 import airsenseur.dev.history.HistoryPersister;
 import airsenseur.dev.history.sql.HistoryPersisterSQL;
+import airsenseur.dev.persisters.BoardsPersister;
 import airsenseur.dev.persisters.SampleAndConfigurationLoader;
 import airsenseur.dev.persisters.SampleLoader;
 import airsenseur.dev.persisters.SamplesPersister;
+import airsenseur.dev.persisters.SensorsConfigPersister;
 import airsenseur.dev.persisters.awsmqtt.SamplePersisterAWSMQTT;
 import airsenseur.dev.persisters.iflink.SamplePersisterIFLINKCurl;
 import airsenseur.dev.persisters.iflink.SamplePersisterIFLINKEmbedded;
 import airsenseur.dev.persisters.influxdb.BoardPersisterInfluxDB;
 import airsenseur.dev.persisters.influxdb.SamplePersisterInfluxDB;
 import airsenseur.dev.persisters.influxdb.SensorConfigPersisterInfluxDB;
+import airsenseur.dev.persisters.lora.BoardsPersisterLoRa;
+import airsenseur.dev.persisters.lora.SamplePersisterLoRa;
+import airsenseur.dev.persisters.lora.SensorsConfigPersisterLoRa;
 import airsenseur.dev.persisters.mqtt.SamplePersisterMQTT;
 import airsenseur.dev.persisters.sosdb.HistorySOSDB;
 import airsenseur.dev.persisters.sosdb.SamplePersisterSOSDB;
@@ -112,10 +117,13 @@ public class AirSensEURDataPush {
             } else if (workingMode == workingMode.SOSDB) {
                 samplePersister = initWM_SOSDB(config, channels);
                 
+            } else if (workingMode == workingMode.LORA) {
+                samplePersister = initWM_LoRa(config, channels, sampleAndConfigurationLoader);
+                
             } else {
                 samplePersister = initWM_iFLINK(config, channels);
                 
-            }   
+            }  
         } catch (PersisterException ex) {
             log.error(ex.getErrorMessage() + " Terminating.");
             return;
@@ -311,6 +319,43 @@ public class AirSensEURDataPush {
         
         return samplePersister;        
     }
+    
+    public SamplesPersister initWM_LoRa(Configuration configuration, List<Integer> channels, SampleAndConfigurationLoader sampleAndConfigurationLoader)  throws PersisterException {
+        
+        SamplesPersister samplePersister;
+        log.info("WorkingMode: LoRa");
+        
+        history = new HistoryPersisterSQL(config.getHistoryPath());
+        
+        SamplePersisterLoRa spLora = new SamplePersisterLoRa(config.getLoRaEndpoint(), 
+                                                            config.getLoRaAppEUI(),
+                                                            config.getLoRaAppKey(), 
+                                                            config.getLoRaDevEUI(),
+                                                            config.getLoRaRecipeFile(),
+                                                            config.getLoRaDataRate(), 
+                                                            config.getLoRaTxPower(), 
+                                                            config.getLoRaMaxRetry(), 
+                                                            config.getLoRaMaxPacketLength(),
+                                                            config.getLoRaSleepTime(),
+                                                            config.disableADR(),
+                                                            config.forceUnconfirmedMessages(),
+                                                            config.getAggregationFactor(),
+                                                            config.debugVerbose());
+        samplePersister = spLora;
+        channels.add(SampleLoader.CHANNEL_INVALID);
+        
+        BoardsPersister boardPersister = new BoardsPersisterLoRa(spLora.getLoRaDeviceComm());
+        SensorsConfigPersister sensorConfigPersister = new SensorsConfigPersisterLoRa(spLora.getLoRaDeviceComm());
+         
+        // Initialize processors. If the user don't need to send registry information, avoid to create the related processors
+        if (!configuration.getSkipRegistry()) {
+            
+            dataPushBoardInfoProcessor = new DataPushBoardInfoProcessor(sampleAndConfigurationLoader, boardPersister);
+            dataPushSensorsConfigProcessor = new DataPushSensorConfigProcessor(sampleAndConfigurationLoader, sensorConfigPersister);
+        }
+        
+        return samplePersister;
+    }
         
     private boolean processBoardConfig() throws PersisterException {
         if (dataPushBoardInfoProcessor == null) {
@@ -396,10 +441,19 @@ public class AirSensEURDataPush {
 
     private void processDataSetInTheRange(int channel, MinMax minMaxTs, DataPushProcessor dataPushProcessor) throws PersisterException {
         
+        // Calculate the timespan for each chunk. If averaging is required, the timestamp should be a multiple of it
+        long timeSpan = config.loadDataTimeSpan() * dataPushProcessor.getTimeSpanMultiplier();
+        long averagingPeriod = config.getAveragingPeriod() * dataPushProcessor.getTimeAveragerMultiplier();
+        if (averagingPeriod != 0) {
+            timeSpan = Math.min(averagingPeriod, timeSpan);
+            log.info("Averaging samples by " + averagingPeriod + " milliseconds");
+        }
+        
         // Loop on all available samples and store them to the remote server
         long minTs = minMaxTs.getMin();
         long maxTs = minMaxTs.getMax();
-        long timeSpan = config.loadDataTimeSpan() * dataPushProcessor.getTimeSpanMultiplier();
+        long maxTsForCompleteAverage = Math.max(minTs, maxTs - averagingPeriod);        
+        
         long lastTsUpdated = -1;
         DataPushDataContainer dataContainer = dataPushProcessor.clearDataContainer();
         do {
@@ -408,7 +462,11 @@ public class AirSensEURDataPush {
             int retry = 0;
             while (retry < config.getMaxDatabaseRetry()) {
                 try {
-                    dataContainer = dataPushProcessor.loadDataSetFromLocalPersistence(channel, new MinMax(minTs, minTs+timeSpan));
+                    if (averagingPeriod != 0) {
+                        dataContainer = dataPushProcessor.loadDataSetFromLocalPersistence(channel, new MinMax(minTs, minTs+timeSpan), averagingPeriod);
+                    } else {
+                        dataContainer = dataPushProcessor.loadDataSetFromLocalPersistence(channel, new MinMax(minTs, minTs+timeSpan));
+                    }
                     retry = config.getMaxDatabaseRetry();
                     
                 } catch (PersisterException ex) {
@@ -462,7 +520,7 @@ public class AirSensEURDataPush {
                     minTs++;
                 }
             }
-        } while (minTs < maxTs);        
+        } while (minTs < maxTsForCompleteAverage);        
     }
     
 }

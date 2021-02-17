@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <Properties>
+    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[858, 547]"/>
+    </Property>
+  </Properties>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
@@ -17,28 +22,27 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="sampleLogger0" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="sampleLogger3" alignment="0" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="sampleLoggerAudioFast" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerAudioSlow" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="sampleLogger1" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="sampleLogger2" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Component id="sampleLogger4" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLoggerTemperature" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLoggerHumidity" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLoggerOPT3001" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jCBBoardId" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jLabelBoardSerialNumber" min="-2" pref="159" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
@@ -47,24 +51,33 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jCBBoardId" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                      <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabelBoardSerialNumber" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jCBBoardId" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="sampleLogger0" min="-2" max="-2" attributes="0"/>
-                  <Component id="sampleLogger2" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="sampleLogger1" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="sampleLoggerAudioSlow" alignment="0" max="32767" attributes="0"/>
+                      <Component id="sampleLoggerAudioFast" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Component id="sampleLoggerTemperature" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerHumidity" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerOPT3001" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="sampleLogger3" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="sampleLogger4" alignment="0" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="217" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -102,18 +115,25 @@
         <Property name="text" type="java.lang.String" value="Board ID:"/>
       </Properties>
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel" name="sampleLogger0">
-      <AuxValues>
-        <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="OPCN2SensorPanel_sampleLogger0"/>
-      </AuxValues>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLoggerAudioFast">
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel" name="sampleLogger1">
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLoggerAudioSlow">
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLogger2">
+    <Component class="javax.swing.JLabel" name="jLabelBoardSerialNumber">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="--"/>
+      </Properties>
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLogger3">
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Board serial number:"/>
+      </Properties>
     </Component>
-    <Component class="airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel" name="sampleLogger4">
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLoggerTemperature">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLoggerHumidity">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLoggerOPT3001">
     </Component>
   </SubComponents>
 </Form>

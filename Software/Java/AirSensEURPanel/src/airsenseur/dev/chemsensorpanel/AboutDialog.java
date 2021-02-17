@@ -60,7 +60,7 @@ public class AboutDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
 
-        jLabel1.setText("AirSensEURPanel R0.8");
+        jLabel1.setText("AirSensEURPanel R0.9");
 
         jLabel2.setText("www.airsenseur.org");
 

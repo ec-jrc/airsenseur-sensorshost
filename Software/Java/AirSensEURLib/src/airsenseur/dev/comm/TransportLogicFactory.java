@@ -44,7 +44,8 @@ public class TransportLogicFactory {
                                                         AppDataMessageQueue rxDataQueue, 
                                                         AppDataMessageQueue txDataQueue, 
                                                         SensorBus parent, 
-                                                        CommChannel commChannel) throws SensorBusException {
+                                                        CommChannel commChannel, 
+                                                        boolean useCRCWhenAvailable) throws SensorBusException {
        
         switch (type) {
             
@@ -56,11 +57,11 @@ public class TransportLogicFactory {
             }
             
             case POINT_TO_MULTIPOINT: {
-                return new TransportLogicPointToMultipoint(rxDataQueue, txDataQueue, parent, commChannel);
+                return new TransportLogicPointToMultipoint(rxDataQueue, txDataQueue, parent, commChannel, useCRCWhenAvailable);
             }
             
             case POINT_TO_MULTIPOINT_FWU: {
-                return new TransportLogicPointToMultipointFWU(rxDataQueue, txDataQueue, parent, commChannel);
+                return new TransportLogicPointToMultipointFWU(rxDataQueue, txDataQueue, parent, commChannel, useCRCWhenAvailable);
             }
             
             default: {

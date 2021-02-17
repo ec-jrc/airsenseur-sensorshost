@@ -57,7 +57,7 @@ public class SensorBusCommunicationHandler extends SensorBusBase implements Sens
         
         // Inizialize with the proper communication channel and transport logic
         init(this, CommChannelFactory.commChannelType.SERIAL, 
-                usePointToMultipoint? TransportLogicFactory.transportLogicType.POINT_TO_MULTIPOINT : TransportLogicFactory.transportLogicType.POINT_TO_POINT);
+                usePointToMultipoint? TransportLogicFactory.transportLogicType.POINT_TO_MULTIPOINT : TransportLogicFactory.transportLogicType.POINT_TO_POINT, false);
         
         connectToBus(portId);
     }
@@ -65,7 +65,7 @@ public class SensorBusCommunicationHandler extends SensorBusBase implements Sens
     public void connectToNetworkedHost(String address) throws SensorBusException {
         
         // Initialize with the proper communication channel and transport logic
-        init(this, CommChannelFactory.commChannelType.JSON_RPC, TransportLogicFactory.transportLogicType.FLAT);
+        init(this, CommChannelFactory.commChannelType.JSON_RPC, TransportLogicFactory.transportLogicType.FLAT, false);
         
         connectToBus(address);
         takeBusOwnership();

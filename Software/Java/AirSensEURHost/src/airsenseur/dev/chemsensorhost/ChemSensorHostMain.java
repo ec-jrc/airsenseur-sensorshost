@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ChemSensorHostMain {
     
-    private static final String VERSION = "AirSensEUR Host R2.0.0";
+    private static final String VERSION = "AirSensEUR Host R2.1.0";
     
     /**
      * @param args the command line arguments

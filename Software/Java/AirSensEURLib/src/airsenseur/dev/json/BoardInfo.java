@@ -36,4 +36,15 @@ public class BoardInfo {
     public String boardType = "";
     public String fwRevision = "";
     public String serial = "";
+
+    public BoardInfo() {
+    }
+    
+    public BoardInfo(int boardId, long timestamp, String boardType, String fwRevision, String serial) {
+        this.boardId = boardId;
+        this.timestamp = timestamp;
+        this.boardType = boardType;
+        this.fwRevision = fwRevision;
+        this.serial = serial;
+    }
 }

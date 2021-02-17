@@ -26,6 +26,7 @@ package airsenseur.dev.persisters.sql;
 
 import airsenseur.dev.exceptions.PersisterException;
 import airsenseur.dev.json.BoardInfo;
+import airsenseur.dev.json.JsonFieldsUtils;
 import airsenseur.dev.json.SensorConfig;
 import airsenseur.dev.persisters.SampleAndConfigurationLoader;
 import com.almworks.sqlite4java.SQLiteException;
@@ -98,12 +99,7 @@ public class SensorConfigLoaderSQL extends SampleLoaderSQL implements SampleAndC
                 String boardFirmware = st1.columnString(3);
                 String boardSerial = st1.columnString(4);
                 
-                BoardInfo data = new BoardInfo();
-                data.timestamp = timestamp;
-                data.boardId = boardId;
-                data.boardType = boardType;
-                data.fwRevision = boardFirmware;
-                data.serial = boardSerial;
+                BoardInfo data = JsonFieldsUtils.safeCheck(new BoardInfo(boardId, timestamp, boardType, boardFirmware, boardSerial));
                 
                 
                 result.add(data);
@@ -128,8 +124,8 @@ public class SensorConfigLoaderSQL extends SampleLoaderSQL implements SampleAndC
         SQLiteStatement st1 = null;
         try {
             
-            //                              0               1           2            3           4         5            6
-            st1 = getDb().prepare("SELECT `timestamp`, `channel`, `channelName`, `serialId`, `unit`, `samplePeriod`, `enabled` "
+            //                              0               1           2            3           4         5            6          7
+            st1 = getDb().prepare("SELECT `timestamp`, `channel`, `boardId`, `channelName`, `serialId`, `unit`, `samplePeriod`, `enabled` "
                             + "FROM " + SENSORS_TABLE_NAME +  " "
                             + "WHERE " + TIMESTAMP_COLUMN_NAME + " >= ? AND " + TIMESTAMP_COLUMN_NAME + "  < ?  ORDER BY " + TIMESTAMP_COLUMN_NAME + "  ASC");
             
@@ -139,20 +135,14 @@ public class SensorConfigLoaderSQL extends SampleLoaderSQL implements SampleAndC
             while (st1.step()) {
                 long timestamp = st1.columnLong(0);
                 int channel = st1.columnInt(1);
-                String channelName = st1.columnString(2);
-                String serialId = st1.columnString(3);
-                String units = st1.columnString(4);
-                int samplePeriod = st1.columnInt(5);
-                int enabled = st1.columnInt(6);
+                int boardId = st1.columnInt(2);
+                String channelName = st1.columnString(3);
+                String serialId = st1.columnString(4);
+                String units = st1.columnString(5);
+                int samplePeriod = st1.columnInt(6);
+                int enabled = st1.columnInt(7);
                 
-                SensorConfig data = new SensorConfig();
-                data.startSamplingTimestamp = timestamp;
-                data.sensorId = channel;
-                data.name = channelName;
-                data.serial = serialId;
-                data.measurementUnits = units;
-                data.samplingPeriod = samplePeriod;
-                data.enabled = (enabled != 0);
+                SensorConfig data = JsonFieldsUtils.safeCheck(new SensorConfig(channelName, serialId, units, channel, boardId, samplePeriod, timestamp, (enabled != 0)));
                 
                 result.add(data);
             }

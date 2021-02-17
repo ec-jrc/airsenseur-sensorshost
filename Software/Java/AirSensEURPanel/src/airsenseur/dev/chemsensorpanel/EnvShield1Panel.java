@@ -27,8 +27,8 @@ package airsenseur.dev.chemsensorpanel;
 import airsenseur.dev.chemsensorpanel.helpers.FileLogger;
 import airsenseur.dev.chemsensorpanel.helpers.HostConfigSensorProperties;
 import airsenseur.dev.chemsensorpanel.helpers.HostConfigWriter;
-import airsenseur.dev.chemsensorpanel.setupdialogs.MOXSensorSetupDialog;
-import airsenseur.dev.chemsensorpanel.setupdialogs.OPCN2SensorSetupDialog;
+import airsenseur.dev.chemsensorpanel.setupdialogs.GenericBoardInfoDialog;
+import airsenseur.dev.chemsensorpanel.setupdialogs.GenericSensorSetupDIalog;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
 import airsenseur.dev.exceptions.SensorBusException;
@@ -41,39 +41,53 @@ import java.util.logging.Logger;
  *
  * @author marco
  */
-public class OPCN2ShieldPanel extends GenericTabPanel {
-
-    public final static int HISTOGRAM_BINS_NUM = 16;
-    public final static int PM_BINS_NUM = 3;
-    public final static int AVERAGER_FOR_PM1  = HISTOGRAM_BINS_NUM;
-    public final static int AVERAGER_FOR_PM25 = (AVERAGER_FOR_PM1+1);
-    public final static int AVERAGER_FOR_PM10 = (AVERAGER_FOR_PM25+1);
-    public final static int AVERAGER_FOR_TEMP = (AVERAGER_FOR_PM10+1);
-    public final static int AVERAGER_FOR_VOLUME = (AVERAGER_FOR_TEMP+1);
-    public final static int AVERAGER_FOR_MOX = (AVERAGER_FOR_VOLUME+1);
-
-    public final static int OPCN2SENSOR_NUM_OF_CHANNELS = 21;
-    public final static int OPCN2_CHANNEL_BIN1  = 0;
-    public final static int OPCN2_CHANNEL_PM1 = OPCN2_CHANNEL_BIN1 + HISTOGRAM_BINS_NUM;
-    public final static int MOX_CHANNEL = AVERAGER_FOR_MOX;
-    public final static int MOX_NUM_OF_CHANNELS = 1;
+public class EnvShield1Panel extends GenericTabPanel {
     
-    public final static int OPCN2_SETUP_DIALOG_OPC = 0;
-    public final static int OPCN2_SETUP_DIALOG_MOX = 1;
+    public final static int AUDIOFAST_CHANNEL = 0;
+    public final static int AUDIOFAST_NUM_OF_CHANNELS = 3;
     
-    private final static String DEFAULT_CHANNEL_MATH_EXPRESSION =  "x/10000";
+    public final static int AUDIOSLOW_CHANNEL = AUDIOFAST_CHANNEL + AUDIOFAST_NUM_OF_CHANNELS;
+    public final static int AUDIOSLOW_NUM_OF_CHANNELS = 3;
+    
+    public final static int TEMPERATURE_CHANNEL = AUDIOSLOW_CHANNEL + AUDIOFAST_NUM_OF_CHANNELS;
+    public final static int HUMIDITY_CHANNEL = TEMPERATURE_CHANNEL + 1;
+    
+    public final static int LIGHT_OPT3001_CHANNEL = HUMIDITY_CHANNEL + 1;
+        
+    public final static int ENVSHIELD1_NUM_OF_CHANNELS = LIGHT_OPT3001_CHANNEL + 1;
+
+    public final static int ENVSHIELD1_SETUP_DIALOG_AUDIOFAST = 0;
+    public final static int ENVSHIELD1_SETUP_DIALOG_AUDIOSLOW = 1;
+    public final static int ENVSHIELD1_SETUP_TEMPERATURE_HUMIDITY = 2;
+    public final static int ENVSHIELD1_SETUP_OPT3001 = 3;
+    public final static int GENERIC_INFO_CHANNEL_ID = ENVSHIELD1_SETUP_OPT3001 + 1;    
     
     private int selectedBoardId = AppDataMessage.BOARD_ID_UNDEFINED;
     private boolean boardEnabled = false;
-    private String boardSerialNumber = "";
+    
+    private final static String DEFAULT_CHANNEL_MATH_EXPRESSION =  "x";
+    private final static String AUDIOFAST_CHANNEL_MATH_EXPRESSION = "x/100";
+    private final static String AUDIOSLOW_CHANNEL_MATH_EXPRESSION = "x/100";
+    private final static String SHT31_TEMP_CHANNEL_MATH_EXPRESSION = "((x/65535*175) - 45.0)";
+    private final static String SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/65535)*100.0";
+    private final static String OPT3001_LIGHT_MATH_EXPRESSION = "x*2";
+    
+    private final static String AUDIOFAST_SENSOR_NAME = "Audio Fast";
+    private final static String AUDIOSLOW_SENSOR_NAME = "Audio Slow";
+    private final static String TEMP_HUMID_PANEL_NAME = "Temperature/Humidity";
+    private final static String TEMP_SENSOR_NAME = "Temperature";
+    private final static String HUM_SENSOR_NAME = "Humidity";
+    private final static String OPT3001_SENSOR_NAME = "Light";
     
     // The chemical sensors setup panels
     private final List<SensorSetupDialog> sensorSetupDialogs = new ArrayList<>();
     
     private final List<SampleLogger> sampleLoggerPanels = new ArrayList<>();
     
+    private String boardSerialNumber = "";
+    
     // This is used only by the graphical composition tool in the Netbeans IDE
-    public OPCN2ShieldPanel() {
+    public EnvShield1Panel() {
         initComponents();
     }
 
@@ -83,52 +97,48 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
      * @param shieldProtocolLayer
      * @param logger
      */
-    public OPCN2ShieldPanel(MainApplicationFrame parent, ShieldProtocolLayer shieldProtocolLayer, FileLogger logger) {
+    public EnvShield1Panel(MainApplicationFrame parent, ShieldProtocolLayer shieldProtocolLayer, FileLogger logger) {
         super(shieldProtocolLayer, logger);
         
         // Generate the sensor setup dialogs
-        sensorSetupDialogs.add(new OPCN2SensorSetupDialog(parent, false, OPCN2_CHANNEL_BIN1, OPCN2SENSOR_NUM_OF_CHANNELS));
-        sensorSetupDialogs.add(new MOXSensorSetupDialog(parent, false, MOX_CHANNEL, MOX_NUM_OF_CHANNELS));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(AUDIOFAST_SENSOR_NAME, AUDIOFAST_CHANNEL, true, true, true, parent, false));        
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(AUDIOSLOW_SENSOR_NAME, AUDIOSLOW_CHANNEL, true, true, true, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_HUMID_PANEL_NAME, TEMPERATURE_CHANNEL, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(OPT3001_SENSOR_NAME, LIGHT_OPT3001_CHANNEL, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericBoardInfoDialog(parent, false, "Environment Shield 1 Generic Info"));        
         
         initComponents();
         
         // Aggregate sample loggers so it's more easy to handle them
-        sampleLoggerPanels.add(sampleLogger0);
-        sampleLoggerPanels.add(sampleLogger1);
-        sampleLoggerPanels.add(sampleLogger2);
-        sampleLoggerPanels.add(sampleLogger3);
-        sampleLoggerPanels.add(sampleLogger4);
+        sampleLoggerPanels.add(sampleLoggerAudioFast);
+        sampleLoggerPanels.add(sampleLoggerAudioSlow);
+        sampleLoggerPanels.add(sampleLoggerTemperature);
+        sampleLoggerPanels.add(sampleLoggerHumidity);
+        sampleLoggerPanels.add(sampleLoggerOPT3001);
         
         // Initialize all loggers with common properties
-        sampleLogger0.setLoggerProperties("OPCN2 - Bins [#/ml] x 1000)", 0, 5, HISTOGRAM_BINS_NUM);
-        sampleLogger0.setSensorId(OPCN2_CHANNEL_BIN1);
-        sampleLogger0.setDataProcessing(new SampleLogger.DataProcessing() {
-
+        sampleLoggerAudioFast.setLoggerProperties("AudioFast [dB] x 100", 0, -1, 10);
+        sampleLoggerAudioFast.setSensorId(AUDIOFAST_CHANNEL);
+        
+        sampleLoggerAudioSlow.setLoggerProperties("AudioSlow [dB] x 100 [ppm]", 0, -1, 10);
+        sampleLoggerAudioSlow.setSensorId(AUDIOSLOW_CHANNEL);
+        
+        sampleLoggerTemperature.setLoggerProperties(TEMP_SENSOR_NAME, 0, 65535, 10);
+        sampleLoggerTemperature.setSensorId(TEMPERATURE_CHANNEL);
+        sampleLoggerTemperature.setDataProcessing(SampleLogger.sht31TemperatureDataProcessing);
+        
+        sampleLoggerHumidity.setLoggerProperties(HUM_SENSOR_NAME, 0, 65535, 10);
+        sampleLoggerHumidity.setSensorId(HUMIDITY_CHANNEL);  
+        sampleLoggerHumidity.setDataProcessing(SampleLogger.sht31HumidityDataProcessing);
+        
+        sampleLoggerOPT3001.setLoggerProperties(OPT3001_SENSOR_NAME, 0, 90000, 0);
+        sampleLoggerOPT3001.setSensorId(LIGHT_OPT3001_CHANNEL);
+        sampleLoggerOPT3001.setDataProcessing(new SampleLogger.DataProcessing() {
             @Override
             public double processSample(double sample) {
-                return sample / 10;
+                return sample * 2;
             }
         });
-        
-        sampleLogger1.setLoggerProperties("OPCN2 - PM1, 2.5, 10 [ug/m3]", 0, 5, PM_BINS_NUM);
-        sampleLogger1.setSensorId(OPCN2_CHANNEL_PM1);
-        sampleLogger1.setDataProcessing(SampleLogger.highResSampleBaseDefaultDataProcessing);
-        
-        // Update some logger with specific properties
-        sampleLogger2.setLoggerProperties("Temperature [C]", 0, 65535, 10);
-        sampleLogger2.setSensorId(AVERAGER_FOR_TEMP);
-        sampleLogger2.setHighResolutionMode();
-        sampleLogger2.setDataProcessing(SampleLogger.highResSampleBaseDefaultDataProcessing);
-        
-        sampleLogger3.setLoggerProperties("Volume [ml]", 0, -1, 10);
-        sampleLogger3.setSensorId(AVERAGER_FOR_VOLUME);
-        sampleLogger3.setHighResolutionMode();
-        sampleLogger3.setDataProcessing(SampleLogger.highResSampleBaseDefaultDataProcessing);
-        
-        sampleLogger4.setLoggerProperties("MOX [ohm]", 0, -1, 10);
-        sampleLogger4.setSensorId(AVERAGER_FOR_MOX);
-        sampleLogger4.setHighResolutionMode();
-        sampleLogger4.setDataProcessing(SampleLogger.highResSampleBaseDefaultDataProcessing);
         
         for (int n = 0; n < sampleLoggerPanels.size(); n++) {
             sampleLoggerPanels.get(n).setLogger(logger);
@@ -137,14 +147,10 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
         }
 
         // Initialize al sensorSetupDialogs
-        int sensorId = OPCN2_CHANNEL_BIN1;
         for (SensorSetupDialog dialog:sensorSetupDialogs) {
             dialog.setShieldProtocolLayer(shieldProtocolLayer);
-            dialog.setChannelId(sensorId);
             dialog.setBoardId(selectedBoardId);
-            sensorId++;
         }
-        
         
         // Board ID handling
         onBoardIDChanged();
@@ -165,6 +171,9 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
         for (int n = 0; n < sampleLoggerPanels.size(); n++) {
             sampleLoggerPanels.get(n).readFromBoard();
         }
+        
+        // Get the board sensor name
+        shieldProtocolLayer.renderReadBoardSerialNumber(selectedBoardId);
     }
 
     @Override
@@ -197,6 +206,12 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
         // Update the sample loggers
         for (int n = 0; n < sampleLoggerPanels.size(); n++) {
             sampleLoggerPanels.get(n).evaluateRxMessage(rxMessage);
+        }
+        
+        String serialBoard = shieldProtocolLayer.evalReadBoardSerialNumber(rxMessage, selectedBoardId);
+        if (serialBoard != null) {
+            boardSerialNumber = serialBoard;
+            jLabelBoardSerialNumber.setText(serialBoard);
         }
     }
 
@@ -301,8 +316,7 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     
     @Override
     public void onDatabaseChanged() {
-        
-        sensorSetupDialogs.get(OPCN2_CHANNEL_BIN1).onSensorPresetDatabaseChanged();
+        // Nothing to do with presets
     }
     
     @Override
@@ -310,11 +324,18 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
         
         // All channels in the OPCN2 Shields have the same behaviour. 
         // Channel name is read from the shield at startup
-        for (int n = 0; n <= AVERAGER_FOR_MOX; n++) {
+        for (int n = 0; n <= ENVSHIELD1_NUM_OF_CHANNELS; n++) {
             HostConfigSensorProperties sensorProperties = hostConfigWriter.addNewSensor();
             sensorProperties.setSensorBoardId(selectedBoardId);
             sensorProperties.setSensorChannel(n);
-            sensorProperties.setSensorExpression(DEFAULT_CHANNEL_MATH_EXPRESSION);
+            
+            if (n == AUDIOSLOW_CHANNEL) {
+                sensorProperties.setSensorExpression(AUDIOSLOW_CHANNEL_MATH_EXPRESSION);
+            } else if (n >= AUDIOFAST_CHANNEL) {
+                sensorProperties.setSensorExpression(AUDIOFAST_CHANNEL_MATH_EXPRESSION);
+            } else {
+                sensorProperties.setSensorExpression(DEFAULT_CHANNEL_MATH_EXPRESSION);
+            }
         }
     }
    
@@ -330,11 +351,15 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
 
         jCBBoardId = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
-        sampleLogger0 = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
-        sampleLogger1 = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
-        sampleLogger2 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
-        sampleLogger3 = new airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel();
-        sampleLogger4 = new airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel();
+        sampleLoggerAudioFast = new airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel();
+        sampleLoggerAudioSlow = new airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel();
+        jLabelBoardSerialNumber = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        sampleLoggerTemperature = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
+        sampleLoggerHumidity = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
+        sampleLoggerOPT3001 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
+
+        setPreferredSize(new java.awt.Dimension(858, 547));
 
         jCBBoardId.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Not Connected", "ID 0", "ID 1", "ID 2", "ID 3", "ID 4", "ID 5", "ID 6", "ID 7", "ID 8", "ID 9", "ID 10", "ID 11", "ID 12", "ID 13", "ID 14" }));
         jCBBoardId.addActionListener(new java.awt.event.ActionListener() {
@@ -345,48 +370,59 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
 
         jLabel2.setText("Board ID:");
 
+        jLabelBoardSerialNumber.setText("--");
+
+        jLabel3.setText("Board serial number:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(sampleLogger0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(sampleLoggerAudioFast, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerAudioSlow, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(sampleLogger1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(sampleLoggerTemperature, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sampleLoggerHumidity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sampleLoggerOPT3001, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelBoardSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(37, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3)
+                        .addComponent(jLabelBoardSerialNumber))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sampleLogger0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLogger2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLogger1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sampleLogger3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLogger4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(sampleLoggerAudioSlow, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(sampleLoggerAudioFast, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(sampleLoggerTemperature, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerHumidity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerOPT3001, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(217, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -419,11 +455,13 @@ public class OPCN2ShieldPanel extends GenericTabPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox jCBBoardId;
     private javax.swing.JLabel jLabel2;
-    private airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel sampleLogger0;
-    private airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel sampleLogger1;
-    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLogger2;
-    private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLogger3;
-    private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLogger4;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabelBoardSerialNumber;
+    private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLoggerAudioFast;
+    private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLoggerAudioSlow;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLoggerHumidity;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLoggerOPT3001;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLoggerTemperature;
     // End of variables declaration//GEN-END:variables
 
 }

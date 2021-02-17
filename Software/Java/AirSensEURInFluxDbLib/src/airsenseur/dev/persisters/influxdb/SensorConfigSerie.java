@@ -47,6 +47,7 @@ public class SensorConfigSerie extends Serie {
         getColumns().add("time");
         getColumns().add("name");
         getColumns().add("sensorid");
+        getColumns().add("boardid");
         getColumns().add("serial");
         getColumns().add("units");
         getColumns().add("samplingperiod");
@@ -61,6 +62,7 @@ public class SensorConfigSerie extends Serie {
         point.add(sensorConfig.startSamplingTimestamp);
         point.add(sensorConfig.name);
         point.add(sensorConfig.sensorId);
+        point.add(sensorConfig.boardId);
         point.add(encloseInQuotation(sensorConfig.serial));
         point.add(encloseInQuotation(sensorConfig.measurementUnits));
         point.add(sensorConfig.samplingPeriod);

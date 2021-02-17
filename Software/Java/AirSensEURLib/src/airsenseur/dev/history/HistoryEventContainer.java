@@ -39,6 +39,10 @@ public class HistoryEventContainer {
     
     public final static String EVENT_LATEST_IFLINK_SAMPLEPUSH_TS = "latestIFLINKTs";
     
+    public final static String EVENT_LATEST_LORA_SAMPLEPUSH_TS = "latestLoRaTs";
+    public final static String EVENT_LATEST_LORA_BOARDINFOPUSH_TS = "latestBoardInfoLoRaTs";
+    public final static String EVENT_LATEST_LORA_SENSORCONFIGPUSH_TS = "latestSensorConfigLoRaTs";
+    
     private final String eventName;
     private final String eventValue;
     

@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AirSensEURDataAggregator {
     
-    static final String VERSION = "AirSensEURDataAggregator V2.0.0";
+    static final String VERSION = "AirSensEURDataAggregator R2.1.0";
     static final Logger log = LoggerFactory.getLogger(AirSensEURDataAggregator.class);
     
     /**

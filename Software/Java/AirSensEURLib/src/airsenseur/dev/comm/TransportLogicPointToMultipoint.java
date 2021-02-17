@@ -40,12 +40,16 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
     private final static char COMMPROTOCOL_PTM_HOST_HEADER = '[';
     private final static char COMMPROTOCOL_PTM_HOST_TRAILER = ']';
     
-    private final static char COMMPROTOCOL_PTM_VERSION = '0';
+    private final static char COMMPROTOCOL_PTM_VERSION_ZERO = '0';
+    private final static char COMMPROTOCOL_PTM_VERSION_ONE = '1';
     
     private final static char COMMPROTOCOL_PTM_SLAVE_HEADER = '(';
     private final static char COMMPROTOCOL_PTM_SLAVE_TRAILER = ')';
     
     private static final int COMMPROTOCOL_BUFFER_LENGTH = 256;
+    
+    private static final int DEFAULT_CRC_INITVALUE = 0xffffffff;
+    private static final int DEFAULT_CRC_POLYNOMIAL = 0x04C11DB7;
 
     private enum rxStatuses {
         IDLE, HEADER_FOUND, VERSION_FOUND, BOARDID1_FOUND, BOARDID_FOUND,
@@ -57,10 +61,13 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
     private final StringBuilder incomingBuffer = new StringBuilder(COMMPROTOCOL_BUFFER_LENGTH);
     private final StringBuilder outcomingBuffer = new StringBuilder(COMMPROTOCOL_BUFFER_LENGTH);
     private final char[] boardIdBuffer = { 0x00, 0x00 };
+    private final boolean useCRCWhenAvailable;
     private final Semaphore semaphore = new Semaphore(1);
 
-    public TransportLogicPointToMultipoint(AppDataMessageQueue rxDataQueue, AppDataMessageQueue txDataQueue, SensorBus parent, CommChannel commChannel) {
+    public TransportLogicPointToMultipoint(AppDataMessageQueue rxDataQueue, AppDataMessageQueue txDataQueue, SensorBus parent, CommChannel commChannel, boolean useCRCWhenAvailable) {
         super(rxDataQueue, txDataQueue, parent, commChannel);
+        
+        this.useCRCWhenAvailable = useCRCWhenAvailable;
     }
 
     // From TransportLogic
@@ -120,9 +127,9 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
                 if (isValidDigit(pivotChar)) {
                     
                     boardIdBuffer[1] = pivotChar;
-                    Integer id = CodecHelper.decodeChars(boardIdBuffer);
+                    Long id = CodecHelper.decodeChars(boardIdBuffer);
                     if (id != null) {
-                        incomingBoardId = id;
+                        incomingBoardId = id.intValue();
                         rxStatus = rxStatuses.BOARDID_FOUND;
                     } else {
                         rxStatus = rxStatuses.IDLE;
@@ -137,13 +144,29 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
                 // Searching for a trailer
                 if (pivotChar == COMMPROTOCOL_PTM_SLAVE_TRAILER) {
                     
-                    // End of frame found. Signal to the sender engine that the bus is not busy anymore
-                    semaphore.drainPermits();
-                    semaphore.release();
+                    // End of frame found. Evaluate it.
+                    boolean packetValid = true;
+                    String incomingMessage = incomingBuffer.toString();
                     
-                    // Generate a datamessage with incoming string
-                    rxStatus = rxStatuses.IDLE;
-                    return new AppDataMessage(incomingBoardId, incomingBuffer.toString());
+                    // Check for CRC-32 on incoming packet to validate the command
+                    if (useCRCWhenAvailable) {
+                        
+                        // CRC-32 is on the last 8 bytes. Evaluated it
+                        String strRxCRC = incomingMessage.substring(incomingMessage.length()-8);
+                        incomingMessage = incomingMessage.substring(0, incomingMessage.length()-8);                        
+                        packetValid = checkCRC(incomingMessage, strRxCRC);
+                    }
+                    
+                    if (packetValid) {
+                        
+                        // Signal to the sender engine that the bus is not busy anymore
+                        semaphore.drainPermits();
+                        semaphore.release();
+
+                        // Generate a datamessage with incoming string
+                        rxStatus = rxStatuses.IDLE;
+                        return new AppDataMessage(incomingBoardId, incomingMessage);
+                    }
                     
                 } else if (pivotChar == COMMPROTOCOL_PTM_SLAVE_HEADER) {
                     // ... We found an header again... discard all
@@ -204,7 +227,7 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
     @Override
     // From TransportLogicBaseImpl
     protected char getProtocolVersion() {
-        return COMMPROTOCOL_PTM_VERSION;
+        return (useCRCWhenAvailable)? COMMPROTOCOL_PTM_VERSION_ONE : COMMPROTOCOL_PTM_VERSION_ZERO;
     }
     
     private boolean isValidDigit(char pivot) {
@@ -213,6 +236,34 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
                 ((pivot >= 'a') && (pivot <= 'f')) );
     }
     
+    private boolean checkCRC(String buffer, String rxCRC) {
+        
+        // Calculate the CRC for the incoming string
+        byte bytes[] = buffer.getBytes();
+        int countCRC = DEFAULT_CRC_INITVALUE;
+
+        for(int j=0; j<bytes.length; j++) {
+            
+            countCRC ^= bytes[j] << 24;
+            for (byte i = 0; i < 8; ++i)
+            {
+                if ( (countCRC & 0x80000000) != 0) {
+                    
+                    countCRC = (countCRC << 1) ^ DEFAULT_CRC_POLYNOMIAL;
+                } else {
+                    
+                    countCRC <<= 1;
+                }
+            }
+        }
+
+        // Decode the CRC from ASCII format
+        Long lRxCRC = CodecHelper.decodeLongAt(rxCRC, 0);
+        
+        // Compare and return
+        return lRxCRC.intValue() == countCRC;
+    }
+        
 }
 
 /**
@@ -233,7 +284,7 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
  * 
  * Where:
  * - The character "(" identifies the start of slave frame
- * - V is a byte identifying the protocol version
+ * - V is a byte identifying the protocol version (0 or 1)
  * - XX is the originating slave Id in hex format (0xFF is reserved)
  * - Payload starts at the 5th byte and reflects the contents of slave answer string
  * - The character ")" identifies the end of host frame
@@ -242,4 +293,23 @@ public class TransportLogicPointToMultipoint extends TransportLogicBaseImpl {
  * 1: frames sent by the host are "echoed" back by the single wire bus so they should be skipped by the rx engine
  * 2: single wire bus is half-duplex by design and, for this reason, the host should wait for slave answer (or timeout) before transmitting next frame
  * 3: there is not any error detection/correction procedure implemented, so, transmitted and/or received frames can be lost
+ * 
+ * Addendum to Protocol Version 1
+ * A CRC has been added to the slave to master only packets. The CRC is calculated as CRC-32 format
+ * and is appended to the payload, before the frame termination character.
+ * The CRC-32 is ASCII encoded and is 8 bytes length. It's calculated from the bytes in the payload only. 
+ * 
+ * Examples:
+ * [101G00](101G0000000000000086D06DD0)
+ * [101G01](101G010000000000006E743BD5)
+ * [101G02](101G020000000000005359DC6D)
+ *  ^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+ *  ||||||  ||||||||||||||||||||||||||
+ *  ||||||  ||||||||||||||||||++++++++- CRC-32 (from the payload bytes)
+ *  ||||||  |||+++++++++++++++- Payload (answer)
+ *  ||||||  |++- Board ID (answer)
+ *  ||||||  +- Protocol version (answer)
+ *  |||+++- Request payload
+ *  |++- Board ID
+ *  +- Protocol version 1
  */
