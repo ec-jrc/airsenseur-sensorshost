@@ -1,0 +1,90 @@
+/* ===========================================================================
+ * Copyright 2015 EUROPEAN UNION
+ *
+ * Licensed under the EUPL, Version 1.1 or subsequent versions of the
+ * EUPL (the "License"); You may not use this work except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://ec.europa.eu/idabc/eupl
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Date: 02/04/2015
+ * Authors:
+ * - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+ *   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+ *   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+ *			European Commission - Joint Research Centre,
+ * - Marco Signorini, marco.signorini@liberaintentio.com
+ *
+ * ===========================================================================
+ */
+
+@import "palette";
+
+@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;700&display=swap');
+$fontFamily: 'Commissioner', sans-serif;
+
+$brandColor: hsl(261, 20%, 31%);
+$mainColor: lighten($brandColor, 7%);
+$mainColorP1: darken($mainColor, 5%);
+$mainColorP2: darken($mainColor, 10%);
+$mainColorP3: darken($mainColor, 15%);
+$mainColorM1: lighten($mainColor, 15%);
+$mainColorM2: lighten($mainColor, 30%);
+$mainColorM3: lighten($mainColor, 45%);
+$mainColorM4: lighten($mainColor, 55%);
+
+$brandContrastColor: #FF0066;
+$contrastColor: $brandContrastColor;
+$contrastColorP1: darken($contrastColor, 5%);
+$contrastColorP2: darken($contrastColor, 10%);
+$contrastColorP3: darken($contrastColor, 20%);
+$contrastColorM1: lighten($contrastColor, 10%);
+$contrastColorM2: lighten($contrastColor, 20%);
+$contrastColorM3: lighten($contrastColor, 30%);
+$contrastColorM3: lighten($contrastColor, 40%);
+
+$gray: #AAA;
+$grayP1: darken($gray, 12%);
+$grayP2: darken($gray, 25%);
+$grayP3: darken($gray, 40%);
+$grayP4: darken($gray, 46%);
+$grayM1: lighten($gray, 10%);
+$grayM2: lighten($gray, 15%);
+$grayM3: lighten($gray, 22%);
+$grayM4: lighten($gray, 33%);
+
+$failureColor: rgb(233, 32, 32);
+
+$backgroundColor: $grayM4;
+$backgroundColorNegative: $grayP4;
+
+$textColor: $grayP4;
+$textColorNegative: $grayM4;
+
+$themeBorderRadius100: 3px;
+$themeBorderRadius200: 5px;
+$themeBorderRadius400: 10px;
+$themeBorderRadius500: 13px;
+$themeBorderRadius600: 15px;
+$themeBorderRadius700: 20px;
+$themeBorderRadius800: 25px;
+$themeBorderRadius900: 30px;
+
+$themeBoxShadow100: 0 1px 3px rgba(0, 0, 0, .12), 0 1px 2px rgba(0, 0, 0, .24);
+$themeBoxShadow300: 0 3px 6px rgba(0, 0, 0, .15), 0 2px 4px rgba(0, 0, 0, 0.12);
+$themeBoxShadow500: 0 8px 20px rgba(0, 0, 0, .18), 0 3px 6px rgba(0, 0, 0, 0.10);
+$themeBoxShadow700: 0 13px 25px rgba(0, 0, 0, .2), 0 5px 10px rgba(0, 0, 0, 0.05);
+$themeBoxShadow900: 0 15px 40px rgba(0, 0, 0, .3);
+
+$defaultPanelPadding: 30px;
+
+$reportTableSelectedShadowColor: RGBA(#3E354E, 0.1);
+$reportTableSelectedShadow: 0px 0px 10px 10px $reportTableSelectedShadowColor;
+
+$desktopControlContainerWidth: 250px;
+
+$mobileHeaderHeight: 50px;

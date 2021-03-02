@@ -1,0 +1,77 @@
+/* ===========================================================================
+ * Copyright 2015 EUROPEAN UNION
+ *
+ * Licensed under the EUPL, Version 1.1 or subsequent versions of the
+ * EUPL (the "License"); You may not use this work except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://ec.europa.eu/idabc/eupl
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Date: 02/04/2015
+ * Authors:
+ * - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+ *   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+ *   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+ *			European Commission - Joint Research Centre,
+ * - Marco Signorini, marco.signorini@liberaintentio.com
+ *
+ * ===========================================================================
+ */
+
+@import '../../../theme';
+
+.Commands {
+    padding: 10px 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+
+    .status {
+        align-self: center;
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+
+        .statusItem {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .statusName {
+                font-size: .7rem;
+                text-transform: uppercase;
+                color: $colorNeutrals400;
+            }
+        }
+    }
+
+    .toggles {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+        gap: 10px;
+
+        .toggle {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: flex-end;
+            text-transform: uppercase;
+            font-size: .8rem;
+            color: $colorNeutrals700;
+            text-align: right;
+        }
+
+        .dataPushNowButton {
+            margin-top: auto;
+            padding-top: 20px;
+            justify-self: flex-end;
+            align-self: flex-end;
+        }
+    }
+}

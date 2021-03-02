@@ -1,0 +1,106 @@
+/* ===========================================================================
+ * Copyright 2015 EUROPEAN UNION
+ *
+ * Licensed under the EUPL, Version 1.1 or subsequent versions of the
+ * EUPL (the "License"); You may not use this work except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://ec.europa.eu/idabc/eupl
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Date: 02/04/2015
+ * Authors:
+ * - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+ *   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+ *   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+ *			European Commission - Joint Research Centre,
+ * - Marco Signorini, marco.signorini@liberaintentio.com
+ *
+ * ===========================================================================
+ */
+
+@import '../../../theme';
+
+$bdRadius: $themeBorderRadius500;
+
+.Sensor {
+    background-color: $colorNeutrals050;
+    border-radius: $bdRadius;
+    display: flex;
+    flex-direction: column;
+    gap:15px;
+    padding-bottom: 15px;
+    box-shadow: $themeBoxShadow300;
+
+    &.disabled {
+        opacity: 0.7;
+
+        .topBar {
+            background-color: $colorNeutrals500;
+        }
+    }
+
+    .topBar {
+        border-top-left-radius: $bdRadius;
+        border-top-right-radius: $bdRadius;
+        padding: 5px 10px;
+        background-color: $colorPrimary700;
+        color: white;
+        font-size: 1.2rem;
+        display: flex;
+        flex-direction: row;
+
+        .sensorName {
+            flex-shrink: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sensorInfo {
+            flex-grow: 1;
+            text-align: right;
+
+            & > span {
+                font-size: 1.35rem;
+                color: white;
+                opacity: 0.8;
+                cursor: pointer;
+
+                &:hover {
+                    opacity: 1;
+
+                }
+            }
+        }
+    }
+
+    .sensorValue {
+        overflow: hidden;
+        text-align: center;
+        flex-grow: 1;
+        font-size: 2.5rem;
+        display: flex;
+        flex-direction: column;
+
+        .unit {
+            font-size: 1.2rem;
+        }
+    }
+
+    .chart {
+        align-self: center;
+    }
+
+    .noDataWarning {
+        flex-grow: 1;
+        justify-self: flex-start;
+        text-align: center;
+        color: $colorReds500;
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+}

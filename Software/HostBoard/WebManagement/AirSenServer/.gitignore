@@ -1,0 +1,14 @@
+*.db
+*.db-journal
+.vscode
+
+package-lock.json
+*.lock
+
+build/
+
+**/rice-box.go
+
+fakeroot/
+
+test.txt

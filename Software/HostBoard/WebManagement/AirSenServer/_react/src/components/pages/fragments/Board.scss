@@ -1,0 +1,94 @@
+/* ===========================================================================
+ * Copyright 2015 EUROPEAN UNION
+ *
+ * Licensed under the EUPL, Version 1.1 or subsequent versions of the
+ * EUPL (the "License"); You may not use this work except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://ec.europa.eu/idabc/eupl
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Date: 02/04/2015
+ * Authors:
+ * - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+ *   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+ *   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+ *			European Commission - Joint Research Centre,
+ * - Marco Signorini, marco.signorini@liberaintentio.com
+ *
+ * ===========================================================================
+ */
+
+@import '../../../theme';
+
+.Board {  
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .boardInfo {
+        white-space: nowrap;
+        flex-wrap: wrap;
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+
+        .boardName {
+            cursor: pointer;
+        }
+
+        .sensorsInfo {
+            margin-left: 20px;
+            display: flex;
+            gap: 3px;
+
+            span {
+                opacity: .9;
+                color: white;
+                border-radius: 12px;
+                padding: 3px 8px;
+                background: $colorNeutrals400;
+                transition: background-color 0.2s;
+                font-size: 0.9rem;
+
+                &.ok {
+                    background: $colorPrimary700;
+                }
+
+                &.warning {
+                    background: $colorReds400;
+                }
+            }
+        }
+
+        .infoIcon {
+            font-size: 1.35rem;
+            opacity: 0.6;
+            cursor: pointer;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        .showDisabledCheck {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+
+            label {
+                display: flex;
+                gap: 5px;
+            }
+        }
+    }
+    
+    .sensorsContainer {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 15px;
+    }
+}

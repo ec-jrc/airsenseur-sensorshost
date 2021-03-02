@@ -1,0 +1,144 @@
+/* ===========================================================================
+ * Copyright 2015 EUROPEAN UNION
+ *
+ * Licensed under the EUPL, Version 1.1 or subsequent versions of the
+ * EUPL (the "License"); You may not use this work except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://ec.europa.eu/idabc/eupl
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Date: 02/04/2015
+ * Authors:
+ * - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+ *   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+ *   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+ *			European Commission - Joint Research Centre,
+ * - Marco Signorini, marco.signorini@liberaintentio.com
+ *
+ * ===========================================================================
+ */
+
+@import "../../theme";
+
+$logo-padding: 5px;
+
+.MenuPanel {
+    min-width: 100%;
+    box-sizing: border-box;
+    height: 100vh;
+    display: flex;
+    overflow-y: auto;
+    flex-direction: column;
+    text-align: center;
+
+    border: none;
+    border-top: 3px solid $colorPrimary500;
+    border-bottom: 2px solid $colorNeutrals200;
+    
+    color: $colorNeutrals900;
+    background-color: white;
+
+    .logoContainer {
+        flex-shrink: 1;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        margin: $logo-padding;
+
+        img {
+            justify-self: center;
+            display: block;
+            grid-area: 1/2;
+            max-height: $mobileHeaderHeight - (2 * $logo-padding);
+            width: auto;
+        }
+
+        .collapseToggle {
+            color: $colorPrimary900;
+            display: initial;
+            text-align: left;
+            cursor: pointer;
+            grid-area: 1/1;
+            font-size: $mobileHeaderHeight - (2 * $logo-padding);
+
+            .collapseIcon {
+                display: flex;
+                align-items: center;
+            }
+        }
+    }
+
+    .menuList {
+        margin: 0;
+        margin-top: 30px;
+        padding: 0 0 0 15px;
+    }
+
+    .uuidContainer {
+        padding: 20px;
+        font-size: 0.8rem;
+        color: $colorNeutrals300;
+
+        .uuid {
+            cursor: pointer;
+            margin-left: 5px;
+            color: $colorNeutrals500;
+        }
+    }
+}
+
+/* Mobile Only */
+@media only screen and (max-width: 768px) {
+    .MenuPanel {
+        &.collapsed {
+            @keyframes collapseControlPanel {
+                0% {min-height: 100%;}
+                100% {min-height: 0;}
+            }
+
+            height: auto;
+            animation: collapseControlPanel 500ms;
+            animation-timing-function: ease-out;
+
+            .logoContainer ~ * {
+                display: none;
+            }
+        }
+    }
+}
+
+/* Desktop Only */
+@media only screen and (min-width: 769px) {
+    .MenuPanel {
+        height: 100%;
+        position: initial;
+        width: 100%;
+        border-top: none;
+        border-bottom: none;
+
+        .menuList {
+            &.main {
+                flex-grow: 1;
+            }
+        }
+
+        .logoContainer {
+            padding: 0;
+            margin: 30px 20px 5px;
+            min-height: 40px;
+
+            .collapseToggle {
+                display: none;
+            }
+
+            img {
+                min-height: 0;
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
+    }
+}

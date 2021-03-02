@@ -1,0 +1,46 @@
+/* ===========================================================================
+ * Copyright 2015 EUROPEAN UNION
+ *
+ * Licensed under the EUPL, Version 1.1 or subsequent versions of the
+ * EUPL (the "License"); You may not use this work except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://ec.europa.eu/idabc/eupl
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Date: 02/04/2015
+ * Authors:
+ * - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+ *   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+ *   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+ *			European Commission - Joint Research Centre,
+ * - Marco Signorini, marco.signorini@liberaintentio.com
+ *
+ * ===========================================================================
+ */
+
+@import "../../../theme";
+
+.InputTextArea {
+    border: 1px solid $colorNeutrals200;
+    border-radius: 5px;
+    line-height: 1.5;
+    padding: 5px 7px;
+    width: 100%;
+    font-size: 1rem;
+    transition: box-shadow 0.3s;
+    margin-top: 4px;
+    
+    &:hover {
+        box-shadow: $themeBoxShadow100;
+    }
+    
+    &.error {
+        border: 1px solid $colorReds500;
+        background-color: $colorReds300;
+        color: $colorReds900
+    }
+}
