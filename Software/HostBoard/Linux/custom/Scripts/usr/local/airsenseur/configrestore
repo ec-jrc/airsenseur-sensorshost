@@ -26,8 +26,6 @@
 
 # Here is the folder destination used by this script
 TGTFOLDER=/usr/local/asbackup
-ASFOLDER=/usr/local/airsenseur
-ASCONFIGFOLDER=/usr/local/etc
 
 # Extract all .gz files
 tar -xvf $1 -C /
@@ -41,5 +39,3 @@ done
 # Remove all temporary files
 rm -f $TGTFOLDER/*.tar.gz
 
-# Remove full backup file
-rm -f $TGTFOLDER/asfullbackup.tar

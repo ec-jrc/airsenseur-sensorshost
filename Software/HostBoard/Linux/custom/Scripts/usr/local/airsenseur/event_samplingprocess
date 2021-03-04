@@ -33,11 +33,9 @@ $SCRIPTBASE/check_hostdaemon
 RESULT=$?
 if [ "$RESULT" = 1 ]; then
         $SCRIPTBASE/stop_samplingprocess
-	$SCRIPTBASE/off_gps
 	$SCRIPTBASE/off_sensor
 	echo SAMPLING_ENABLED=0 > $SAMPLING_ENABLEFILE
 else
-	$SCRIPTBASE/on_gps
 	$SCRIPTBASE/on_sensor
 	$SCRIPTBASE/start_samplingprocess
 	echo SAMPLING_ENABLED=1 > $SAMPLING_ENABLEFILE

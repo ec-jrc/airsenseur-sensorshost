@@ -19,15 +19,16 @@
 # - Laurent Spinelle - laurent.spinelle@jrc.ec.europa.eu,
 #                     European Commission - Joint Research Centre, 
 # 
-# ======================================================================== 
-# Check for WLAN1 interface status
-# Returns 1 if active, 0 if not
-# ======================================================================== 
+# ========================================================================
+# Power on the sensor bus and start sampling processes
 
 cd "$(dirname "$0")"
 
-INTERFACE=wlan1
 SCRIPTBASE="."
+SAMPLING_ENABLEFILE=$SCRIPTBASE/sampling_enabled
 
-$SCRIPTBASE/check_wlan $INTERFACE
-return $?
+$SCRIPTBASE/on_sensor
+$SCRIPTBASE/start_samplingprocess
+echo SAMPLING_ENABLED=1 > $SAMPLING_ENABLEFILE
+
+$SCRIPTBASE/update_leds

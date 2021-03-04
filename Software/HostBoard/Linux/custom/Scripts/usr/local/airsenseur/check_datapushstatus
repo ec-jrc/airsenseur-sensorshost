@@ -26,6 +26,8 @@
 # Returns 1 if active, 0 if not enabled
 # ========================================================================
 
+cd "$(dirname "$0")"
+
 DATAPUSH_ENABLED=0
 DATAPUSH_ENABLEFILE=./datapush_enabled
 

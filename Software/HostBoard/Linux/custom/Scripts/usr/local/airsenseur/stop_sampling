@@ -20,38 +20,15 @@
 #                     European Commission - Joint Research Centre, 
 # 
 # ========================================================================
-# Event handler for start/stop wlan1 interface
+# Power off the sensor bus and stop sampling processes
 
 cd "$(dirname "$0")"
 
-INTERFACE=wlan1
 SCRIPTBASE="."
+SAMPLING_ENABLEFILE=$SCRIPTBASE/sampling_enabled
 
-echo timer > /sys/class/leds/led_4/trigger
-
-# Check for current wlan status
-$SCRIPTBASE/check_wlan $INTERFACE
-RESULT=$?
-
-# Turn off the interface each time
-# to prevent problems when turning up
-ifdown $INTERFACE
-$SCRIPTBASE/off_gprs
-
-# Remove dhcp leases (this could generate problems when time is not aligned)
-rm /var/lib/dhcp/dhclient.wlan1.leases
-#/sbin/dhclient -r wlan1
-
-# Turn on the interface if required
-if [ "$RESULT" = 0 ]; then
-	echo CLWLAN_ENABLED=1 > clwlan_enabled
-	$SCRIPTBASE/on_gprs
-	sleep 5
-	ifup $INTERFACE
-else
-	echo CLWLAN_ENABLED=0 > clwlan_enabled
-fi
-
-echo none > /sys/class/leds/led_4/trigger
+$SCRIPTBASE/stop_samplingprocess
+$SCRIPTBASE/off_sensor
+echo SAMPLING_ENABLED=0 > $SAMPLING_ENABLEFILE
 
 $SCRIPTBASE/update_leds

@@ -44,20 +44,21 @@
 /bin/chown root:root /etc/sudoers
 /bin/chmod 440 /etc/sudoers
 
+# Configure gpsd service at startup
+/bin/systemctl daemon-reload
+/bin/systemctl disable gpsd.socket
+/bin/systemctl enable gpsd.service
+/bin/systemctl stop ntp.service
+/bin/systemctl start gpsd.service
+/bin/systemctl start ntp.service
+
+# Enable some airsenseur services at startup
+/bin/systemctl enable airsenserver
+/bin/systemctl start airsenserver
 
 # Disable some services we don't need at startup
-/usr/sbin/update-rc.d hostapd remove
-/usr/sbin/update-rc.d udhcpd remove
-
-# Configure lighttpd server
-/usr/sbin/lighty-enable-mod fastcgi-php
-/etc/init.d/lighttpd force-reload
-
-# Configure the GPRS dongle
-/usr/local/airsenseur/on_gprs
-/bin/sleep 30
-/usr/bin/wvdialconf
-/usr/local/airsenseur_off_gprs
+/bin/systemctl disable hostapd
+/bin/systemctl disable udhcpd
 
 # Delete me so I'll never run again
 rm /firstrun.sh

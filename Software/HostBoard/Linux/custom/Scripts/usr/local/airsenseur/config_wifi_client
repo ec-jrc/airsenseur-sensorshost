@@ -25,15 +25,11 @@
 
 cd "$(dirname "$0")"
 
-INTERFACE=wlan0
 SCRIPTBASE="."
 
 echo timer > /sys/class/leds/led_2/trigger
 
-echo "Disable WiFi"
-echo WLAN_ENABLED=0 > $SCRIPTBASE/wlan_enabled
-ifdown $INTERFACE
-$SCRIPTBASE/off_usben
+$SCRIPTBASE/off_wlan
 
 echo "Switching WiFi configuration to client mode"
 cp -a /etc/network/interfaces_client /etc/network/interfaces

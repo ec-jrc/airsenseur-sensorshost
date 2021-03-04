@@ -1,0 +1,8 @@
+port=ttyS1
+debug=5
+jsonHostname=0.0.0.0
+jsonPort=8000
+pollTime=5000
+useBusProtocol=1
+enableAutoDiscovery=true
+useCRCInSensorBus=true

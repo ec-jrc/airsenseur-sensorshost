@@ -26,10 +26,13 @@
 
 cd "$(dirname "$0")"
 
+# Ethernet eth0 (we suppose always available even if not installed)
+ifup eth0
+
+# WiFi dongle
 INTERFACE=wlan0
 SCRIPTBASE="."
 
-# WiFi Hotspot
 WLAN_ENABLED=0
 WLAN_ENABLEFILE=./wlan_enabled
 
@@ -39,13 +42,4 @@ if [ "$WLAN_ENABLED" = 1 ]; then
         $SCRIPTBASE/event_wlan&
 fi
 
-# WiFi Client
-CLWLAN_ENABLED=0
-CLWLAN_ENABLEFILE=./clwlan_enabled
-
-[ -r $CLWLAN_ENABLEFILE ] && . $CLWLAN_ENABLEFILE
-
-if [ -f "$SCRIPTBASE/event_clwlan" ] && [ "$CLWLAN_ENABLED" = 1 ]; then
-        $SCRIPTBASE/event_clwlan&
-fi
 

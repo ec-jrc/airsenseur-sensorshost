@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# ===========================================================================
+# Copyright 2015 EUROPEAN UNION
+#
+# Licensed under the EUPL, Version 1.1 or subsequent versions of the
+# EUPL (the "License"); You may not use this work except in compliance
+# with the License. You may obtain a copy of the License at
+# http://ec.europa.eu/idabc/eupl
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Date: 02/04/2015
+# Authors:
+# - Michel Gerboles, michel.gerboles@jrc.ec.europa.eu,
+#   Laurent Spinelle, laurent.spinelle@jrc.ec.europa.eu and
+#   Alexander Kotsev, alexander.kotsev@jrc.ec.europa.eu:
+#                       European Commission - Joint Research Centre,
+# - Marco Signorini, marco.signorini@liberaintentio.com
+#
+# ===========================================================================
+
+# Apply changes in GPRS configuration. 
+# Input Parameters: APN,SimPIN comma separated values in $1, target file in $2
+
+IFS=",";
+PARAMETERS=($1) 
+TARGETFILE=$2
+
+APN=${PARAMETERS[0]}
+PIN=${PARAMETERS[1]}
+
+# Find an Init4 string if any
+INIT4=`grep Init4 $TARGETFILE`
+if [ "$INIT4" != "" ]; then
+
+        # Delete Init3 row
+        sed -i "/\(Init3 =\) .*/d" $TARGETFILE
+
+        # Rename Init4 to Init3
+        sed -i "s/Init4 = \(.*\)/Init3 = \1/" $TARGETFILE
+fi
+
+# Replace APN
+sed -i "s/\(Init3 =\) .*/\1 AT+CGDCONT=1,\"ip\",\"${APN}\",,0,0/" $TARGETFILE
+
+# Add the PIN if required
+if [ "$PIN" != "" ]; then
+        sed -i "s/\(Init3 =\) \(.*\)/\1 AT+CPIN=${PIN}\nInit4 = \2/" $TARGETFILE
+fi

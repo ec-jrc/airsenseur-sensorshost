@@ -28,5 +28,5 @@ echo "Powering up GPRS device"
 
 # PA26 (GPRS) is output
 echo "1" > /sys/class/gpio/pioA26/value
-
+sleep 3
 

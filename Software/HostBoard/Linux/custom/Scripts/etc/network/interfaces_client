@@ -2,5 +2,6 @@
 auto lo 
 iface lo inet loopback
 
+source /etc/network/ifcfg-eth0
 source /etc/network/ifcfg-wlan0_client
 

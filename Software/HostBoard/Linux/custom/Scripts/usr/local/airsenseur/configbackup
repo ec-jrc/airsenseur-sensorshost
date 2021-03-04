@@ -37,19 +37,16 @@ mkdir -p $TGTFOLDER
 tar -czvf - $ASCONFIGFOLDER/* > $TGTFOLDER/airsenseurconfig.tar.gz
 
 # Backing up other system configuration files
-tar -czvf - /etc/cron.d/datapushcron /etc/hostapd/hostapd.conf /etc/wvdial.conf > $TGTFOLDER/sysetc.tar.gz
-
-# Backing up WiFiClient configuration files
-tar -czvf - /etc/network/interfaces /etc/network/ifcfg-wlan1 /etc/eventmonitor/handler_5 $ASFOLDER/check_wlan1 $ASFOLDER/event_clwlan $ASFOLDER/leds_checkfile $ASFOLDER/runDataPush > $TGTFOLDER/wificlient.tar.gz
+tar -czvf - /etc/cron.d/datapushcron /etc/hostname /etc/hostapd/hostapd.conf /etc/wvdial.conf /etc/network/interfaces /etc/network/interfaces_ap /etc/network/interfaces_client /etc/network/ifcfg-wlan0_ap /etc/network/ifcfg-wlan0_client > $TGTFOLDER/sysetc.tar.gz
 
 # Backing up log files
 tar -czvf - /var/log/* > $TGTFOLDER/varlog.tar.gz
 
 # Backing up database files
-tar -czvf - $ASFOLDER/AirSensEURDataAggregator/airsenseur.db $ASFOLDER/AirSensEURDataAggregator/*.csv $ASFOLDER/AirSensEURDataPush/history.db > $TGTFOLDER/airsenseurdata.tar.gz
+# tar -czvf - $ASFOLDER/AirSensEURDataAggregator/airsenseur.db $ASFOLDER/AirSensEURDataAggregator/*.csv $ASFOLDER/AirSensEURDataPush/history.db > $TGTFOLDER/airsenseurdata.tar.gz
 
 # Merge together in a single tar file
-tar -cvf - $TGTFOLDER/*.tar.gz > $TGTFOLDER/asfullbackup.tar
+tar -cvf - $TGTFOLDER/*.tar.gz > $TGTFOLDER/asconfigbackup.tar
 
 # Remove temporary files
 rm -f $TGTFOLDER/*.tar.gz

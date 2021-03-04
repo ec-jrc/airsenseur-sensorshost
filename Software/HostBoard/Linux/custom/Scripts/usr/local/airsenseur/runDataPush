@@ -35,6 +35,7 @@ flock -n 200 || exit 1
 cd "$(dirname "$0")"
 
 SCRIPTBASE="."
+CONFIGBASE="/usr/local/etc"
 
 $SCRIPTBASE/check_datapushstatus
 RESULT=$?
@@ -42,36 +43,33 @@ if [ "$RESULT" = 0 ]; then
 	exit 0;
 fi
 
+# Check if we should use the GPRS channel
+USEGPRS=1
+USEGPRSFLAG=`grep enabled=true ${CONFIGBASE}/GPRS.properties`
+if [ "$USEGPRSFLAG" = "" ]; then
+	USEGPRS=0
+fi
 
 echo timer > /sys/class/leds/led_3/trigger
 
-GPRSON="$SCRIPTBASE/on_gprs"
-GPRSOFF="$SCRIPTBASE/off_gprs"
-
-# Power up GPRS dongle
-$GPRSON
-sleep 60
-
-# Start PPP connection
-/sbin/route del default
-wvdial &
-sleep 20
+# If GPRS is needed, please start the PPP interface
+if [ $USEGPRS = 1 ]; then
+	$SCRIPTBASE/on_gprs_ppp
+fi
 
 # Push updates
 cd $SCRIPTBASE/AirSensEURDataPush
-#java -jar AirSensEURDataPush.jar ../../etc/influxpush.properties
+java -jar AirSensEURDataPush.jar ../../etc/influxpush.properties
 java -jar AirSensEURDataPush.jar ../../etc/datapushsosdb.properties
+# java -jar AirSensEURDataPush.jar ../../etc/lorapush.properties
 cd ..
 
-# Stop GPRS
-sleep 30
-killall wvdial
-sleep 20
-
-# Power down GPRS dongle
-$GPRSOFF
-
 echo none > /sys/class/leds/led_3/trigger
+
+# If GPRS was used, stops the PPP interface
+if [ $USEGPRS = 1 ]; then
+	$SCRIPTBASE/off_gprs_ppp
+fi
 
 $SCRIPTBASE/update_leds
 

@@ -1,0 +1,19 @@
+auto eth0
+
+# Uncomment the next row only if DHCP is required
+iface eth0 inet dhcp
+
+# Uncomment the next row if static IP address is required instead
+#iface eth0 inet static
+
+# Set next parameters if static IP address is required
+address 192.168.1.100
+netmask 255.255.255.0
+broadcast 192.168.1.255
+network 192.168.1.0
+gateway 192.168.1.1
+
+
+# Power up/down the dongle
+pre-up /usr/local/airsenseur/on_gprs
+post-down /usr/local/airsenseur/off_gprs
