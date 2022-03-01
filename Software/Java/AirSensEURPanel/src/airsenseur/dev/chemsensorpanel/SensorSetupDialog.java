@@ -37,6 +37,7 @@ public abstract class SensorSetupDialog extends javax.swing.JDialog {
     protected int boardId = AppDataMessage.BOARD_ID_UNDEFINED;
     protected int sensorId = 0;
     protected ShieldProtocolLayer shieldProtocolLayer = null;
+    protected boolean connected = false;
     
     public SensorSetupDialog(MainApplicationFrame parent, boolean modal, int sensorId) {
         super(parent, modal);
@@ -54,6 +55,10 @@ public abstract class SensorSetupDialog extends javax.swing.JDialog {
     
     public void setChannelId(int sensorId) {
         this.sensorId = sensorId;
+    }
+    
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
     
     public abstract void storeToBoard() throws SensorBusException;

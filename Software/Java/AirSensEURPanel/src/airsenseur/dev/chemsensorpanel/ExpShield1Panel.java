@@ -130,8 +130,8 @@ public class ExpShield1Panel extends GenericTabPanel {
         super(shieldProtocolLayer, logger);
         
         // Generate the sensor setup dialogs
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog("RD200M", RD200M_CHANNEL, false, true, true, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog("D300", D300_CHANNEL, false, true, true, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog("RD200M", RD200M_CHANNEL, 1, false, true, true, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog("D300", D300_CHANNEL, 1, false, true, true, parent, false));
         sensorSetupDialogs.add(new PMS5003SensorSetupDIalog(PMS5003_CHANNEL, PMS5003_TOTAL_PMAT_NUM, PMS5003_HISTOGRAM_BIN0_CHANNEL, PMS5003_HISTOGRAM_BINS_NUM, parent, false));
         sensorSetupDialogs.add(new OPCN3SensorSetupDIalog(OPCN3_HISTOGRAM_PM_CHANNEL, OPCN3_HISTOGRAM_PM_NUM, OPCN3_HISTOGRAM_BIN0_CHANNEL, OPCN3_HISTOGRAM_BINS_NUM, OPCN3_HISTOGRAM_TEMP_CHANNEL, OPCN3_HISTOGRAM_VOLUME_CHANNEL, OPCN3_DEBUG_CHANNELNUM, parent, false));
         sensorSetupDialogs.add(new SPS30SensorSetupDIalog(SPS30_CHANNEL, SPS30_HISTOGRAM_PM_NUM, SPS30_HISTOGRAM_BIN0_CHANNEL, SPS30_HISTOGRAM_BINS_NUM, SPS30_TYPSIZE_CHANNEL, parent, false));
@@ -310,6 +310,11 @@ public class ExpShield1Panel extends GenericTabPanel {
     @Override
     public void setConnected(boolean connected) {
         jCBBoardId.setEnabled(!connected);
+        
+        // Propagate to the configuration dialogs, they may require this information
+        for (SensorSetupDialog dialog : sensorSetupDialogs) {
+            dialog.setConnected(connected);
+        }
     }
     
     @Override

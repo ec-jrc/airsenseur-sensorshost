@@ -135,7 +135,20 @@ public class AppDataMessage {
         }
         
         AppDataMessage c = r.clone();
-        return (commandString.startsWith(c.getCommandString()) ||
-                c.getCommandString().startsWith(commandString));
+        if (commandString.startsWith(c.getCommandString()) ||
+                c.getCommandString().startsWith(commandString)) {
+            return true;
+        }
+        
+        // Some commands needs a special treatment (this is the case, for register read/write where
+        // the command includes parameters. This let the direct full string comparison impossible
+        // but it's required to restrict the comparison only to the 1st three characters 
+        // (command and channel identifiers)
+        if ((commandString.length() >= 3) && (r.getCommandString().length() >= 3) && 
+                commandString.regionMatches(0, r.getCommandString(), 0, 3)) {
+            return true;
+        }
+        
+        return false;
     }    
 };

@@ -37,6 +37,7 @@ public abstract class SensorBusInteractingPanel extends javax.swing.JPanel {
     protected ShieldProtocolLayer shieldProtocolLayer;
     protected int boardId = AppDataMessage.BOARD_ID_UNDEFINED;
     protected int channelId = 0;
+    protected boolean connected = false;
     
     public void setShieldProtocolLayer(ShieldProtocolLayer shieldProtocolLayer) {
         this.shieldProtocolLayer = shieldProtocolLayer;
@@ -48,6 +49,10 @@ public abstract class SensorBusInteractingPanel extends javax.swing.JPanel {
     
     public void setChannelId(int channelId) {
         this.channelId = channelId;
+    }
+    
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
     
     public abstract void storeToBoard() throws SensorBusException;

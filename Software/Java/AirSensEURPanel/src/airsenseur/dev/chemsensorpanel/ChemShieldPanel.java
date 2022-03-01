@@ -99,11 +99,11 @@ public class ChemShieldPanel extends GenericTabPanel {
         sensorSetupDialogs.add(new ChemSensorSetupDialog(parent, false, CHEM_SENSOR_CHANNEL_ID_2));
         sensorSetupDialogs.add(new ChemSensorSetupDialog(parent, false, CHEM_SENSOR_CHANNEL_ID_3));
         sensorSetupDialogs.add(new ChemSensorSetupDialog(parent, false, CHEM_SENSOR_CHANNEL_ID_4));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(PRESS_SENSOR_NAME, PRESS_SENSOR_CHANNEL_ID, true, false, false, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_EXT_SENSOR_NAME, TEMP_EXT_SENSOR_CHANNEL_ID, true, false, false, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(HUM_EXT_SENSOR_NAME, HUM_EXT_SENSOR_CHANNEL_ID, true, true, false, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_INT_SENSOR_NAME, TEMP_INT_SENSOR_CHANNEL_ID, true, false, false, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(HUM_INT_SENSOR_NAME, HUM_INT_SENSOR_CHANNEL_ID, true, true, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(PRESS_SENSOR_NAME, PRESS_SENSOR_CHANNEL_ID, 1, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_EXT_SENSOR_NAME, TEMP_EXT_SENSOR_CHANNEL_ID, 1, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(HUM_EXT_SENSOR_NAME, HUM_EXT_SENSOR_CHANNEL_ID, 1, true, true, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_INT_SENSOR_NAME, TEMP_INT_SENSOR_CHANNEL_ID, 1, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(HUM_INT_SENSOR_NAME, HUM_INT_SENSOR_CHANNEL_ID, 1, true, true, false, parent, false));
         sensorSetupDialogs.add(new GenericBoardInfoDialog(parent, false, "Chemical Shield Generic Info"));
         
         initComponents();
@@ -213,6 +213,11 @@ public class ChemShieldPanel extends GenericTabPanel {
     @Override
     public void setConnected(boolean connected) {
         jCBBoardId.setEnabled(!connected);
+        
+        // Propagate to the configuration dialogs, they may require this information
+        for (SensorSetupDialog dialog : sensorSetupDialogs) {
+            dialog.setConnected(connected);
+        }
     }
     
     @Override

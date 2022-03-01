@@ -73,8 +73,13 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     // Main tab panel list
     private final List<GenericTabPanel> tabPanelsList = new ArrayList<>();
     
-    // TypedSessionsID in the configuration file, expected for each tab
-    private final Integer tabSessions[] = { ShieldProtocolLayer.CHEM_SHIELD_R3X_TYPE_ID, ShieldProtocolLayer.EXP1_SHIELD_R1X_TYPE_ID, ShieldProtocolLayer.ENV1_SHIELD_R1X_TYPE_ID };
+    // TypedSessionsID in the configuration file, expected for each tab. 
+    // NOTE: The array order NEEDs to match the tabPanelsList order
+    private final Integer tabSessions[] = { ShieldProtocolLayer.CHEM_SHIELD_R3X_TYPE_ID,
+                                            ShieldProtocolLayer.ENV1_SHIELD_R1X_TYPE_ID,
+                                            ShieldProtocolLayer.EXP1_SHIELD_R1X_TYPE_ID, 
+                                            ShieldProtocolLayer.EXP2_SHIELD_R1X_TYPE_ID
+                                            };
     
     // We need to understand if the board has been connected or not
     private boolean connected = false;
@@ -125,8 +130,9 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         
         // Add genericTabPanels in a list for an easy access
         tabPanelsList.add(chemSensorPanel);
-        tabPanelsList.add(envShield1Panel1);
+        tabPanelsList.add(envShield1Panel);
         tabPanelsList.add(expShield1Panel);
+        tabPanelsList.add(expShield2Panel);
         
         // Populate links between menu items and windows
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.CHEM_SENSOR_CHANNEL_ID_1), jMenuItemChemSetup1);
@@ -140,18 +146,27 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.HUM_INT_SENSOR_CHANNEL_ID), jMenuItemIntHumSetup);
         menuFromWindow.put(chemSensorPanel.getSensorSetupDialogs().get(ChemShieldPanel.GENERIC_INFO_CHANNEL_ID), jMenuChemShieldInfo);
 
-        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOFAST), jMenuItemAudioFast);
-        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOSLOW), jMenuItemAudioSlow);
-        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_TEMPERATURE_HUMIDITY), jMenuItemTemperatureHum);
-        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_OPT3001), jMenuItemOPT3001);
-        menuFromWindow.put(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.GENERIC_INFO_CHANNEL_ID), jMenuEnvShieldInfo);
-
+        menuFromWindow.put(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOFAST), jMenuItemAudioFast);
+        menuFromWindow.put(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOSLOW), jMenuItemAudioSlow);
+        menuFromWindow.put(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_TEMPERATURE_HUMIDITY), jMenuItemTemperatureHum);
+        menuFromWindow.put(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_OPT3001), jMenuItemOPT3001);
+        menuFromWindow.put(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.GENERIC_INFO_CHANNEL_ID), jMenuEnvShieldInfo);
+       
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_RD200M), jMenuItemRD200MSetup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_D300), jMenuItemD300Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_PMS5003), jMenuItemPMS5003Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_OPCN3), jMenuItemOPCN3Setup);
-        menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(expShield1Panel.EXPSHIELD1_SETUP_DIALOG_SPS30), jMenuItemSPS30Setup);
+        menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_SPS30), jMenuItemSPS30Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_GENERIC_INFO), jMenuItemExpShieldInfo);
+        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_D300), jMenuItemD300_Exp2Setup);        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_SHT31I), jMenuItemSHT31I_Exp2);        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_SHT31E), jMenuItemSHT31E_Exp2);        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_INTAD), jMenuItemAnFbk_Exp2);        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_PID), jMenuItemPID_HC_Exp2);        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_ADT7470), jMenuItemTAndFan_Exp2);        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_K96), jMenuItemK96_Exp2);        
+        menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_GENERIC_INFO), jMenuItemExpShield2Info);        
         
         menuFromWindow.put(sensorPresetManagerDialog, jMenuItemSensorDBEdit);
         
@@ -160,10 +175,13 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         for (SensorSetupDialog dialog:chemSensorPanel.getSensorSetupDialogs()) {
             dialog.addWindowListener(this);
         }
-        for (SensorSetupDialog dialog:envShield1Panel1.getSensorSetupDialogs()) {
+        for (SensorSetupDialog dialog:envShield1Panel.getSensorSetupDialogs()) {
             dialog.addWindowListener(this);
         }
         for (SensorSetupDialog dialog:expShield1Panel.getSensorSetupDialogs()) {
+            dialog.addWindowListener(this);
+        }
+        for (SensorSetupDialog dialog:expShield2Panel.getSensorSetupDialogs()) {
             dialog.addWindowListener(this);
         }
         sensorPresetManagerDialog.addWindowListener(this);
@@ -262,11 +280,13 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
         jMenuItem7 = new javax.swing.JMenuItem();
+        jMenuItem8 = new javax.swing.JMenuItem();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         chemSensorPanel = new airsenseur.dev.chemsensorpanel.ChemShieldPanel(this, shieldProtocolLayer, logger)
         ;
         expShield1Panel = new airsenseur.dev.chemsensorpanel.ExpShield1Panel(this, shieldProtocolLayer, logger);
-        envShield1Panel1 = new airsenseur.dev.chemsensorpanel.EnvShield1Panel(this, shieldProtocolLayer, logger);
+        expShield2Panel = new airsenseur.dev.chemsensorpanel.ExpShield2Panel(this, shieldProtocolLayer, logger);
+        envShield1Panel = new airsenseur.dev.chemsensorpanel.EnvShield1Panel(this, shieldProtocolLayer, logger);
         jMenuBar = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemSaveConfig = new javax.swing.JMenuItem();
@@ -306,6 +326,16 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuItemSPS30Setup = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         jMenuItemExpShieldInfo = new javax.swing.JMenuItem();
+        jMenuExpShield2 = new javax.swing.JMenu();
+        jMenuItemSHT31I_Exp2 = new javax.swing.JMenuItem();
+        jMenuItemSHT31E_Exp2 = new javax.swing.JMenuItem();
+        jMenuItemAnFbk_Exp2 = new javax.swing.JMenuItem();
+        jMenuItemPID_HC_Exp2 = new javax.swing.JMenuItem();
+        jMenuItemTAndFan_Exp2 = new javax.swing.JMenuItem();
+        jMenuItemD300_Exp2Setup = new javax.swing.JMenuItem();
+        jMenuItemK96_Exp2 = new javax.swing.JMenuItem();
+        jSeparator8 = new javax.swing.JPopupMenu.Separator();
+        jMenuItemExpShield2Info = new javax.swing.JMenuItem();
         jMenuEnvShield1 = new javax.swing.JMenu();
         jMenuItemAudioFast = new javax.swing.JMenuItem();
         jMenuItemAudioSlow = new javax.swing.JMenuItem();
@@ -330,13 +360,16 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
 
         jMenuItem7.setText("jMenuItem7");
 
+        jMenuItem8.setText("jMenuItem8");
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("AirSensEUR Panel");
         setLocationByPlatform(true);
 
         jTabbedPane1.addTab("Chemical Sensor Shield", chemSensorPanel);
         jTabbedPane1.addTab("ExpShield1", expShield1Panel);
-        jTabbedPane1.addTab("EnvShield1", envShield1Panel1);
+        jTabbedPane1.addTab("ExpShield2", expShield2Panel);
+        jTabbedPane1.addTab("EnvShield1", envShield1Panel);
 
         jMenuFile.setText("File");
 
@@ -597,6 +630,75 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuExpShield1.add(jMenuItemExpShieldInfo);
 
         jMenuBar.add(jMenuExpShield1);
+
+        jMenuExpShield2.setText("ExpShield2");
+
+        jMenuItemSHT31I_Exp2.setText("Int Temp/Umid");
+        jMenuItemSHT31I_Exp2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSHT31I_Exp2ActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemSHT31I_Exp2);
+
+        jMenuItemSHT31E_Exp2.setText("Ext Temp/Umid");
+        jMenuItemSHT31E_Exp2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSHT31E_Exp2ActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemSHT31E_Exp2);
+
+        jMenuItemAnFbk_Exp2.setText("Analog Fbk");
+        jMenuItemAnFbk_Exp2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemAnFbk_Exp2ActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemAnFbk_Exp2);
+
+        jMenuItemPID_HC_Exp2.setText("PID Heater/Cooler");
+        jMenuItemPID_HC_Exp2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemPID_HC_Exp2ActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemPID_HC_Exp2);
+
+        jMenuItemTAndFan_Exp2.setText("Temp/Fans");
+        jMenuItemTAndFan_Exp2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemTAndFan_Exp2ActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemTAndFan_Exp2);
+
+        jMenuItemD300_Exp2Setup.setText("D300");
+        jMenuItemD300_Exp2Setup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemD300_Exp2SetupActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemD300_Exp2Setup);
+
+        jMenuItemK96_Exp2.setText("K96");
+        jMenuItemK96_Exp2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemK96_Exp2ActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemK96_Exp2);
+        jMenuExpShield2.add(jSeparator8);
+
+        jMenuItemExpShield2Info.setText("Generic Information");
+        jMenuItemExpShield2Info.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemExpShield2InfoActionPerformed(evt);
+            }
+        });
+        jMenuExpShield2.add(jMenuItemExpShield2Info);
+
+        jMenuBar.add(jMenuExpShield2);
 
         jMenuEnvShield1.setText("EnvShield1");
 
@@ -1005,28 +1107,60 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     }//GEN-LAST:event_jMenuItemIntHumSetupActionPerformed
 
     private void jMenuItemAudioFastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAudioFastActionPerformed
-        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOFAST));
+        updateMenuItemVisibilityForDialog(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOFAST));
     }//GEN-LAST:event_jMenuItemAudioFastActionPerformed
 
     private void jMenuItemAudioSlowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAudioSlowActionPerformed
-        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOSLOW));
+        updateMenuItemVisibilityForDialog(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_DIALOG_AUDIOSLOW));
     }//GEN-LAST:event_jMenuItemAudioSlowActionPerformed
 
     private void jMenuItemTemperatureHumActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemTemperatureHumActionPerformed
-        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_TEMPERATURE_HUMIDITY));
+        updateMenuItemVisibilityForDialog(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_TEMPERATURE_HUMIDITY));
     }//GEN-LAST:event_jMenuItemTemperatureHumActionPerformed
 
     private void jMenuItemOPT3001ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemOPT3001ActionPerformed
-        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_OPT3001));
+        updateMenuItemVisibilityForDialog(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.ENVSHIELD1_SETUP_OPT3001));
     }//GEN-LAST:event_jMenuItemOPT3001ActionPerformed
 
     private void jMenuEnvShieldInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuEnvShieldInfoActionPerformed
-        updateMenuItemVisibilityForDialog(envShield1Panel1.getSensorSetupDialogs().get(EnvShield1Panel.GENERIC_INFO_CHANNEL_ID));
+        updateMenuItemVisibilityForDialog(envShield1Panel.getSensorSetupDialogs().get(EnvShield1Panel.GENERIC_INFO_CHANNEL_ID));
     }//GEN-LAST:event_jMenuEnvShieldInfoActionPerformed
 
     private void jMenuItemSPS30SetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSPS30SetupActionPerformed
         updateMenuItemVisibilityForDialog(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_SPS30));
     }//GEN-LAST:event_jMenuItemSPS30SetupActionPerformed
+
+    private void jMenuItemD300_Exp2SetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemD300_Exp2SetupActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_D300));
+    }//GEN-LAST:event_jMenuItemD300_Exp2SetupActionPerformed
+
+    private void jMenuItemSHT31I_Exp2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSHT31I_Exp2ActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_SHT31I));
+    }//GEN-LAST:event_jMenuItemSHT31I_Exp2ActionPerformed
+
+    private void jMenuItemSHT31E_Exp2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSHT31E_Exp2ActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_SHT31E));
+    }//GEN-LAST:event_jMenuItemSHT31E_Exp2ActionPerformed
+
+    private void jMenuItemAnFbk_Exp2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAnFbk_Exp2ActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_INTAD));
+    }//GEN-LAST:event_jMenuItemAnFbk_Exp2ActionPerformed
+
+    private void jMenuItemPID_HC_Exp2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemPID_HC_Exp2ActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_PID));
+    }//GEN-LAST:event_jMenuItemPID_HC_Exp2ActionPerformed
+
+    private void jMenuItemTAndFan_Exp2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemTAndFan_Exp2ActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_ADT7470));
+    }//GEN-LAST:event_jMenuItemTAndFan_Exp2ActionPerformed
+
+    private void jMenuItemK96_Exp2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemK96_Exp2ActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_K96));
+    }//GEN-LAST:event_jMenuItemK96_Exp2ActionPerformed
+
+    private void jMenuItemExpShield2InfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExpShield2InfoActionPerformed
+        updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_GENERIC_INFO));
+    }//GEN-LAST:event_jMenuItemExpShield2InfoActionPerformed
 
     protected List<AppDataMessage> getCurrentConfiguration(int tabPanelIndex, boolean forceRestartSampling) {
         
@@ -1132,14 +1266,16 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private airsenseur.dev.chemsensorpanel.ChemShieldPanel chemSensorPanel;
-    private airsenseur.dev.chemsensorpanel.EnvShield1Panel envShield1Panel1;
+    private airsenseur.dev.chemsensorpanel.EnvShield1Panel envShield1Panel;
     private airsenseur.dev.chemsensorpanel.ExpShield1Panel expShield1Panel;
+    private airsenseur.dev.chemsensorpanel.ExpShield2Panel expShield2Panel;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenu jMenuChemSensors;
     private javax.swing.JMenuItem jMenuChemShieldInfo;
     private javax.swing.JMenu jMenuEnvShield1;
     private javax.swing.JMenuItem jMenuEnvShieldInfo;
     private javax.swing.JMenu jMenuExpShield1;
+    private javax.swing.JMenu jMenuExpShield2;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
@@ -1148,7 +1284,9 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
+    private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JMenuItem jMenuItemAnFbk_Exp2;
     private javax.swing.JMenuItem jMenuItemAudioFast;
     private javax.swing.JMenuItem jMenuItemAudioSlow;
     private javax.swing.JMenuItem jMenuItemChemSetup1;
@@ -1158,26 +1296,33 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItemConnectNetwork;
     private javax.swing.JMenuItem jMenuItemConnectSerial;
     private javax.swing.JMenuItem jMenuItemD300Setup;
+    private javax.swing.JMenuItem jMenuItemD300_Exp2Setup;
     private javax.swing.JMenuItem jMenuItemDisconnect;
     private javax.swing.JMenuItem jMenuItemExit;
+    private javax.swing.JMenuItem jMenuItemExpShield2Info;
     private javax.swing.JMenuItem jMenuItemExpShieldInfo;
     private javax.swing.JMenuItem jMenuItemExtHumSetup;
     private javax.swing.JMenuItem jMenuItemExtTempSetup;
     private javax.swing.JMenuItem jMenuItemIntHumSetup;
     private javax.swing.JMenuItem jMenuItemIntTempSetup;
+    private javax.swing.JMenuItem jMenuItemK96_Exp2;
     private javax.swing.JMenuItem jMenuItemOPCN3Setup;
     private javax.swing.JMenuItem jMenuItemOPT3001;
+    private javax.swing.JMenuItem jMenuItemPID_HC_Exp2;
     private javax.swing.JMenuItem jMenuItemPMS5003Setup;
     private javax.swing.JMenuItem jMenuItemPressSetup;
     private javax.swing.JMenuItem jMenuItemRD200MSetup;
     private javax.swing.JMenuItem jMenuItemReadConfig;
     private javax.swing.JMenuItem jMenuItemReadFromBoard;
+    private javax.swing.JMenuItem jMenuItemSHT31E_Exp2;
+    private javax.swing.JMenuItem jMenuItemSHT31I_Exp2;
     private javax.swing.JMenuItem jMenuItemSPS30Setup;
     private javax.swing.JMenuItem jMenuItemSaveConfig;
     private javax.swing.JMenuItem jMenuItemSaveSensorProperties;
     private javax.swing.JMenuItem jMenuItemSensorDBEdit;
     private javax.swing.JMenuItem jMenuItemStartSampling;
     private javax.swing.JMenuItem jMenuItemStopSampling;
+    private javax.swing.JMenuItem jMenuItemTAndFan_Exp2;
     private javax.swing.JMenuItem jMenuItemTemperatureHum;
     private javax.swing.JMenuItem jMenuItemWriteToBoard;
     private javax.swing.JMenu jMenuSensorBus;
@@ -1189,6 +1334,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JPopupMenu.Separator jSeparator5;
     private javax.swing.JPopupMenu.Separator jSeparator6;
     private javax.swing.JPopupMenu.Separator jSeparator7;
+    private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
 

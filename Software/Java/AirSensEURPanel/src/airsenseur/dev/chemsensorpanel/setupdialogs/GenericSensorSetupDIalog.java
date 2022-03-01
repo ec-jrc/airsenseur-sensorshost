@@ -39,22 +39,25 @@ public class GenericSensorSetupDIalog extends SensorSetupDialog {
     
     private String sensorName = "Generic Sensor";
     private final boolean serialDisabled;
+    private final int numChannels;
 
     /**
      * Creates new form GenericSensorSetupDIalog
      * @param sensorName
      * @param sensorId
+     * @param numChannels: number of consecutive channels, if any. Used only for enable/disable channel checkbox
      * @param sensorSerialDisabled
      * @param prescalerDisabled
      * @param IIRDisabled
      * @param parent
      * @param modal
      */
-    public GenericSensorSetupDIalog(String sensorName, int sensorId, boolean sensorSerialDisabled, boolean prescalerDisabled, boolean IIRDisabled, MainApplicationFrame parent, boolean modal) {
+    public GenericSensorSetupDIalog(String sensorName, int sensorId, int numChannels, boolean sensorSerialDisabled, boolean prescalerDisabled, boolean IIRDisabled, MainApplicationFrame parent, boolean modal) {
         super(parent, modal, sensorId);
         
         this.sensorName = sensorName;
         this.serialDisabled = sensorSerialDisabled;
+        this.numChannels = numChannels;
         
         initComponents();
         
@@ -96,7 +99,10 @@ public class GenericSensorSetupDIalog extends SensorSetupDialog {
     public void storeToBoard() throws SensorBusException {
         iIRAndAvgPanel.storeToBoard();
         
-        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorId, jCheckBoxChannelEnabled.isSelected());
+        boolean channelsEnabled = jCheckBoxChannelEnabled.isSelected();
+        for (int channel = sensorId; channel < sensorId + numChannels; channel++) {
+            shieldProtocolLayer.renderWriteChannelEnable(boardId, channel, channelsEnabled);
+        }
         
         if (shieldProtocolLayer != null) {
             shieldProtocolLayer.renderSavePresetWithName(boardId, sensorId, this.sensorName);
@@ -113,7 +119,9 @@ public class GenericSensorSetupDIalog extends SensorSetupDialog {
         iIRAndAvgPanel.readFromBoard();
         
         shieldProtocolLayer.renderReadSensorSerialNumber(boardId, sensorId);
-        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorId);
+        for (int channel = sensorId; channel < sensorId + numChannels; channel++) {
+            shieldProtocolLayer.renderReadChannelEnable(boardId, channel);
+        }
     }
 
     @Override

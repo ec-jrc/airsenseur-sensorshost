@@ -37,6 +37,11 @@
         <Property name="text" type="java.lang.String" value="jMenuItem7"/>
       </Properties>
     </Component>
+    <Component class="javax.swing.JMenuItem" name="jMenuItem8">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jMenuItem8"/>
+      </Properties>
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenuFile">
@@ -331,6 +336,79 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenuExpShield2">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="ExpShield2"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemSHT31I_Exp2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Int Temp/Umid"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemSHT31I_Exp2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemSHT31E_Exp2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Ext Temp/Umid"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemSHT31E_Exp2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemAnFbk_Exp2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Analog Fbk"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemAnFbk_Exp2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemPID_HC_Exp2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="PID Heater/Cooler"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemPID_HC_Exp2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemTAndFan_Exp2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Temp/Fans"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemTAndFan_Exp2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemD300_Exp2Setup">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="D300"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemD300_Exp2SetupActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemK96_Exp2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="K96"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemK96_Exp2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator8">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemExpShield2Info">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Generic Information"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemExpShield2InfoActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
         <Menu class="javax.swing.JMenu" name="jMenuEnvShield1">
           <Properties>
             <Property name="text" type="java.lang.String" value="EnvShield1"/>
@@ -464,7 +542,19 @@
             </Constraint>
           </Constraints>
         </Component>
-        <Component class="airsenseur.dev.chemsensorpanel.EnvShield1Panel" name="envShield1Panel1">
+        <Component class="airsenseur.dev.chemsensorpanel.ExpShield2Panel" name="expShield2Panel">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new airsenseur.dev.chemsensorpanel.ExpShield2Panel(this, shieldProtocolLayer, logger)"/>
+          </AuxValues>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="ExpShield2">
+                <Property name="tabTitle" type="java.lang.String" value="ExpShield2"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.EnvShield1Panel" name="envShield1Panel">
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new airsenseur.dev.chemsensorpanel.EnvShield1Panel(this, shieldProtocolLayer, logger)"/>
           </AuxValues>

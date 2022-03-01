@@ -81,7 +81,7 @@ public class TextBasedSampleLoggerPanelLite extends SampleLogger {
     protected double onNewSample(double sample, int timestamp) {
         sample = super.onNewSample(sample, timestamp);
         
-        String newSample = String.format("%.2f %s", sample, units);
+        String newSample = formatSample(sample) + " " + units;
         jLblValue.setText(newSample);
         
         return sample;

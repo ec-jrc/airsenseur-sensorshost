@@ -101,10 +101,10 @@ public class EnvShield1Panel extends GenericTabPanel {
         super(shieldProtocolLayer, logger);
         
         // Generate the sensor setup dialogs
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(AUDIOFAST_SENSOR_NAME, AUDIOFAST_CHANNEL, true, true, true, parent, false));        
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(AUDIOSLOW_SENSOR_NAME, AUDIOSLOW_CHANNEL, true, true, true, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_HUMID_PANEL_NAME, TEMPERATURE_CHANNEL, true, false, false, parent, false));
-        sensorSetupDialogs.add(new GenericSensorSetupDIalog(OPT3001_SENSOR_NAME, LIGHT_OPT3001_CHANNEL, true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(AUDIOFAST_SENSOR_NAME, AUDIOFAST_CHANNEL, AUDIOFAST_NUM_OF_CHANNELS, true, true, true, parent, false));        
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(AUDIOSLOW_SENSOR_NAME, AUDIOSLOW_CHANNEL, AUDIOSLOW_NUM_OF_CHANNELS, true, true, true, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(TEMP_HUMID_PANEL_NAME, TEMPERATURE_CHANNEL, 2,true, false, false, parent, false));
+        sensorSetupDialogs.add(new GenericSensorSetupDIalog(OPT3001_SENSOR_NAME, LIGHT_OPT3001_CHANNEL, 1, true, false, false, parent, false));
         sensorSetupDialogs.add(new GenericBoardInfoDialog(parent, false, "Environment Shield 1 Generic Info"));        
         
         initComponents();
@@ -189,6 +189,11 @@ public class EnvShield1Panel extends GenericTabPanel {
     @Override
     public void setConnected(boolean connected) {
         jCBBoardId.setEnabled(!connected);
+        
+        // Propagate to the configuration dialogs, they may require this information
+        for (SensorSetupDialog dialog : sensorSetupDialogs) {
+            dialog.setConnected(connected);
+        }
     }
     
     @Override
@@ -398,7 +403,7 @@ public class EnvShield1Panel extends GenericTabPanel {
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabelBoardSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

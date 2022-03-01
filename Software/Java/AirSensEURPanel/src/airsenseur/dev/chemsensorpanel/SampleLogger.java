@@ -53,6 +53,12 @@ public abstract class SampleLogger extends javax.swing.JPanel {
         public double processSample(double sample);
     }
     
+    // This interface could be used to apply a specific string-based formatting
+    // of each incoming sample
+    public interface DataFormatting {
+        public String formatSample(double sample);
+    }
+    
     // This is a simple signed to unsigned routine conversion
     // that could be applied to the chemical sensors A/D converter results
     public final static DataProcessing unsignedConvertion = new DataProcessing() {
@@ -107,14 +113,42 @@ public abstract class SampleLogger extends javax.swing.JPanel {
             return sample / 10000;
         }
     };
+    
+    public final static SampleLogger.DataFormatting formatToFloat = new DataFormatting() {
+        @Override
+        public String formatSample(double sample) {
+            return String.format("%.2f", sample);
+        }
+    };
+    
+    public final static SampleLogger.DataFormatting formatToTwoDigitHex = new DataFormatting() {
+        @Override
+        public String formatSample(double sample) {
+            int intSample = (int)sample;
+            
+            return String.format("%02X", intSample);
+        }
+    };
+    
+    public final static SampleLogger.DataFormatting formatToFourDigitHex = new DataFormatting() {
+        @Override
+        public String formatSample(double sample) {
+            int intSample = (int)sample;
+
+            return String.format("%04X", intSample);
+        }
+    };
+    
 
     protected long lastSampleTimeStamp = 0;
     protected int boardId = AppDataMessage.BOARD_ID_UNDEFINED;
     protected int sensorId = 0;  
     protected DataProcessing dataProcessing = null;
+    protected DataFormatting dataFormatting = formatToFloat;
     protected FileLogger fileLogger = null;
     protected ShieldProtocolLayer shieldProtocolLayer = null;
     protected boolean highResEnabled = false;
+    protected String stringFormat = "%.2f";
     
     public void setBoardId(int boardId) {
         this.boardId = boardId;
@@ -133,6 +167,10 @@ public abstract class SampleLogger extends javax.swing.JPanel {
     }
     
     public abstract void setLoggerProperties(String title, int minVal, int maxVal, int historyLength);
+    
+    public void setDataFormatting(DataFormatting dataFormatting) {
+        this.dataFormatting = dataFormatting;
+    }
     
     public void setDataProcessing(DataProcessing dataProcessing) {
         this.dataProcessing = dataProcessing;
@@ -202,5 +240,13 @@ public abstract class SampleLogger extends javax.swing.JPanel {
         }
                 
         return sample;
+    }
+    
+    protected String formatSample(double sample) {
+        if (dataFormatting != null) {
+            return dataFormatting.formatSample(sample);
+        }
+        
+        return "";
     }
 }
