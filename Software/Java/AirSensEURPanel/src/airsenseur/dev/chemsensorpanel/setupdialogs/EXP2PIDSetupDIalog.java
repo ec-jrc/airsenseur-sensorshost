@@ -65,7 +65,6 @@ public class EXP2PIDSetupDIalog extends SensorSetupDialog {
         
         PIDRegisterRW.setBoardId(boardId);
         PIDRegisterRW.setChannelId(sensorId);
-        PIDRegisterRW.setMaxValue(65535);
         
         // Channel is enabled by default
         jCheckBoxChannelsEnabled.setSelected(true);
@@ -161,15 +160,10 @@ public class EXP2PIDSetupDIalog extends SensorSetupDialog {
 
         iIRAndAvgPanel = new airsenseur.dev.chemsensorpanel.widgets.IIRAndAvgPanel();
         jCheckBoxChannelsEnabled = new javax.swing.JCheckBox();
-        PIDRegisterRW = new airsenseur.dev.chemsensorpanel.widgets.FreeRegisterRWPanel();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
+        PIDRegisterRW = new airsenseur.dev.chemsensorpanel.widgets.PIDRegistersPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle(sensorName);
@@ -182,19 +176,9 @@ public class EXP2PIDSetupDIalog extends SensorSetupDialog {
             }
         });
 
-        jLabel1.setText("Read/Write to a specific register into PID sensor.");
+        jLabel1.setText("PID specific parameters for heating and cooling.");
 
-        jLabel3.setText("Don't do it unless you know what you're doing.");
-
-        jLabel5.setText("Address: 0x0000 to 0x0002 -> P,I,D coefficients");
-
-        jLabel7.setText("Address: 0x0006 -> Write 0xAA to confirm and apply");
-
-        jLabel6.setText("Address: 0x0003 -> Multiplier, common to the PID coeffs.");
-
-        jLabel8.setText("Address: 0x0004 -> Min heating % threshold (in 1/100)");
-
-        jLabel9.setText("Address: 0x0005 -> Min cooling % threshold (in 1/100)");
+        jLabel3.setText("Don't change it unless you know what you're doing.");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -209,18 +193,12 @@ public class EXP2PIDSetupDIalog extends SensorSetupDialog {
                             .addComponent(jCheckBoxChannelsEnabled)
                             .addComponent(jLabel1)
                             .addComponent(jLabel3)
-                            .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel7)
-                            .addComponent(jLabel6)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(PIDRegisterRW, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel9)))
+                            .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel8)
+                .addComponent(PIDRegisterRW, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -236,19 +214,9 @@ public class EXP2PIDSetupDIalog extends SensorSetupDialog {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(PIDRegisterRW, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         pack();
@@ -259,16 +227,11 @@ public class EXP2PIDSetupDIalog extends SensorSetupDialog {
     }//GEN-LAST:event_jCheckBoxChannelsEnabledActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private airsenseur.dev.chemsensorpanel.widgets.FreeRegisterRWPanel PIDRegisterRW;
+    private airsenseur.dev.chemsensorpanel.widgets.PIDRegistersPanel PIDRegisterRW;
     private airsenseur.dev.chemsensorpanel.widgets.IIRAndAvgPanel iIRAndAvgPanel;
     private javax.swing.JCheckBox jCheckBoxChannelsEnabled;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JSeparator jSeparator1;
     // End of variables declaration//GEN-END:variables
 

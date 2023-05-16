@@ -72,7 +72,13 @@ public class ExpShield2Panel extends GenericTabPanel {
     public final static int CHANNEL_K96_TEMP_UCDIE = 0x17;
     public final static int CHANNEL_K96_RH0 = 0x18;
     public final static int CHANNEL_K96_T_RH0 = 0x19;
-    public final static int CHANNEL_K96_ERRORSTATUS = 0x1A;
+    public final static int CHANNEL_K96_LPL_UFLT_IR = 0x1A;
+    public final static int CHANNEL_K96_SPL_UFLT_IR = 0x1B;
+    public final static int CHANNEL_K96_MPL_UFLT_IR = 0x1C;
+    public final static int CHANNEL_K96_ERRORSTATUS = 0x1D;
+    public final static int CHANNEL_K96_LPL_UFLT_ERR = 0x1E;
+    public final static int CHANNEL_K96_SPL_UFLT_ERR = 0x1F;
+    public final static int CHANNEL_K96_MPL_UFLT_ERR = 0x20;
     
     public final static int CHANNEL_K96_NUM_CHANNELS = CHANNEL_K96_ERRORSTATUS - CHANNEL_K96_LPL_PC_FLT + 1;
     
@@ -91,6 +97,7 @@ public class ExpShield2Panel extends GenericTabPanel {
     private boolean boardEnabled = false;
     
     private final static String DEFAULT_CHANNEL_MATH_EXPRESSION =  "x";
+    private final static String SIGNED_SHORT_CHANNEL_MATH_EXPRESSION = "x-32768";
     private final static String SHT31_TEMP_CHANNEL_MATH_EXPRESSION = "((x/65535*175) - 45.0)";
     private final static String SHT31_HUMIDITY_CHANNEL_MATH_EXPRESSION = "(x/65535)*100.0";
     private final static String INTAD_12V_MATH_EXPRESSION = "x * (13.6 / 3.6) * 1000";
@@ -133,7 +140,11 @@ public class ExpShield2Panel extends GenericTabPanel {
                                                         CHANNEL_K96_LPL_PC_FLT, 
                                                         CHANNEL_K96_SPL_PC_FLT, CHANNEL_K96_MPL_PC_FLT, 
                                                         CHANNEL_K96_PRESS0, CHANNEL_K96_TEMP_NTC0, 
-                                                        CHANNEL_K96_RH0, CHANNEL_K96_ERRORSTATUS, parent, false));
+                                                        CHANNEL_K96_RH0, CHANNEL_K96_LPL_UFLT_IR,
+                                                        CHANNEL_K96_SPL_UFLT_IR, CHANNEL_K96_MPL_UFLT_IR,
+                                                        CHANNEL_K96_ERRORSTATUS, CHANNEL_K96_LPL_UFLT_ERR, 
+                                                        CHANNEL_K96_SPL_UFLT_ERR, CHANNEL_K96_MPL_UFLT_ERR,
+                                                        parent, false));
         sensorSetupDialogs.add(new GenericBoardInfoDialog(parent, false, "ExpShield2 Generic Info"));
                 
         initComponents();
@@ -149,7 +160,13 @@ public class ExpShield2Panel extends GenericTabPanel {
         sampleLoggerPanels.add(sampleLoggerK96_uCDie);
         sampleLoggerPanels.add(sampleLoggerK96_RH0);
         sampleLoggerPanels.add(sampleLoggerK96_T_RH0);
+        sampleLoggerPanels.add(sampleLoggerK96_ufLPL);
+        sampleLoggerPanels.add(sampleLoggerK96_ufSPL);
+        sampleLoggerPanels.add(sampleLoggerK96_ufMPL);
         sampleLoggerPanels.add(sampleLoggerK96_Error);
+        sampleLoggerPanels.add(sampleLoggerK96_LPL_Uflt_Err);
+        sampleLoggerPanels.add(sampleLoggerK96_SPL_Uflt_Err);
+        sampleLoggerPanels.add(sampleLoggerK96_MPL_Uflt_Err);
         sampleLoggerPanels.add(sampleLoggerSHT31E_H);
         sampleLoggerPanels.add(sampleLoggerSHT31E_T);
         sampleLoggerPanels.add(sampleLoggerSHT31I_H);
@@ -182,8 +199,17 @@ public class ExpShield2Panel extends GenericTabPanel {
         sampleLoggerK96_uCDie.setSensorId(CHANNEL_K96_TEMP_UCDIE);
         sampleLoggerK96_RH0.setSensorId(CHANNEL_K96_RH0);
         sampleLoggerK96_T_RH0.setSensorId(CHANNEL_K96_T_RH0);
+        sampleLoggerK96_ufLPL.setSensorId(CHANNEL_K96_LPL_UFLT_IR);
+        sampleLoggerK96_ufSPL.setSensorId(CHANNEL_K96_SPL_UFLT_IR);
+        sampleLoggerK96_ufMPL.setSensorId(CHANNEL_K96_MPL_UFLT_IR);
         sampleLoggerK96_Error.setSensorId(CHANNEL_K96_ERRORSTATUS);
         sampleLoggerK96_Error.setDataFormatting(SampleLogger.formatToFourDigitHex);
+        sampleLoggerK96_LPL_Uflt_Err.setSensorId(CHANNEL_K96_LPL_UFLT_ERR);
+        sampleLoggerK96_LPL_Uflt_Err.setDataFormatting(SampleLogger.formatToFourDigitHex);
+        sampleLoggerK96_SPL_Uflt_Err.setSensorId(CHANNEL_K96_SPL_UFLT_ERR);
+        sampleLoggerK96_SPL_Uflt_Err.setDataFormatting(SampleLogger.formatToFourDigitHex);
+        sampleLoggerK96_MPL_Uflt_Err.setSensorId(CHANNEL_K96_MPL_UFLT_ERR);
+        sampleLoggerK96_MPL_Uflt_Err.setDataFormatting(SampleLogger.formatToFourDigitHex);
         
         sampleLoggerSHT31I_T.setSensorId(CHANNEL_TEMPERATURE_I);
         sampleLoggerSHT31I_H.setSensorId(CHANNEL_HUMIDIDY_I);
@@ -416,7 +442,7 @@ public class ExpShield2Panel extends GenericTabPanel {
             } else if ( (n >= CHANNEL_ADT7470_F_EXT_HEATSINK) && (n <= CHANNEL_ADT7470_F_AIR_CIR)) {
                 sensorProperties.setSensorExpression(ADT7470_FAN_SPEED_MAT_EXPRESSION);
             } else if ( (n >= CHANNEL_K96_LPL_PC_FLT) && (n < CHANNEL_K96_PRESS0)) {
-                sensorProperties.setSensorExpression(DEFAULT_CHANNEL_MATH_EXPRESSION);
+                sensorProperties.setSensorExpression(SIGNED_SHORT_CHANNEL_MATH_EXPRESSION);
             } else if ( n == CHANNEL_K96_PRESS0 ) {
                 sensorProperties.setSensorExpression(DIVIDE_BY_10_MATH_EXPRESSION);
             } else if ( (n >= CHANNEL_K96_TEMP_NTC0) && (n < CHANNEL_K96_ERRORSTATUS) ) {
@@ -460,11 +486,6 @@ public class ExpShield2Panel extends GenericTabPanel {
         sampleLoggerT_uC = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerT_Int_Heatsink = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerT_Ext_Heatsink = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
-        jPanelSHT = new javax.swing.JPanel();
-        sampleLoggerSHT31I_T = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
-        sampleLoggerSHT31I_H = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
-        sampleLoggerSHT31E_H = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
-        sampleLoggerSHT31E_T = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
         jPanelK96Extended = new javax.swing.JPanel();
         sampleLoggerK96_SPL = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerK96_MPL = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
@@ -474,7 +495,17 @@ public class ExpShield2Panel extends GenericTabPanel {
         sampleLoggerK96_uCDie = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerK96_RH0 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerK96_T_RH0 = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerK96_ufLPL = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerK96_ufSPL = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerK96_ufMPL = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         sampleLoggerK96_Error = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerK96_LPL_Uflt_Err = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerK96_MPL_Uflt_Err = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerK96_SPL_Uflt_Err = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerSHT31E_T = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
+        sampleLoggerSHT31I_H = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerSHT31I_T = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel();
+        sampleLoggerSHT31E_H = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
 
         setPreferredSize(new java.awt.Dimension(858, 547));
 
@@ -499,7 +530,7 @@ public class ExpShield2Panel extends GenericTabPanel {
         jPanelFans.setLayout(jPanelFansLayout);
         jPanelFansLayout.setHorizontalGroup(
             jPanelFansLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 202, Short.MAX_VALUE)
+            .addGap(0, 210, Short.MAX_VALUE)
             .addGroup(jPanelFansLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelFansLayout.createSequentialGroup()
                     .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -579,13 +610,10 @@ public class ExpShield2Panel extends GenericTabPanel {
         jPanelTemperatures.setLayout(jPanelTemperaturesLayout);
         jPanelTemperaturesLayout.setHorizontalGroup(
             jPanelTemperaturesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelTemperaturesLayout.createSequentialGroup()
-                .addGroup(jPanelTemperaturesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sampleLoggerT_uC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLoggerT_Int_Chamber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLoggerT_Int_Heatsink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sampleLoggerT_Ext_Heatsink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 12, Short.MAX_VALUE))
+            .addComponent(sampleLoggerT_uC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(sampleLoggerT_Int_Chamber, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(sampleLoggerT_Int_Heatsink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(sampleLoggerT_Ext_Heatsink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         jPanelTemperaturesLayout.setVerticalGroup(
             jPanelTemperaturesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -598,33 +626,6 @@ public class ExpShield2Panel extends GenericTabPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sampleLoggerT_Ext_Heatsink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout jPanelSHTLayout = new javax.swing.GroupLayout(jPanelSHT);
-        jPanelSHT.setLayout(jPanelSHTLayout);
-        jPanelSHTLayout.setHorizontalGroup(
-            jPanelSHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelSHTLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanelSHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelSHTLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanelSHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(sampleLoggerSHT31E_T, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sampleLoggerSHT31I_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sampleLoggerSHT31E_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(sampleLoggerSHT31I_T, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-        );
-        jPanelSHTLayout.setVerticalGroup(
-            jPanelSHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSHTLayout.createSequentialGroup()
-                .addComponent(sampleLoggerSHT31I_T, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sampleLoggerSHT31I_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sampleLoggerSHT31E_T, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sampleLoggerSHT31E_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         javax.swing.GroupLayout jPanelK96ExtendedLayout = new javax.swing.GroupLayout(jPanelK96Extended);
@@ -641,38 +642,59 @@ public class ExpShield2Panel extends GenericTabPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(sampleLoggerK96_RH0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanelK96ExtendedLayout.createSequentialGroup()
+                        .addComponent(sampleLoggerK96_Press0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerK96_uCDie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelK96ExtendedLayout.createSequentialGroup()
+                        .addComponent(sampleLoggerK96_ufLPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerK96_ufMPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerK96_ufSPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanelK96ExtendedLayout.createSequentialGroup()
                         .addComponent(sampleLoggerK96_MPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(sampleLoggerK96_NTC1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(sampleLoggerK96_T_RH0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelK96ExtendedLayout.createSequentialGroup()
-                        .addComponent(sampleLoggerK96_Press0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(sampleLoggerK96_uCDie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(sampleLoggerK96_Error, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(sampleLoggerK96_T_RH0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(sampleLoggerK96_LPL_Uflt_Err, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerK96_SPL_Uflt_Err, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerK96_MPL_Uflt_Err, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerK96_Error, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanelK96ExtendedLayout.setVerticalGroup(
             jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelK96ExtendedLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelK96ExtendedLayout.createSequentialGroup()
+                        .addComponent(sampleLoggerK96_LPL_Uflt_Err, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerK96_MPL_Uflt_Err, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanelK96ExtendedLayout.createSequentialGroup()
                         .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(sampleLoggerK96_SPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(sampleLoggerK96_NTC0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(sampleLoggerK96_RH0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(sampleLoggerK96_MPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(sampleLoggerK96_T_RH0, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(sampleLoggerK96_NTC1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(sampleLoggerK96_MPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(sampleLoggerK96_T_RH0, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(sampleLoggerK96_NTC1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(sampleLoggerK96_Press0, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sampleLoggerK96_uCDie, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerK96_SPL_Uflt_Err, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelK96ExtendedLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(sampleLoggerK96_ufLPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerK96_ufSPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerK96_ufMPL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sampleLoggerK96_Error, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -684,49 +706,47 @@ public class ExpShield2Panel extends GenericTabPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanelK96Extended, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabelBoardSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel3)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabelBoardSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(sampleLoggerK96, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(sampleLoggerD300, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(6, 6, 6)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(sampleLoggerSHT31E_T, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(sampleLoggerSHT31I_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(sampleLoggerSHT31E_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(sampleLoggerVIN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(sampleLoggerSHT31I_T, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(sampleLoggerK96, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sampleLoggerD300, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(1, 1, 1)
-                                .addComponent(jPanelSHT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sampleLoggerVIN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanelK96Extended, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addComponent(jPanelPeltier, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jPanelPID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanelFans, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanelTemperatures, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(jPanelFans, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jPanelTemperatures, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 8, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(28, 28, 28)
-                        .addComponent(jPanelSHT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jCBBoardId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2)
@@ -735,13 +755,19 @@ public class ExpShield2Panel extends GenericTabPanel {
                         .addGap(7, 7, 7)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(sampleLoggerK96, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(sampleLoggerD300, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanelK96Extended, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sampleLoggerD300, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
+                        .addComponent(sampleLoggerSHT31I_T, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerSHT31I_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerSHT31E_T, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sampleLoggerSHT31E_H, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(sampleLoggerVIN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanelK96Extended, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jPanelPID, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -788,7 +814,6 @@ public class ExpShield2Panel extends GenericTabPanel {
     private javax.swing.JPanel jPanelK96Extended;
     private javax.swing.JPanel jPanelPID;
     private javax.swing.JPanel jPanelPeltier;
-    private javax.swing.JPanel jPanelSHT;
     private javax.swing.JPanel jPanelTemperatures;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerAirCircFan;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLoggerD300;
@@ -796,14 +821,20 @@ public class ExpShield2Panel extends GenericTabPanel {
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerIntFan;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLoggerK96;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_Error;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_LPL_Uflt_Err;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_MPL;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_MPL_Uflt_Err;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_NTC0;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_NTC1;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_Press0;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_RH0;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_SPL;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_SPL_Uflt_Err;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_T_RH0;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_uCDie;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_ufLPL;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_ufMPL;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerK96_ufSPL;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLoggerPID_C;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerPID_H;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel sampleLoggerPLT_C;

@@ -29,9 +29,10 @@ import airsenseur.dev.chemsensorpanel.helpers.HostConfigSensorProperties;
 import airsenseur.dev.chemsensorpanel.helpers.HostConfigWriter;
 import airsenseur.dev.chemsensorpanel.setupdialogs.GenericBoardInfoDialog;
 import airsenseur.dev.chemsensorpanel.setupdialogs.GenericSensorSetupDIalog;
+import airsenseur.dev.chemsensorpanel.setupdialogs.NextPMSensorSetupDIalog;
 import airsenseur.dev.chemsensorpanel.setupdialogs.OPCN3SensorSetupDIalog;
 import airsenseur.dev.chemsensorpanel.setupdialogs.PMS5003SensorSetupDIalog;
-import airsenseur.dev.chemsensorpanel.setupdialogs.SPS30SensorSetupDIalog;
+import airsenseur.dev.chemsensorpanel.setupdialogs.SPS30SensorSetupDialog;
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.comm.ShieldProtocolLayer;
 import airsenseur.dev.exceptions.SensorBusException;
@@ -84,15 +85,24 @@ public class ExpShield1Panel extends GenericTabPanel {
     public final static int SPS30_HISTOGRAM_BIN0_CHANNEL = SPS30_CHANNEL + SPS30_HISTOGRAM_PM_NUM;
     public final static int SPS30_HISTOGRAM_PM_CHANNEL = SPS30_CHANNEL;
     public final static int SPS30_TYPSIZE_CHANNEL = SPS30_CHANNEL + SPS30_NUM_OF_CHANNELS - 1;
+    
+    public final static int NEXTPM_PM_NUM = 3;
+    public final static int NEXTPM_PCS_NUM = 3;
+    public final static int NEXTPM_HISTOGRAM_PCS_CHANNEL = SPS30_TYPSIZE_CHANNEL + 1;
+    public final static int NEXTPM_HISTOGRAM_PM_CHANNEL = NEXTPM_HISTOGRAM_PCS_CHANNEL + NEXTPM_PCS_NUM;
+    public final static int NEXTPM_TEMPERATURE_CHANNEL = NEXTPM_HISTOGRAM_PM_CHANNEL + NEXTPM_PCS_NUM;
+    public final static int NEXTPM_HUMIDITY_CHANNEL = NEXTPM_TEMPERATURE_CHANNEL + 1;
+    public final static int NEXTPM_STATE_CHANNEL = NEXTPM_HUMIDITY_CHANNEL + 1;
         
-    public final static int EXPSHIELD1_NUM_OF_CHANNELS = SPS30_CHANNEL + SPS30_NUM_OF_CHANNELS;
+    public final static int EXPSHIELD1_NUM_OF_CHANNELS = NEXTPM_STATE_CHANNEL + 1;
 
     public final static int EXPSHIELD1_SETUP_DIALOG_RD200M = 0;
     public final static int EXPSHIELD1_SETUP_DIALOG_D300 = 1;
     public final static int EXPSHIELD1_SETUP_DIALOG_PMS5003 = 2;
     public final static int EXPSHIELD1_SETUP_DIALOG_OPCN3 = 3;
     public final static int EXPSHIELD1_SETUP_DIALOG_SPS30 = 4;
-    public final static int EXPSHIELD1_SETUP_GENERIC_INFO = 5;
+    public final static int EXPSHIELD1_SETUP_DIALOG_NEXTPM = 5;
+    public final static int EXPSHIELD1_SETUP_GENERIC_INFO = 6;
     
     private int selectedBoardId = AppDataMessage.BOARD_ID_UNDEFINED;
     private boolean boardEnabled = false;
@@ -107,6 +117,10 @@ public class ExpShield1Panel extends GenericTabPanel {
     private final static String SPS30_PM_MATH_EXPRESSION = "x/32";
     private final static String SPS30_BINS_MATH_EXPRESSION = "x/32";
     private final static String SPS30_TYPSIZE_MATH_EXPRESSION = "x/65536";
+    private final static String NEXTPM_PM_MATH_EXPRESSION = "x/10";
+    private final static String NEXTPM_PCS_MATH_EXPRESSION = "x";
+    private final static String NEXTPM_TEMP_MATH_EXPRESSION = "x/100";
+    private final static String NEXTPM_HUMIDITY_MATH_EXPRESSION = "x/100";
 
     // The chemical sensors setup panels
     private final List<SensorSetupDialog> sensorSetupDialogs = new ArrayList<>();
@@ -134,7 +148,8 @@ public class ExpShield1Panel extends GenericTabPanel {
         sensorSetupDialogs.add(new GenericSensorSetupDIalog("D300", D300_CHANNEL, 1, false, true, true, parent, false));
         sensorSetupDialogs.add(new PMS5003SensorSetupDIalog(PMS5003_CHANNEL, PMS5003_TOTAL_PMAT_NUM, PMS5003_HISTOGRAM_BIN0_CHANNEL, PMS5003_HISTOGRAM_BINS_NUM, parent, false));
         sensorSetupDialogs.add(new OPCN3SensorSetupDIalog(OPCN3_HISTOGRAM_PM_CHANNEL, OPCN3_HISTOGRAM_PM_NUM, OPCN3_HISTOGRAM_BIN0_CHANNEL, OPCN3_HISTOGRAM_BINS_NUM, OPCN3_HISTOGRAM_TEMP_CHANNEL, OPCN3_HISTOGRAM_VOLUME_CHANNEL, OPCN3_DEBUG_CHANNELNUM, parent, false));
-        sensorSetupDialogs.add(new SPS30SensorSetupDIalog(SPS30_CHANNEL, SPS30_HISTOGRAM_PM_NUM, SPS30_HISTOGRAM_BIN0_CHANNEL, SPS30_HISTOGRAM_BINS_NUM, SPS30_TYPSIZE_CHANNEL, parent, false));
+        sensorSetupDialogs.add(new SPS30SensorSetupDialog(SPS30_CHANNEL, SPS30_HISTOGRAM_PM_NUM, SPS30_HISTOGRAM_BIN0_CHANNEL, SPS30_HISTOGRAM_BINS_NUM, SPS30_TYPSIZE_CHANNEL, parent, false));
+        sensorSetupDialogs.add(new NextPMSensorSetupDIalog(NEXTPM_HISTOGRAM_PM_CHANNEL, NEXTPM_PM_NUM, NEXTPM_HISTOGRAM_PCS_CHANNEL, NEXTPM_PCS_NUM, NEXTPM_TEMPERATURE_CHANNEL, NEXTPM_HUMIDITY_CHANNEL, NEXTPM_STATE_CHANNEL, parent, false));
         sensorSetupDialogs.add(new GenericBoardInfoDialog(parent, false, "ExpShield1 Generic Info"));
         
         initComponents();
@@ -154,6 +169,11 @@ public class ExpShield1Panel extends GenericTabPanel {
         sampleLoggerPanels.add(sampleLoggerSPS30Bins);
         sampleLoggerPanels.add(sampleLoggerSPS30PM);
         sampleLoggerPanels.add(sampleLoggerSPS30PSize);
+        sampleLoggerPanels.add(sampleLoggerNextPMPcs);
+        sampleLoggerPanels.add(sampleLoggerNextPMPM);
+        sampleLoggerPanels.add(sampleLoggerNextPMTemp);
+        sampleLoggerPanels.add(sampleLoggerNextPMHumidity);
+        sampleLoggerPanels.add(sampleLoggerNextPMState);
         
         // Initialize all loggers with common properties
         sampleLoggerPMSBins.setLoggerProperties("Bins [#/100ml]", 0, 5, PMS5003_HISTOGRAM_BINS_NUM);
@@ -254,6 +274,40 @@ public class ExpShield1Panel extends GenericTabPanel {
                 return (sample / 32768.0f);
             }
         });
+        
+        sampleLoggerNextPMPcs.setLoggerProperties("PM1, 2.5, 10 [pcs/L]", 0, 5, NEXTPM_PCS_NUM);
+        sampleLoggerNextPMPcs.setSensorId(NEXTPM_HISTOGRAM_PCS_CHANNEL);
+        
+        sampleLoggerNextPMPM.setLoggerProperties("PM1, 2.5, 10 [ug/m3]", 0, 5, NEXTPM_PM_NUM);
+        sampleLoggerNextPMPM.setSensorId(NEXTPM_HISTOGRAM_PM_CHANNEL);
+        sampleLoggerNextPMPM.setDataProcessing(new SampleLogger.DataProcessing() {
+            @Override
+            public double processSample(double sample) {
+                return (sample / 10f);
+            }
+        });
+        
+        sampleLoggerNextPMTemp.setLoggerProperties("Temp", 0, 5, 0);
+        sampleLoggerNextPMTemp.setSensorId(NEXTPM_TEMPERATURE_CHANNEL);
+        sampleLoggerNextPMTemp.setDataProcessing(new SampleLogger.DataProcessing() {
+            @Override
+            public double processSample(double sample) {
+                return (sample / 100f);
+            }
+        });
+        
+        sampleLoggerNextPMHumidity.setLoggerProperties("Hum", 0, 5, 0);
+        sampleLoggerNextPMHumidity.setSensorId(NEXTPM_HUMIDITY_CHANNEL);
+        sampleLoggerNextPMHumidity.setDataProcessing(new SampleLogger.DataProcessing() {
+            @Override
+            public double processSample(double sample) {
+                return (sample / 100f);
+            }
+        });
+        
+        sampleLoggerNextPMState.setLoggerProperties("State", 0, 5, 0);
+        sampleLoggerNextPMState.setSensorId(NEXTPM_STATE_CHANNEL);
+        sampleLoggerNextPMState.setDataFormatting(SampleLogger.formatToHeightBinary);
          
         
         for (int n = 0; n < sampleLoggerPanels.size(); n++) {
@@ -291,10 +345,11 @@ public class ExpShield1Panel extends GenericTabPanel {
         // Get the board sensor name
         shieldProtocolLayer.renderReadBoardSerialNumber(selectedBoardId);
         
-        // Get the PMS5003, OPC-N3 and SPS30 serials
+        // Get the PMS5003, OPC-N3, SPS30 and NextPM serials
         shieldProtocolLayer.renderReadSensorSerialNumber(selectedBoardId, PMS5003_HISTOGRAM_BIN0_CHANNEL);
         shieldProtocolLayer.renderReadSensorSerialNumber(selectedBoardId, OPCN3_HISTOGRAM_BIN0_CHANNEL);
         shieldProtocolLayer.renderReadSensorSerialNumber(selectedBoardId, SPS30_HISTOGRAM_PM_CHANNEL);
+        shieldProtocolLayer.renderReadSensorSerialNumber(selectedBoardId, NEXTPM_HISTOGRAM_PCS_CHANNEL);
     }
 
     @Override
@@ -353,6 +408,11 @@ public class ExpShield1Panel extends GenericTabPanel {
         String sps30Serial = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, selectedBoardId, SPS30_HISTOGRAM_PM_CHANNEL);
         if (sps30Serial != null) {
             jLabelSPS30SerialNumber.setText(sps30Serial);
+        }
+        
+        String nextPMSerial = shieldProtocolLayer.evalReadSensorSerialNumber(rxMessage, selectedBoardId, NEXTPM_HISTOGRAM_PCS_CHANNEL);
+        if (nextPMSerial != null) {
+            jLabelNextPMSerialNumber.setText(nextPMSerial);
         }
     }
 
@@ -465,7 +525,7 @@ public class ExpShield1Panel extends GenericTabPanel {
         
         // All channels in the OPCN2 Shields have the same behaviour. 
         // Channel name is read from the shield at startup
-        for (int n = 0; n <= EXPSHIELD1_NUM_OF_CHANNELS; n++) {
+        for (int n = 0; n < EXPSHIELD1_NUM_OF_CHANNELS; n++) {
             HostConfigSensorProperties sensorProperties = hostConfigWriter.addNewSensor();
             sensorProperties.setSensorBoardId(selectedBoardId);
             sensorProperties.setSensorChannel(n);
@@ -488,6 +548,14 @@ public class ExpShield1Panel extends GenericTabPanel {
                 sensorProperties.setSensorExpression(SPS30_BINS_MATH_EXPRESSION);
             } else if (n == SPS30_TYPSIZE_CHANNEL) {
                 sensorProperties.setSensorExpression(SPS30_TYPSIZE_MATH_EXPRESSION);
+            } else if ((n >= NEXTPM_HISTOGRAM_PCS_CHANNEL) && (n < NEXTPM_HISTOGRAM_PM_CHANNEL)) {
+                sensorProperties.setSensorExpression(NEXTPM_PCS_MATH_EXPRESSION);
+            } else if ((n >= NEXTPM_HISTOGRAM_PM_CHANNEL) && (n < NEXTPM_TEMPERATURE_CHANNEL)) {
+                sensorProperties.setSensorExpression(NEXTPM_PM_MATH_EXPRESSION);
+            } else if (n == NEXTPM_TEMPERATURE_CHANNEL) {
+                sensorProperties.setSensorExpression(NEXTPM_TEMP_MATH_EXPRESSION);
+            } else if (n == NEXTPM_HUMIDITY_CHANNEL) {
+                sensorProperties.setSensorExpression(NEXTPM_HUMIDITY_MATH_EXPRESSION);
             } else {
                 sensorProperties.setSensorExpression(DEFAULT_CHANNEL_MATH_EXPRESSION);
             }
@@ -530,6 +598,14 @@ public class ExpShield1Panel extends GenericTabPanel {
         sampleLoggerSPS30PSize = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
         jLabel4 = new javax.swing.JLabel();
         jLabelSPS30SerialNumber = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        sampleLoggerNextPMPcs = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
+        sampleLoggerNextPMPM = new airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel();
+        sampleLoggerNextPMTemp = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerNextPMHumidity = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        sampleLoggerNextPMState = new airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite();
+        jLabel6 = new javax.swing.JLabel();
+        jLabelNextPMSerialNumber = new javax.swing.JLabel();
         jLabelBoardSerialNumber = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
 
@@ -674,6 +750,53 @@ public class ExpShield1Panel extends GenericTabPanel {
 
         jTabbedPane1.addTab("SPS30", jPanel3);
 
+        jLabel6.setText("Serial:");
+
+        jLabelNextPMSerialNumber.setText("--");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(sampleLoggerNextPMPcs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sampleLoggerNextPMPM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabelNextPMSerialNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(sampleLoggerNextPMTemp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerNextPMHumidity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerNextPMState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(sampleLoggerNextPMPcs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sampleLoggerNextPMPM, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 12, Short.MAX_VALUE))
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(jLabelNextPMSerialNumber))
+                .addGap(18, 18, 18)
+                .addComponent(sampleLoggerNextPMTemp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(sampleLoggerNextPMHumidity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(sampleLoggerNextPMState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("NextPM", jPanel4);
+
         jLabelBoardSerialNumber.setText("--");
 
         jLabel3.setText("Board serial number:");
@@ -757,15 +880,23 @@ public class ExpShield1Panel extends GenericTabPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabelBoardSerialNumber;
+    private javax.swing.JLabel jLabelNextPMSerialNumber;
     private javax.swing.JLabel jLabelOPCN3SerialNumber;
     private javax.swing.JLabel jLabelPMS5003SerialNumber;
     private javax.swing.JLabel jLabelSPS30SerialNumber;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JTabbedPane jTabbedPane1;
     private airsenseur.dev.chemsensorpanel.widgets.LineGraphSampleLoggerPanel sampleLoggerD300;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerNextPMHumidity;
+    private airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel sampleLoggerNextPMPM;
+    private airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel sampleLoggerNextPMPcs;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerNextPMState;
+    private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerNextPMTemp;
     private airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel sampleLoggerOPCBins;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerOPCFlowRate;
     private airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite sampleLoggerOPCHum;

@@ -97,6 +97,7 @@ public class ShieldProtocolLayer {
         put(String.valueOf(COMMPROTOCOL_WRITE_SSERIAL), String.valueOf(COMMPROTOCOL_READ_SSERIAL));
         put(String.valueOf(COMMPROTOCOL_WRITE_BOARDSERIAL), String.valueOf(COMMPROTOCOL_READ_BOARDSERIAL)); 
         put(String.valueOf(COMMPROTOCOL_WRITE_CHANENABLE), String.valueOf(COMMPROTOCOL_READ_CHANENABLE));
+        put(String.valueOf(COMMPROTOCOL_WRITE_REGISTER), String.valueOf(COMMPROTOCOL_READ_REGISTER));
     }};
     
     private static final List<String> boardTypesString = new ArrayList<String>() {{
@@ -126,9 +127,14 @@ public class ShieldProtocolLayer {
         sensorBus.writeMessageToBus(new AppDataMessage(boardId, sb.toString(), "LMP9100 Register Setup for channel " + channelId));
     }
     
-    public void renderWriteSetpoint(int boardId, int channelId, int setpoint) throws SensorBusException {
-        sensorBus.writeMessageToBus(new AppDataMessage(boardId, renderChannelCmd(channelId, COMMPROTOCOL_WRITE_STP_REG, (char) setpoint), 
-                                                    "Setpoint Register Setup for channel " + channelId));
+    public void renderWriteSetpoint(int boardId, int channelId, short setpoint) throws SensorBusException {
+        
+        StringBuilder sb = new StringBuilder(10);
+        sb.append(COMMPROTOCOL_WRITE_STP_REG);
+        sb.append(CodecHelper.encodeValue((char)channelId));
+        sb.append(CodecHelper.encodeValue((short)setpoint));
+        
+        sensorBus.writeMessageToBus(new AppDataMessage(boardId, sb.toString(), "Setpoint Register Setup for channel " + channelId));
     }
     
     public void renderSavePresetWithName(int boardId, int channelId, String name) throws SensorBusException {
@@ -465,7 +471,7 @@ public class ShieldProtocolLayer {
     }
     
     // Returns the setpoint value read from the channel, or null if the rxMessage does not match the command and channel
-    public Integer evalReadSetpoint(AppDataMessage rxMessage, int boardId, int channel) {
+    public Short evalReadSetpoint(AppDataMessage rxMessage, int boardId, int channel) {
         
         if (!rxMessage.matches(boardId, COMMPROTOCOL_READ_STP_REG)) {
             return null;
@@ -477,9 +483,9 @@ public class ShieldProtocolLayer {
             return null;
         }
         
-        Integer setpoint = CodecHelper.decodeCharAt(commandString, 3);
+        Integer setpoint = CodecHelper.decodeShortAt(commandString, 3);
         
-        return setpoint;
+        return setpoint.shortValue();
     }
     
     // Returns the result of a write generic register, or null if the rxMessage does not match the command and channel
@@ -501,7 +507,7 @@ public class ShieldProtocolLayer {
     }
     
     // Returns the result of a read generic register, or null if the rxMessage does not match the command and channel
-    public String evalReadGenericRegister(AppDataMessage rxMessage, int boardId, int channel) {
+    public Pair<Integer, Integer> evalReadGenericRegister(AppDataMessage rxMessage, int boardId, int channel) {
         
         if (!rxMessage.matches(boardId, COMMPROTOCOL_READ_REGISTER)) {
             return null;
@@ -513,9 +519,10 @@ public class ShieldProtocolLayer {
             return null;
         }
         
-        String result = CodecHelper.decodeStringAt(commandString, 3);
+        int address = CodecHelper.decodeIntAt(commandString, 3);
+        int result = CodecHelper.decodeIntAt(commandString, 11);
         
-        return result;
+        return new Pair<>(address, result);
     }
     
     

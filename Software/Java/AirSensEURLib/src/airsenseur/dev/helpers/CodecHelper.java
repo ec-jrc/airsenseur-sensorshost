@@ -75,6 +75,7 @@ public class CodecHelper {
         }
     }
     
+    // Encode 32 bit value
     public static char[] encodeValue(int value) {
         try {
     
@@ -92,6 +93,7 @@ public class CodecHelper {
         }        
     }
     
+    // Encode 64 bit value
     public static char[] encodeValue(long value) {
         try {
     

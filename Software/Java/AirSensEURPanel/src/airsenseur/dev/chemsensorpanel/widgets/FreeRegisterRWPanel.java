@@ -26,6 +26,7 @@ package airsenseur.dev.chemsensorpanel.widgets;
 
 import airsenseur.dev.comm.AppDataMessage;
 import airsenseur.dev.exceptions.SensorBusException;
+import airsenseur.dev.helpers.Pair;
 
 /**
  *
@@ -282,9 +283,9 @@ public class FreeRegisterRWPanel extends SensorBusInteractingPanel {
             return;
         }
         
-        result = shieldProtocolLayer.evalReadGenericRegister(rxMessage, boardId, channelId);
+        Pair<Integer, Integer> results = shieldProtocolLayer.evalReadGenericRegister(rxMessage, boardId, channelId);
         if (result != null) {
-            jTextResult.setText(result);
+            jTextResult.setText(String.format("%2X",results.second));
         }
     }
 

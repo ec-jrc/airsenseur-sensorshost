@@ -34,6 +34,8 @@ import airsenseur.dev.exceptions.SensorBusException;
 public class PresetCursorPanel extends SensorBusInteractingPanel {
     
     private String unit;
+    private double factor = 100.0;
+    private double guiFactor = 1/factor;
 
     /**
      * Creates new form GenericCursorPanel
@@ -41,23 +43,39 @@ public class PresetCursorPanel extends SensorBusInteractingPanel {
     public PresetCursorPanel() {
         initComponents();
         
-        sliderDataModel.setValue(50);
-    }
+        setMinimum(0);
+        setMaximum(100);
+        setValue(50);
+    }    
     
     public void setLabel(String label) {
         jLabel.setText(label);
     }
 
-    public void setMinimum(int value) {
-        sliderDataModel.setMinimum(value);
+    public void setMinimum(int value) { 
+        sliderDataModel.setMinimum((int)(value * factor));
     }
     
     public void setMaximum(int value) {
-        sliderDataModel.setMaximum(value);
+        sliderDataModel.setMaximum((int)(value * factor));
+    }
+    
+    public void setFactor(double factor) {
+        this.factor = factor;
+    }
+    
+    public void setGUIFactor(double guiFactor) {
+        this.guiFactor = guiFactor;
+    }
+    
+    public void setTickSpacing(int value) {
+        
+        jSlider.setMajorTickSpacing(value);
+        jSlider.setSnapToTicks(true);
     }
         
     public void setValue(int value) {
-        sliderDataModel.setValue(value);
+        sliderDataModel.setValue((int)(value * factor));
     }
     
     public void setUnit(String unit) {
@@ -66,7 +84,8 @@ public class PresetCursorPanel extends SensorBusInteractingPanel {
     }
     
     private void refreshLabelValue() {
-        jLabelVal.setText("" + sliderDataModel.getValue() + " " + unit);
+        String value = String.format("%.2f", (sliderDataModel.getValue() * guiFactor));
+        jLabelVal.setText("" + value + " " + unit);
     }
 
     /**
@@ -129,7 +148,7 @@ public class PresetCursorPanel extends SensorBusInteractingPanel {
     public void storeToBoard() throws SensorBusException {
         
         int value = sliderDataModel.getValue();
-        shieldProtocolLayer.renderWriteSetpoint(boardId, channelId, value);
+        shieldProtocolLayer.renderWriteSetpoint(boardId, channelId, (short)value);
     }
 
     @Override
@@ -140,7 +159,7 @@ public class PresetCursorPanel extends SensorBusInteractingPanel {
     @Override
     public void evaluateRxMessage(AppDataMessage rxMessage) {
         
-        Integer setpoint = shieldProtocolLayer.evalReadSetpoint(rxMessage, boardId, channelId);
+        Short setpoint = shieldProtocolLayer.evalReadSetpoint(rxMessage, boardId, channelId);
         if (setpoint == null) {
             return;
         }

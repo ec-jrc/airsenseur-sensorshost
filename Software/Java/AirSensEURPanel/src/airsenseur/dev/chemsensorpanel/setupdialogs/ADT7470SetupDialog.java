@@ -82,11 +82,12 @@ public class ADT7470SetupDialog extends SensorSetupDialog {
         panelExtFan.setUnit("%");
         
         // Minimum and maximum temperature setpoints
-        panelInternalTemperature.setMinimum(15);
-        panelInternalTemperature.setMaximum(40);
+        panelInternalTemperature.setMinimum(5);
+        panelInternalTemperature.setMaximum(45);
+        panelInternalTemperature.setTickSpacing(10);
         
         // Suggested internal chamber temperature
-        panelInternalTemperature.setValue(25);
+        panelInternalTemperature.setValue(40);
         
         // Initialize panels with board and channel information
         panelInternalTemperature.setBoardId(boardId);
@@ -94,12 +95,15 @@ public class ADT7470SetupDialog extends SensorSetupDialog {
         
         panelAirCircFan.setBoardId(boardId);
         panelAirCircFan.setChannelId(airCircFanChanNumber);
+        panelAirCircFan.setTickSpacing(100);
         
         panelIntHtrFan.setBoardId(boardId);
         panelIntHtrFan.setChannelId(intFanChanNumber);
+        panelIntHtrFan.setTickSpacing(100);
         
         panelExtFan.setBoardId(boardId);
         panelExtFan.setChannelId(extFanChanNumber);
+        panelExtFan.setTickSpacing(100);
         
         iIRAndAvgPanel.setBoardId(boardId);
         iIRAndAvgPanel.setChannelId(sensorId);

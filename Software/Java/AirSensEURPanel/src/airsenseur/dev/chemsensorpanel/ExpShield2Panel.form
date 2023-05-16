@@ -24,63 +24,58 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jCBBoardId" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="jLabelBoardSerialNumber" min="-2" pref="159" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="sampleLoggerK96" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="sampleLoggerD300" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
+                  <Component id="jPanelK96Extended" alignment="0" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
-                              <Component id="jPanelSHT" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jCBBoardId" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jLabelBoardSerialNumber" min="-2" pref="159" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="sampleLoggerK96" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="sampleLoggerD300" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="sampleLoggerSHT31E_T" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="sampleLoggerSHT31I_H" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="sampleLoggerSHT31E_H" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="sampleLoggerVIN" min="-2" max="-2" attributes="0"/>
+                                  <Component id="sampleLoggerSHT31I_T" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
-                          <Group type="102" alignment="1" attributes="0">
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="sampleLoggerVIN" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="jPanelK96Extended" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
+                          <Group type="102" attributes="0">
                               <Component id="jPanelPeltier" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="jPanelPID" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="jPanelFans" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jPanelTemperatures" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanelTemperatures" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="8" max="32767" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
-                      <Component id="jPanelSHT" min="-2" max="-2" attributes="0"/>
-                  </Group>
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jCBBoardId" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -93,15 +88,20 @@
                           <Component id="sampleLoggerD300" max="32767" attributes="0"/>
                       </Group>
                   </Group>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jPanelK96Extended" min="-2" max="-2" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerSHT31I_T" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerSHT31I_H" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerSHT31E_T" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerSHT31E_H" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="sampleLoggerVIN" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jPanelK96Extended" min="-2" pref="140" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
               <Group type="103" groupAlignment="1" max="-2" attributes="0">
                   <Component id="jPanelPID" alignment="0" max="32767" attributes="0"/>
@@ -175,7 +175,7 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="202" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="210" max="32767" attributes="0"/>
               <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="32767" attributes="0"/>
@@ -319,15 +319,10 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="sampleLoggerT_uC" min="-2" max="-2" attributes="0"/>
-                      <Component id="sampleLoggerT_Int_Chamber" min="-2" max="-2" attributes="0"/>
-                      <Component id="sampleLoggerT_Int_Heatsink" min="-2" max="-2" attributes="0"/>
-                      <Component id="sampleLoggerT_Ext_Heatsink" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace min="0" pref="12" max="32767" attributes="0"/>
-              </Group>
+              <Component id="sampleLoggerT_uC" min="-2" max="-2" attributes="0"/>
+              <Component id="sampleLoggerT_Int_Chamber" min="-2" max="-2" attributes="0"/>
+              <Component id="sampleLoggerT_Int_Heatsink" min="-2" max="-2" attributes="0"/>
+              <Component id="sampleLoggerT_Ext_Heatsink" min="-2" max="-2" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -356,52 +351,6 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="jPanelSHT">
-
-      <Layout>
-        <DimensionLayout dim="0">
-          <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="sampleLoggerSHT31E_T" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="sampleLoggerSHT31I_H" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="sampleLoggerSHT31E_H" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <Component id="sampleLoggerSHT31I_T" alignment="0" max="32767" attributes="0"/>
-                  </Group>
-              </Group>
-          </Group>
-        </DimensionLayout>
-        <DimensionLayout dim="1">
-          <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="1" attributes="0">
-                  <Component id="sampleLoggerSHT31I_T" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="sampleLoggerSHT31I_H" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="sampleLoggerSHT31E_T" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="sampleLoggerSHT31E_H" min="-2" max="-2" attributes="0"/>
-              </Group>
-          </Group>
-        </DimensionLayout>
-      </Layout>
-      <SubComponents>
-        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLoggerSHT31I_T">
-        </Component>
-        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerSHT31I_H">
-        </Component>
-        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerSHT31E_H">
-        </Component>
-        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLoggerSHT31E_T">
-        </Component>
-      </SubComponents>
-    </Container>
     <Container class="javax.swing.JPanel" name="jPanelK96Extended">
 
       <Layout>
@@ -418,19 +367,31 @@
                           <Component id="sampleLoggerK96_RH0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
+                          <Component id="sampleLoggerK96_Press0" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="sampleLoggerK96_uCDie" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="sampleLoggerK96_ufLPL" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="sampleLoggerK96_ufMPL" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="sampleLoggerK96_ufSPL" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
                           <Component id="sampleLoggerK96_MPL" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="sampleLoggerK96_NTC1" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="sampleLoggerK96_T_RH0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="sampleLoggerK96_Press0" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="sampleLoggerK96_uCDie" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="sampleLoggerK96_Error" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="sampleLoggerK96_LPL_Uflt_Err" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerK96_SPL_Uflt_Err" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerK96_MPL_Uflt_Err" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerK96_Error" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -438,27 +399,41 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" attributes="0">
-                      <Group type="102" attributes="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="sampleLoggerK96_LPL_Uflt_Err" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="sampleLoggerK96_MPL_Uflt_Err" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="sampleLoggerK96_SPL" min="-2" max="-2" attributes="0"/>
                               <Component id="sampleLoggerK96_NTC0" min="-2" max="-2" attributes="0"/>
                               <Component id="sampleLoggerK96_RH0" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="sampleLoggerK96_MPL" min="-2" max="-2" attributes="0"/>
-                              <Component id="sampleLoggerK96_T_RH0" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="sampleLoggerK96_MPL" min="-2" max="-2" attributes="0"/>
+                                  <Component id="sampleLoggerK96_T_RH0" alignment="1" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="sampleLoggerK96_NTC1" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <Component id="sampleLoggerK96_NTC1" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="sampleLoggerK96_Press0" min="-2" max="-2" attributes="0"/>
                       <Component id="sampleLoggerK96_uCDie" min="-2" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerK96_SPL_Uflt_Err" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="sampleLoggerK96_ufLPL" min="-2" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerK96_ufSPL" min="-2" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerK96_ufMPL" min="-2" max="-2" attributes="0"/>
                       <Component id="sampleLoggerK96_Error" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
@@ -483,9 +458,29 @@
         </Component>
         <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_T_RH0">
         </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_ufLPL">
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_ufSPL">
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_ufMPL">
+        </Component>
         <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_Error">
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_LPL_Uflt_Err">
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_MPL_Uflt_Err">
+        </Component>
+        <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerK96_SPL_Uflt_Err">
         </Component>
       </SubComponents>
     </Container>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLoggerSHT31E_T">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerSHT31I_H">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanel" name="sampleLoggerSHT31I_T">
+    </Component>
+    <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerSHT31E_H">
+    </Component>
   </SubComponents>
 </Form>

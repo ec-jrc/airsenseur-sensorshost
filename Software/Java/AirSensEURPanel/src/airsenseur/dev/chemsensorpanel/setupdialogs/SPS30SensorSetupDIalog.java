@@ -34,7 +34,7 @@ import airsenseur.dev.exceptions.SensorBusException;
  *
  * @author marco
  */
-public class SPS30SensorSetupDIalog extends SensorSetupDialog {
+public class SPS30SensorSetupDialog extends SensorSetupDialog {
     
     private final String sensorName = "SPS30";
     private final int pmChanNumber;
@@ -52,7 +52,7 @@ public class SPS30SensorSetupDIalog extends SensorSetupDialog {
      * @param parent
      * @param modal
      */
-    public SPS30SensorSetupDIalog(int sensorId, int pmChanNumber, int sensorBin0Channel, int binsChanNumber, int typicalSizeChannel, MainApplicationFrame parent, boolean modal) {
+    public SPS30SensorSetupDialog(int sensorId, int pmChanNumber, int sensorBin0Channel, int binsChanNumber, int typicalSizeChannel, MainApplicationFrame parent, boolean modal) {
         super(parent, modal, sensorId);
         
         this.pmChanNumber = pmChanNumber;

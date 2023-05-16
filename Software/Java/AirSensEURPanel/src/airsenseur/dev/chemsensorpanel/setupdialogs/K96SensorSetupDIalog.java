@@ -43,7 +43,13 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
     private final int sensorPressureChannel;
     private final int sensorNTCChannel;
     private final int sensorRH0Channel;
+    private final int sensorUFLPLChannel;
+    private final int sensorUFMPLChannel;
+    private final int sensorUFSPLChannel;
     private final int sensorErrorChannel;
+    private final int sensorUFLPLErrorChannel;
+    private final int sensorUFSPLErrorChanel;
+    private final int sensorUFMPLErrorChannel;
 
     /**
      * Creates new form GenericSensorSetupDIalog
@@ -54,7 +60,13 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
      * @param sensorPressureChannel
      * @param sensorNTCChannel
      * @param sensorRH0Channel
+     * @param sensorUFMPLChannel
+     * @param sensorUFSPLChannel
+     * @param sensorUFLPLChannel
      * @param sensorErrorChannel
+     * @param sensorUFLPLErrorChannel
+     * @param sensorUFSPLErrorChanel
+     * @param sensorUFMPLErrorChannel
      * @param parent
      * @param modal
      */
@@ -62,7 +74,10 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
                                 int sensorLPLChannel, 
                                 int sensorSPLChannel, int sensorMPLChannel, 
                                 int sensorPressureChannel, int sensorNTCChannel, 
-                                int sensorRH0Channel, int sensorErrorChannel,
+                                int sensorRH0Channel, int sensorUFLPLChannel,
+                                int sensorUFSPLChannel, int sensorUFMPLChannel,
+                                int sensorErrorChannel, int sensorUFLPLErrorChannel,
+                                int sensorUFSPLErrorChanel, int sensorUFMPLErrorChannel,
                                 MainApplicationFrame parent, boolean modal) {
         super(parent, modal, sensorId);
         
@@ -72,7 +87,13 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
         this.sensorPressureChannel = sensorPressureChannel;
         this.sensorNTCChannel = sensorNTCChannel;
         this.sensorRH0Channel = sensorRH0Channel;
+        this.sensorUFLPLChannel = sensorUFLPLChannel;
+        this.sensorUFMPLChannel = sensorUFMPLChannel;
+        this.sensorUFSPLChannel = sensorUFSPLChannel;
         this.sensorErrorChannel = sensorErrorChannel;
+        this.sensorUFLPLErrorChannel = sensorUFLPLErrorChannel;
+        this.sensorUFSPLErrorChanel = sensorUFSPLErrorChanel;
+        this.sensorUFMPLErrorChannel = sensorUFMPLErrorChannel;
         
         initComponents();
         
@@ -90,6 +111,9 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
         jCheckBoxNTCEnabled.setSelected(true);
         jCheckBoxPressureEnabled.setSelected(true);
         jCheckBoxTHEnabled.setSelected(true);
+        jCheckBoxUFLPLEnabled.setSelected(true);
+        jCheckBoxUFMPLEnabled.setSelected(true);
+        jCheckBoxUFSPLEnabled.setSelected(true);
         jCheckBoxDebugChEnabled.setSelected(true);
     }
 
@@ -127,6 +151,15 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
         boolean splEnabled = jCheckBoxSPLEnabled.isSelected();
         shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorSPLChannel, splEnabled);
         
+        boolean uflplEnabled = jCheckBoxUFLPLEnabled.isSelected();
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorUFLPLChannel, uflplEnabled);
+        
+        boolean ufmplEnabled = jCheckBoxUFMPLEnabled.isSelected();
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorUFMPLChannel, ufmplEnabled);
+        
+        boolean ufsplEnabled = jCheckBoxUFSPLEnabled.isSelected();
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorUFSPLChannel, ufsplEnabled);
+        
         boolean pressureEnabled = jCheckBoxPressureEnabled.isSelected();
         shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorPressureChannel, pressureEnabled);
         
@@ -141,6 +174,9 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
         
         boolean debugEnabled = jCheckBoxDebugChEnabled.isSelected();
         shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorErrorChannel, debugEnabled);
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorUFLPLErrorChannel, debugEnabled);
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorUFMPLErrorChannel, debugEnabled);
+        shieldProtocolLayer.renderWriteChannelEnable(boardId, sensorUFSPLErrorChanel, debugEnabled);
         
         if (shieldProtocolLayer != null) {
             shieldProtocolLayer.renderSavePresetWithName(boardId, sensorId, this.sensorName);
@@ -160,7 +196,13 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
         shieldProtocolLayer.renderReadChannelEnable(boardId, sensorPressureChannel);
         shieldProtocolLayer.renderReadChannelEnable(boardId, sensorRH0Channel);
         shieldProtocolLayer.renderReadChannelEnable(boardId, sensorNTCChannel);
-        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorErrorChannel);        
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorUFLPLChannel);
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorUFMPLChannel);
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorUFSPLChannel);
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorErrorChannel);   
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorUFLPLErrorChannel);
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorUFSPLErrorChanel);
+        shieldProtocolLayer.renderReadChannelEnable(boardId, sensorUFMPLErrorChannel);
     }
 
     @Override
@@ -200,6 +242,21 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
             jCheckBoxNTCEnabled.setSelected(ntcEnabled);
             return;
         }   
+        Boolean uflplEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorUFLPLChannel);
+        if (uflplEnabled != null) {
+            jCheckBoxUFLPLEnabled.setSelected(uflplEnabled);
+            return;
+        }
+        Boolean ufmplEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorUFMPLChannel);
+        if (ufmplEnabled != null) {
+            jCheckBoxUFMPLEnabled.setSelected(ufmplEnabled);
+            return;
+        }
+        Boolean uflslEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorUFSPLChannel);
+        if (uflslEnabled != null) {
+            jCheckBoxUFSPLEnabled.setSelected(uflslEnabled);
+            return;
+        }
         Boolean debugEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorErrorChannel);
         if (debugEnabled != null) {
             jCheckBoxDebugChEnabled.setSelected(debugEnabled);
@@ -242,6 +299,21 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
             jCheckBoxNTCEnabled.setSelected(ntcEnabled);
             return;            
         }   
+        Boolean uflplEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorUFLPLChannel);
+        if (uflplEnabled != null) {
+            jCheckBoxUFLPLEnabled.setSelected(uflplEnabled);
+            return;
+        }
+        Boolean ufmplEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorUFMPLChannel);
+        if (ufmplEnabled != null) {
+            jCheckBoxUFMPLEnabled.setSelected(ufmplEnabled);
+            return;
+        }
+        Boolean uflslEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorUFSPLChannel);
+        if (uflslEnabled != null) {
+            jCheckBoxUFSPLEnabled.setSelected(uflslEnabled);
+            return;
+        }        
         Boolean debugEnabled = shieldProtocolLayer.evalReadChannelEnable(rxMessage, boardId, sensorErrorChannel);
         if (debugEnabled != null) {
             jCheckBoxDebugChEnabled.setSelected(debugEnabled);
@@ -276,6 +348,9 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
         jCheckBoxTHEnabled = new javax.swing.JCheckBox();
         jCheckBoxDebugChEnabled = new javax.swing.JCheckBox();
         jCheckBoxNTCEnabled = new javax.swing.JCheckBox();
+        jCheckBoxUFLPLEnabled = new javax.swing.JCheckBox();
+        jCheckBoxUFSPLEnabled = new javax.swing.JCheckBox();
+        jCheckBoxUFMPLEnabled = new javax.swing.JCheckBox();
         k96RegisterRW = new airsenseur.dev.chemsensorpanel.widgets.FreeRegisterRWPanel();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
@@ -321,6 +396,12 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
 
         jCheckBoxNTCEnabled.setText("NTC Chs. Enabled");
 
+        jCheckBoxUFLPLEnabled.setText("UFLPL IR Channel Enabled");
+
+        jCheckBoxUFSPLEnabled.setText("UFSPL IR Channel Enabled");
+
+        jCheckBoxUFMPLEnabled.setText("UFMPL IR Channel Enabled");
+
         jLabel1.setText("Read/Write to a specific register into the K96 sensor.");
 
         jLabel2.setText("NOTE: The shield needs to be connected and sampling with");
@@ -335,18 +416,23 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator1))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jCheckBoxUFMPLEnabled)
                                     .addGroup(layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(jCheckBoxSPLEnabled)
                                             .addComponent(jCheckBoxLPLEnabled)
-                                            .addComponent(jCheckBoxMPLEnabled))
+                                            .addComponent(jCheckBoxMPLEnabled)
+                                            .addComponent(jCheckBoxUFLPLEnabled))
                                         .addGap(29, 29, 29)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(jCheckBoxPressureEnabled)
@@ -370,6 +456,10 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
                                 .addComponent(k96RegisterRW, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jCheckBoxUFSPLEnabled)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -379,20 +469,28 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
                     .addComponent(jCheckBoxLPLEnabled, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jCheckBoxTHEnabled))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jCheckBoxSPLEnabled)
-                    .addComponent(jCheckBoxNTCEnabled))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jCheckBoxNTCEnabled)
+                    .addComponent(jCheckBoxSPLEnabled, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jCheckBoxMPLEnabled)
+                    .addComponent(jCheckBoxPressureEnabled)
+                    .addComponent(jCheckBoxMPLEnabled))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCheckBoxDebugChEnabled)
+                    .addComponent(jCheckBoxUFLPLEnabled))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jCheckBoxUFSPLEnabled)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jCheckBoxUFMPLEnabled)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jCheckBoxPressureEnabled)
+                        .addGap(177, 177, 177)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jCheckBoxDebugChEnabled)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(iIRAndAvgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -403,7 +501,7 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(k96RegisterRW, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31))
+                .addContainerGap())
         );
 
         pack();
@@ -434,6 +532,9 @@ public class K96SensorSetupDIalog extends SensorSetupDialog {
     private javax.swing.JCheckBox jCheckBoxPressureEnabled;
     private javax.swing.JCheckBox jCheckBoxSPLEnabled;
     private javax.swing.JCheckBox jCheckBoxTHEnabled;
+    private javax.swing.JCheckBox jCheckBoxUFLPLEnabled;
+    private javax.swing.JCheckBox jCheckBoxUFMPLEnabled;
+    private javax.swing.JCheckBox jCheckBoxUFSPLEnabled;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

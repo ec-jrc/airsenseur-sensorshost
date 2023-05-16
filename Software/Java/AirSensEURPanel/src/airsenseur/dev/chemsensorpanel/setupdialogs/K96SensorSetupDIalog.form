@@ -29,18 +29,24 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jSeparator1" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="iIRAndAvgPanel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jSeparator1" max="32767" attributes="0"/>
+                  </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="iIRAndAvgPanel" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jCheckBoxUFMPLEnabled" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Component id="jCheckBoxSPLEnabled" min="-2" max="-2" attributes="0"/>
                                           <Component id="jCheckBoxLPLEnabled" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="jCheckBoxMPLEnabled" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="jCheckBoxUFLPLEnabled" alignment="0" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -78,6 +84,11 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jCheckBoxUFSPLEnabled" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
+          </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -89,23 +100,34 @@
                   <Component id="jCheckBoxTHEnabled" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jCheckBoxSPLEnabled" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jCheckBoxNTCEnabled" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jCheckBoxNTCEnabled" min="-2" max="-2" attributes="0"/>
+                  <Component id="jCheckBoxSPLEnabled" alignment="1" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jCheckBoxPressureEnabled" min="-2" max="-2" attributes="0"/>
                   <Component id="jCheckBoxMPLEnabled" min="-2" max="-2" attributes="0"/>
-                  <Group type="102" attributes="0">
-                      <Component id="jCheckBoxPressureEnabled" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jCheckBoxDebugChEnabled" min="-2" max="-2" attributes="0"/>
-                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="iIRAndAvgPanel" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jCheckBoxDebugChEnabled" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jCheckBoxUFLPLEnabled" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
+              <Component id="jCheckBoxUFSPLEnabled" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jCheckBoxUFMPLEnabled" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace min="-2" pref="177" max="-2" attributes="0"/>
+                      <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="iIRAndAvgPanel" min="-2" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -116,7 +138,7 @@
               <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="k96RegisterRW" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -169,6 +191,21 @@
     <Component class="javax.swing.JCheckBox" name="jCheckBoxNTCEnabled">
       <Properties>
         <Property name="text" type="java.lang.String" value="NTC Chs. Enabled"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="jCheckBoxUFLPLEnabled">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="UFLPL IR Channel Enabled"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="jCheckBoxUFSPLEnabled">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="UFSPL IR Channel Enabled"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="jCheckBoxUFMPLEnabled">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="UFMPL IR Channel Enabled"/>
       </Properties>
     </Component>
     <Component class="airsenseur.dev.chemsensorpanel.widgets.FreeRegisterRWPanel" name="k96RegisterRW">

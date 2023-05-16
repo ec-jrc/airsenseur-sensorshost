@@ -157,6 +157,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_PMS5003), jMenuItemPMS5003Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_OPCN3), jMenuItemOPCN3Setup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_SPS30), jMenuItemSPS30Setup);
+        menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_NEXTPM), jMenuItemNextPMSetup);
         menuFromWindow.put(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_GENERIC_INFO), jMenuItemExpShieldInfo);
         
         menuFromWindow.put(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_DIALOG_D300), jMenuItemD300_Exp2Setup);        
@@ -324,6 +325,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         jMenuItemPMS5003Setup = new javax.swing.JMenuItem();
         jMenuItemOPCN3Setup = new javax.swing.JMenuItem();
         jMenuItemSPS30Setup = new javax.swing.JMenuItem();
+        jMenuItemNextPMSetup = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         jMenuItemExpShieldInfo = new javax.swing.JMenuItem();
         jMenuExpShield2 = new javax.swing.JMenu();
@@ -619,6 +621,14 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
             }
         });
         jMenuExpShield1.add(jMenuItemSPS30Setup);
+
+        jMenuItemNextPMSetup.setText("NextPM");
+        jMenuItemNextPMSetup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemNextPMSetupActionPerformed(evt);
+            }
+        });
+        jMenuExpShield1.add(jMenuItemNextPMSetup);
         jMenuExpShield1.add(jSeparator4);
 
         jMenuItemExpShieldInfo.setText("Generic Information");
@@ -1162,6 +1172,10 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
         updateMenuItemVisibilityForDialog(expShield2Panel.getSensorSetupDialogs().get(ExpShield2Panel.EXPSHIELD2_SETUP_GENERIC_INFO));
     }//GEN-LAST:event_jMenuItemExpShield2InfoActionPerformed
 
+    private void jMenuItemNextPMSetupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemNextPMSetupActionPerformed
+        updateMenuItemVisibilityForDialog(expShield1Panel.getSensorSetupDialogs().get(ExpShield1Panel.EXPSHIELD1_SETUP_DIALOG_NEXTPM));
+    }//GEN-LAST:event_jMenuItemNextPMSetupActionPerformed
+
     protected List<AppDataMessage> getCurrentConfiguration(int tabPanelIndex, boolean forceRestartSampling) {
         
         List<AppDataMessage> currentConfiguration = new ArrayList<>();
@@ -1306,6 +1320,7 @@ public class AirSensEURPanel extends MainApplicationFrame implements WindowListe
     private javax.swing.JMenuItem jMenuItemIntHumSetup;
     private javax.swing.JMenuItem jMenuItemIntTempSetup;
     private javax.swing.JMenuItem jMenuItemK96_Exp2;
+    private javax.swing.JMenuItem jMenuItemNextPMSetup;
     private javax.swing.JMenuItem jMenuItemOPCN3Setup;
     private javax.swing.JMenuItem jMenuItemOPT3001;
     private javax.swing.JMenuItem jMenuItemPID_HC_Exp2;

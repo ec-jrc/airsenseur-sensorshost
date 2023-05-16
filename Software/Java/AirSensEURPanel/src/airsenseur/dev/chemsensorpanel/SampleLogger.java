@@ -139,6 +139,19 @@ public abstract class SampleLogger extends javax.swing.JPanel {
         }
     };
     
+    public final static SampleLogger.DataFormatting formatToHeightBinary = new DataFormatting() {
+        @Override
+        public String formatSample(double sample) {
+            int intSample = ((int)sample) & 0xFF;
+            
+            String binary = Integer.toBinaryString(intSample);
+            String leadingZeros = "0000000";
+            int numOfLeadingZeros = leadingZeros.length() - binary.length() + 1;
+            numOfLeadingZeros = (numOfLeadingZeros < 0)? 0:numOfLeadingZeros;
+            return leadingZeros.substring(0, numOfLeadingZeros) + binary;
+        }
+    };
+    
 
     protected long lastSampleTimeStamp = 0;
     protected int boardId = AppDataMessage.BOARD_ID_UNDEFINED;

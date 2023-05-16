@@ -346,6 +346,87 @@
             </Component>
           </SubComponents>
         </Container>
+        <Container class="javax.swing.JPanel" name="jPanel4">
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="NextPM">
+                <Property name="tabTitle" type="java.lang.String" value="NextPM"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout>
+            <DimensionLayout dim="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerNextPMPcs" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="sampleLoggerNextPMPM" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="jLabelNextPMSerialNumber" min="-2" pref="130" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="sampleLoggerNextPMTemp" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLoggerNextPMHumidity" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLoggerNextPMState" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+            <DimensionLayout dim="1">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="sampleLoggerNextPMPcs" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="sampleLoggerNextPMPM" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="12" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="jLabelNextPMSerialNumber" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerNextPMTemp" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerNextPMHumidity" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="sampleLoggerNextPMState" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+          </Layout>
+          <SubComponents>
+            <Component class="airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel" name="sampleLoggerNextPMPcs">
+            </Component>
+            <Component class="airsenseur.dev.chemsensorpanel.widgets.HistogramGraphSampleLoggerPanel" name="sampleLoggerNextPMPM">
+            </Component>
+            <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerNextPMTemp">
+            </Component>
+            <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerNextPMHumidity">
+            </Component>
+            <Component class="airsenseur.dev.chemsensorpanel.widgets.TextBasedSampleLoggerPanelLite" name="sampleLoggerNextPMState">
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel6">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Serial:"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabelNextPMSerialNumber">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="--"/>
+              </Properties>
+            </Component>
+          </SubComponents>
+        </Container>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JLabel" name="jLabelBoardSerialNumber">
